@@ -16,7 +16,7 @@ External links:
 
 See also [`Bernoulli`](@ref)
 """
-struct BernoulliLogit{T<:Real} <: DiscreteUnivariateDistribution
+struct BernoulliLogit{T <: Real} <: DiscreteUnivariateDistribution
     logitp::T
 end
 
@@ -27,8 +27,9 @@ BernoulliLogit() = BernoulliLogit(0.0)
 Base.eltype(::Type{<:BernoulliLogit}) = Bool
 
 #### Conversions
-Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit) where {T<:Real} = BernoulliLogit{T}(T(d.logitp))
-Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit{T}) where {T<:Real} = d
+Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit) where {T <: Real} =
+    BernoulliLogit{T}(T(d.logitp))
+Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -43,7 +44,7 @@ partype(::BernoulliLogit{T}) where {T} = T
 #### Properties
 
 mean(d::BernoulliLogit) = succprob(d)
-var(d::BernoulliLogit) =  succprob(d) * failprob(d)
+var(d::BernoulliLogit) = succprob(d) * failprob(d)
 function skewness(d::BernoulliLogit)
     p0 = failprob(d)
     p1 = succprob(d)
@@ -56,49 +57,59 @@ mode(d::BernoulliLogit) = d.logitp > 0 ? 1 : 0
 function modes(d::BernoulliLogit)
     logitp = d.logitp
     z = zero(logitp)
-    logitp < z ? [false] : (logitp > z ? [true] : [false, true])
+    return logitp < z ? [false] : (logitp > z ? [true] : [false, true])
 end
 
 median(d::BernoulliLogit) = d.logitp > 0
 
 function entropy(d::BernoulliLogit)
     logitp = d.logitp
-    (logitp == -Inf || logitp == Inf) ? float(zero(logitp)) : (logitp > 0 ? -(succprob(d) * logitp + logfailprob(d)) : -(logsuccprob(d) - failprob(d) * logitp))
+    return (logitp == -Inf || logitp == Inf) ? float(zero(logitp)) :
+        (
+            logitp > 0 ? -(succprob(d) * logitp + logfailprob(d)) :
+            -(logsuccprob(d) - failprob(d) * logitp)
+        )
 end
 
 #### Evaluation
 
 pdf(d::BernoulliLogit, x::Bool) = x ? succprob(d) : failprob(d)
-pdf(d::BernoulliLogit, x::Real) = x == 0 ? failprob(d) : (x == 1 ? succprob(d) : zero(float(d.logitp)))
+pdf(d::BernoulliLogit, x::Real) =
+    x == 0 ? failprob(d) : (x == 1 ? succprob(d) : zero(float(d.logitp)))
 
 logpdf(d::BernoulliLogit, x::Bool) = x ? logsuccprob(d) : logfailprob(d)
-logpdf(d::BernoulliLogit, x::Real) = x == 0 ? logfailprob(d) : (x == 1 ? logsuccprob(d) : oftype(float(d.logitp), -Inf))
+logpdf(d::BernoulliLogit, x::Real) =
+    x == 0 ? logfailprob(d) : (x == 1 ? logsuccprob(d) : oftype(float(d.logitp), -Inf))
 
 cdf(d::BernoulliLogit, x::Bool) = x ? one(float(d.logitp)) : failprob(d)
-cdf(d::BernoulliLogit, x::Int) = x < 0 ? zero(float(d.logitp)) : (x < 1 ? failprob(d) : one(float(d.logitp)))
+cdf(d::BernoulliLogit, x::Int) =
+    x < 0 ? zero(float(d.logitp)) : (x < 1 ? failprob(d) : one(float(d.logitp)))
 
 logcdf(d::BernoulliLogit, x::Bool) = x ? zero(float(d.logitp)) : logfailprob(d)
-logcdf(d::BernoulliLogit, x::Int) = x < 0 ? oftype(float(d.logitp), -Inf) : (x < 1 ? logfailprob(d) : zero(float(d.logitp)))
+logcdf(d::BernoulliLogit, x::Int) =
+    x < 0 ? oftype(float(d.logitp), -Inf) : (x < 1 ? logfailprob(d) : zero(float(d.logitp)))
 
 ccdf(d::BernoulliLogit, x::Bool) = x ? zero(float(d.logitp)) : succprob(d)
-ccdf(d::BernoulliLogit, x::Int) = x < 0 ? one(float(d.logitp)) : (x < 1 ? succprob(d) : zero(float(d.logitp)))
+ccdf(d::BernoulliLogit, x::Int) =
+    x < 0 ? one(float(d.logitp)) : (x < 1 ? succprob(d) : zero(float(d.logitp)))
 
 logccdf(d::BernoulliLogit, x::Bool) = x ? oftype(float(d.logitp), -Inf) : logsuccprob(d)
-logccdf(d::BernoulliLogit, x::Int) = x < 0 ? zero(float(d.logitp)) : (x < 1 ? logsuccprob(d) : oftype(float(d.logitp), -Inf))
+logccdf(d::BernoulliLogit, x::Int) =
+    x < 0 ? zero(float(d.logitp)) : (x < 1 ? logsuccprob(d) : oftype(float(d.logitp), -Inf))
 
 function quantile(d::BernoulliLogit, p::Real)
     T = float(partype(d))
-    0 <= p <= 1 ? (p <= failprob(d) ? zero(T) : one(T)) : T(NaN)
+    return 0 <= p <= 1 ? (p <= failprob(d) ? zero(T) : one(T)) : T(NaN)
 end
 function cquantile(d::BernoulliLogit, p::Real)
     T = float(partype(d))
-    0 <= p <= 1 ? (p >= succprob(d) ? zero(T) : one(T)) : T(NaN)
+    return 0 <= p <= 1 ? (p >= succprob(d) ? zero(T) : one(T)) : T(NaN)
 end
 
 mgf(d::BernoulliLogit, t::Real) = failprob(d) + exp(t + logsuccprob(d))
 function cgf(d::BernoulliLogit, t)
     # log(1-p+p*exp(t)) = logaddexp(log(1-p), t + log(p))
-    logaddexp(logfailprob(d), t + logsuccprob(d))
+    return logaddexp(logfailprob(d), t + logsuccprob(d))
 end
 cf(d::BernoulliLogit, t::Real) = failprob(d) + succprob(d) * cis(t)
 

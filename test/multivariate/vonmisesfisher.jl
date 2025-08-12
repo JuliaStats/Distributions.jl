@@ -5,19 +5,19 @@ using LinearAlgebra, Test
 
 using SpecialFunctions
 
-logvmfCp(p::Int, κ::Real) = (p / 2 - 1) * log(κ) - log(besselix(p / 2 - 1, κ)) - κ - p / 2 * log(2π)
+logvmfCp(p::Int, κ::Real) =
+    (p / 2 - 1) * log(κ) - log(besselix(p / 2 - 1, κ)) - κ - p / 2 * log(2π)
 
 safe_logvmfpdf(μ::Vector, κ::Real, x::Vector) = logvmfCp(length(μ), κ) + κ * dot(μ, x)
 
-function gen_vmf_tdata(n::Int, p::Int,
-                       rng::Union{AbstractRNG, Missing} = missing)
+function gen_vmf_tdata(n::Int, p::Int, rng::Union{AbstractRNG, Missing} = missing)
     if ismissing(rng)
         X = randn(p, n)
     else
         X = randn(rng, p, n)
     end
-    for i = 1:n
-        X[:,i] = X[:,i] ./ norm(X[:,i])
+    for i in 1:n
+        X[:, i] = X[:, i] ./ norm(X[:, i])
     end
     return X
 end
@@ -34,13 +34,12 @@ function test_vmf_rot(p::Int, rng::Union{AbstractRNG, Missing} = missing)
     μ = μ ./ κ
 
     s = Distributions.VonMisesFisherSampler(μ, κ)
-    v = μ - vcat(1, zeros(p-1))
-    H = I - 2*v*v'/(v'*v)
+    v = μ - vcat(1, zeros(p - 1))
+    H = I - 2 * v * v' / (v' * v)
 
-    @test Distributions._vmf_rot!(s.v, copy(x)) ≈ (H*x)
+    return @test Distributions._vmf_rot!(s.v, copy(x)) ≈ (H * x)
 
 end
-
 
 
 function test_genw3(κ::Real, ns::Int, rng::Union{AbstractRNG, Missing} = missing)
@@ -58,21 +57,26 @@ function test_genw3(κ::Real, ns::Int, rng::Union{AbstractRNG, Missing} = missin
     genw3_res = [Distributions._vmf_genw3(rng, s.p, s.b, s.x0, s.c, s.κ) for _ in 1:ns]
     genwp_res = [Distributions._vmf_genwp(rng, s.p, s.b, s.x0, s.c, s.κ) for _ in 1:ns]
 
-    @test isapprox(mean(genw3_res), mean(genwp_res), atol=0.01)
-    @test isapprox(std(genw3_res), std(genwp_res), atol=0.01/κ)
+    @test isapprox(mean(genw3_res), mean(genwp_res), atol = 0.01)
+    @test isapprox(std(genw3_res), std(genwp_res), atol = 0.01 / κ)
 
     # test mean and stdev against analytical formulas
     coth_κ = coth(κ)
-    mean_w = coth_κ - 1/κ
-    var_w = 1 - coth_κ^2 + 1/κ^2
+    mean_w = coth_κ - 1 / κ
+    var_w = 1 - coth_κ^2 + 1 / κ^2
 
-    @test isapprox(mean(genw3_res), mean_w, atol=0.01)
-    @test isapprox(std(genw3_res), sqrt(var_w), atol=0.01/κ)
+    @test isapprox(mean(genw3_res), mean_w, atol = 0.01)
+    return @test isapprox(std(genw3_res), sqrt(var_w), atol = 0.01 / κ)
 end
 
 
-function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
-                             rng::Union{AbstractRNG, Missing} = missing)
+function test_vonmisesfisher(
+        p::Int,
+        κ::Real,
+        n::Int,
+        ns::Int,
+        rng::Union{AbstractRNG, Missing} = missing,
+    )
     if ismissing(rng)
         μ = randn(p)
     else
@@ -88,7 +92,10 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
 
     # conversions
     @test convert(VonMisesFisher{partype(d)}, d) === d
-    for d32 in (convert(VonMisesFisher{Float32}, d), convert(VonMisesFisher{Float32}, d.μ, d.κ, d.logCκ))
+    for d32 in (
+            convert(VonMisesFisher{Float32}, d),
+            convert(VonMisesFisher{Float32}, d.μ, d.κ, d.logCκ),
+        )
         @test d32 isa VonMisesFisher{Float32}
         @test params(d32) == (map(Float32, μ), Float32(κ))
     end
@@ -99,12 +106,12 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     @test meandir(d2) ≈ μ
     @test concentration(d2) ≈ κ
 
-    @test d.logCκ ≈ logvmfCp(p, κ) atol=1.0e-12
+    @test d.logCκ ≈ logvmfCp(p, κ) atol = 1.0e-12
 
     X = gen_vmf_tdata(n, p, rng)
     lp0 = zeros(n)
-    for i = 1:n
-        xi = X[:,i]
+    for i in 1:n
+        xi = X[:, i]
         lp0[i] = safe_logvmfpdf(μ, κ, xi)
         @test logpdf(d, xi) ≈ lp0[i]
     end
@@ -124,9 +131,9 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     else
         X = rand(rng, d, n)
     end
-    for i = 1:n
-        @test norm(X[:,i]) ≈ 1.0
-        @test insupport(d, X[:,i])
+    for i in 1:n
+        @test norm(X[:, i]) ≈ 1.0
+        @test insupport(d, X[:, i])
     end
 
     # MLE
@@ -137,12 +144,12 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     end
     d_est = fit_mle(VonMisesFisher, X)
     @test isa(d_est, VonMisesFisher)
-    @test isapprox(d_est.μ, μ, atol=0.01)
-    @test isapprox(d_est.κ, κ, atol=κ * 0.01)
+    @test isapprox(d_est.μ, μ, atol = 0.01)
+    @test isapprox(d_est.κ, κ, atol = κ * 0.01)
     d_est = fit(VonMisesFisher{Float64}, X)
     @test isa(d_est, VonMisesFisher)
-    @test isapprox(d_est.μ, μ, atol=0.01)
-    @test isapprox(d_est.κ, κ, atol=κ * 0.01)
+    @test isapprox(d_est.μ, μ, atol = 0.01)
+    return @test isapprox(d_est.κ, κ, atol = κ * 0.01)
 end
 
 
@@ -161,17 +168,20 @@ end
 
 n = 1000
 ns = 10^6
-@testset "Testing VonMisesFisher with $key" for (key, rng) in
-    Dict("rand(...)" => missing,
-         "rand(rng, ...)" => MersenneTwister(123))
+@testset "Testing VonMisesFisher with $key" for (key, rng) in Dict(
+        "rand(...)" => missing,
+        "rand(rng, ...)" => MersenneTwister(123),
+    )
 
-    @testset "Testing VonMisesFisher with $key at ($p, $κ)" for (p, κ) in [(2, 1.0),
-                                                                           (2, 5.0),
-                                                                           (3, 1.0),
-                                                                           (3, 5.0),
-                                                                           (5, 2.0),
-                                                                           (2, 2),
-                                                                           (2, 1000)] # test with large κ
+    @testset "Testing VonMisesFisher with $key at ($p, $κ)" for (p, κ) in [
+            (2, 1.0),
+            (2, 5.0),
+            (3, 1.0),
+            (3, 5.0),
+            (5, 2.0),
+            (2, 2),
+            (2, 1000),
+        ] # test with large κ
         test_vonmisesfisher(p, κ, n, ns, rng)
         test_vmf_rot(p, rng)
     end

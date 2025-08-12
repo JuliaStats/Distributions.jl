@@ -1,4 +1,4 @@
-struct QQPair{U<:AbstractVector, V<:AbstractVector}
+struct QQPair{U <: AbstractVector, V <: AbstractVector}
     qx::U
     qy::V
 end

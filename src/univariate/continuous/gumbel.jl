@@ -22,20 +22,22 @@ External links
 
 * [Gumbel distribution on Wikipedia](http://en.wikipedia.org/wiki/Gumbel_distribution)
 """
-struct Gumbel{T<:Real} <: ContinuousUnivariateDistribution
+struct Gumbel{T <: Real} <: ContinuousUnivariateDistribution
     μ::T  # location
     θ::T  # scale
     Gumbel{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
-function Gumbel(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
+function Gumbel(μ::T, θ::T; check_args::Bool = true) where {T <: Real}
     @check_args Gumbel (θ, θ > zero(θ))
     return Gumbel{T}(μ, θ)
 end
 
-Gumbel(μ::Real, θ::Real; check_args::Bool=true) = Gumbel(promote(μ, θ)...; check_args=check_args)
-Gumbel(μ::Integer, θ::Integer; check_args::Bool=true) = Gumbel(float(μ), float(θ); check_args=check_args)
-Gumbel(μ::Real=0.0) = Gumbel(μ, one(μ); check_args=false)
+Gumbel(μ::Real, θ::Real; check_args::Bool = true) =
+    Gumbel(promote(μ, θ)...; check_args = check_args)
+Gumbel(μ::Integer, θ::Integer; check_args::Bool = true) =
+    Gumbel(float(μ), float(θ); check_args = check_args)
+Gumbel(μ::Real = 0.0) = Gumbel(μ, one(μ); check_args = false)
 
 @distr_support Gumbel -Inf Inf
 
@@ -46,8 +48,8 @@ Base.eltype(::Type{Gumbel{T}}) where {T} = T
 #### Conversions
 
 convert(::Type{Gumbel{T}}, μ::S, θ::S) where {T <: Real, S <: Real} = Gumbel(T(μ), T(θ))
-Base.convert(::Type{Gumbel{T}}, d::Gumbel) where {T<:Real} = Gumbel{T}(T(d.μ), T(d.θ))
-Base.convert(::Type{Gumbel{T}}, d::Gumbel{T}) where {T<:Real} = d
+Base.convert(::Type{Gumbel{T}}, d::Gumbel) where {T <: Real} = Gumbel{T}(T(d.μ), T(d.θ))
+Base.convert(::Type{Gumbel{T}}, d::Gumbel{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -69,15 +71,15 @@ end
 
 mean(d::Gumbel) = d.μ + d.θ * MathConstants.γ
 
-median(d::Gumbel{T}) where {T<:Real} = d.μ - d.θ * log(T(logtwo))
+median(d::Gumbel{T}) where {T <: Real} = d.μ - d.θ * log(T(logtwo))
 
 mode(d::Gumbel) = d.μ
 
-var(d::Gumbel{T}) where {T<:Real} = T(π)^2/6 * d.θ^2
+var(d::Gumbel{T}) where {T <: Real} = T(π)^2 / 6 * d.θ^2
 
-skewness(d::Gumbel{T}) where {T<:Real} = 12*sqrt(T(6))*zeta(T(3)) / π^3
+skewness(d::Gumbel{T}) where {T <: Real} = 12 * sqrt(T(6)) * zeta(T(3)) / π^3
 
-kurtosis(d::Gumbel{T}) where {T<:Real} = T(12)/5
+kurtosis(d::Gumbel{T}) where {T <: Real} = T(12) / 5
 
 entropy(d::Gumbel) = log(d.θ) + 1 + MathConstants.γ
 
@@ -89,12 +91,12 @@ xval(d::Gumbel, z::Real) = z * d.θ + d.μ
 
 function pdf(d::Gumbel, x::Real)
     z = zval(d, x)
-    exp(-z - exp(-z)) / d.θ
+    return exp(-z - exp(-z)) / d.θ
 end
 
 function logpdf(d::Gumbel, x::Real)
     z = zval(d, x)
-    - (z + exp(-z) + log(d.θ))
+    return -(z + exp(-z) + log(d.θ))
 end
 
 cdf(d::Gumbel, x::Real) = exp(-exp(-zval(d, x)))

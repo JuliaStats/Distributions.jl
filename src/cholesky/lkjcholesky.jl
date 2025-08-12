@@ -29,7 +29,7 @@ External links
   Journal of Multivariate Analysis (2009), 100(9): 1989-2001
   doi: [10.1016/j.jmva.2009.04.008](https://doi.org/10.1016/j.jmva.2009.04.008)
 """
-struct LKJCholesky{T <: Real} <: Distribution{CholeskyVariate,Continuous}
+struct LKJCholesky{T <: Real} <: Distribution{CholeskyVariate, Continuous}
     d::Int
     η::T
     uplo::Char
@@ -40,7 +40,12 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args::Bool=true)
+function LKJCholesky(
+        d::Int,
+        η::Real,
+        _uplo::Union{Char, Symbol} = 'L';
+        check_args::Bool = true,
+    )
     @check_args(
         LKJCholesky,
         (d, d > 0, "matrix dimension must be positive"),
@@ -53,7 +58,7 @@ function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_ar
 end
 
 # adapted from LinearAlgebra.char_uplo
-function _char_uplo(uplo::Union{Symbol,Char})
+function _char_uplo(uplo::Union{Symbol, Char})
     uplo ∈ (:U, 'U') && return 'U'
     uplo ∈ (:L, 'L') && return 'L'
     throw(ArgumentError("uplo argument must be either 'U' (upper) or 'L' (lower)"))
@@ -69,12 +74,18 @@ Base.show(io::IO, d::LKJCholesky) = show(io, d, (:d, :η, :uplo))
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where T <: Real
+function Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where {T <: Real}
     return LKJCholesky{T}(d.d, T(d.η), d.uplo, T(d.logc0))
 end
-Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky{T}) where T <: Real = d
+Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky{T}) where {T <: Real} = d
 
-function convert(::Type{LKJCholesky{T}}, d::Integer, η::Real, uplo::Char, logc0::Real) where T <: Real
+function convert(
+        ::Type{LKJCholesky{T}},
+        d::Integer,
+        η::Real,
+        uplo::Char,
+        logc0::Real,
+    ) where {T <: Real}
     return LKJCholesky{T}(Int(d), T(η), uplo, T(logc0))
 end
 
@@ -109,7 +120,7 @@ function insupport(d::LKJCholesky, R::LinearAlgebra.Cholesky)
     return true
 end
 
-function mode(d::LKJCholesky; check_args::Bool=true)
+function mode(d::LKJCholesky; check_args::Bool = true)
     @check_args(
         LKJCholesky,
         @setup(η = d.η),
@@ -134,7 +145,7 @@ function logkernel(d::LKJCholesky, R::LinearAlgebra.Cholesky)
     p == 1 && return c * log(first(factors))
     # assuming D = diag(factors) with length(D) = p,
     # logp = sum(i -> (c - i) * log(D[i]), 2:p)
-    logp = sum(Iterators.drop(enumerate(diagind(factors)), 1)) do (i, di) 
+    logp = sum(Iterators.drop(enumerate(diagind(factors)), 1)) do (i, di)
         return (c - i) * log(factors[di])
     end
     return logp
@@ -168,7 +179,7 @@ function Base.rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     uplo = d.uplo
     T = eltype(d)
     TM = Matrix{T}
-    Rs = Array{LinearAlgebra.Cholesky{T,TM}}(undef, dims)
+    Rs = Array{LinearAlgebra.Cholesky{T, TM}}(undef, dims)
     for i in eachindex(Rs)
         factors = TM(undef, p, p)
         Rs[i] = R = LinearAlgebra.Cholesky(factors, uplo, 0)
@@ -183,11 +194,11 @@ function Random.rand!(rng::AbstractRNG, d::LKJCholesky, R::LinearAlgebra.Cholesk
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    d::LKJCholesky,
-    Rs::AbstractArray{<:LinearAlgebra.Cholesky{T,TM}},
-    allocate::Bool,
-) where {T,TM}
+        rng::AbstractRNG,
+        d::LKJCholesky,
+        Rs::AbstractArray{<:LinearAlgebra.Cholesky{T, TM}},
+        allocate::Bool,
+    ) where {T, TM}
     p = d.d
     uplo = d.uplo
     if allocate
@@ -206,11 +217,12 @@ function Random.rand!(
     return Rs
 end
 function Random.rand!(
-    rng::AbstractRNG,
-    d::LKJCholesky,
-    Rs::AbstractArray{<:LinearAlgebra.Cholesky{<:Real}},
-)
-    allocate = any(!isassigned(Rs, i) for i in eachindex(Rs)) || any(R -> size(R, 1) != d.d, Rs)
+        rng::AbstractRNG,
+        d::LKJCholesky,
+        Rs::AbstractArray{<:LinearAlgebra.Cholesky{<:Real}},
+    )
+    allocate =
+        any(!isassigned(Rs, i) for i in eachindex(Rs)) || any(R -> size(R, 1) != d.d, Rs)
     return Random.rand!(rng, d, Rs, allocate)
 end
 
@@ -219,10 +231,10 @@ end
 #
 
 function _lkj_cholesky_onion_sampler!(
-    rng::AbstractRNG,
-    d::LKJCholesky,
-    R::LinearAlgebra.Cholesky,
-)
+        rng::AbstractRNG,
+        d::LKJCholesky,
+        R::LinearAlgebra.Cholesky,
+    )
     if R.uplo === 'U'
         _lkj_cholesky_onion_tri!(rng, R.factors, d.d, d.η, Val(:U))
     else
@@ -232,19 +244,19 @@ function _lkj_cholesky_onion_sampler!(
 end
 
 function _lkj_cholesky_onion_tri!(
-    rng::AbstractRNG,
-    A::AbstractMatrix,
-    d::Int,
-    η::Real,
-    ::Val{uplo},
-) where {uplo}
+        rng::AbstractRNG,
+        A::AbstractMatrix,
+        d::Int,
+        η::Real,
+        ::Val{uplo},
+    ) where {uplo}
     # Section 3.2 in LKJ (2009 JMA)
     # reformulated to incrementally construct Cholesky factor as mentioned in Section 5
     # equivalent steps in algorithm in reference are marked.
     @assert size(A) == (d, d)
     A[1, 1] = 1
     d > 1 || return A
-    β = η + (d - 2)//2
+    β = η + (d - 2) // 2
     #  1. Initialization
     w0 = 2 * rand(rng, Beta(β, β)) - 1
     @inbounds if uplo === :L
@@ -256,9 +268,9 @@ function _lkj_cholesky_onion_tri!(
     #  2. Loop, each iteration k adds row/column k+1
     for k in 2:(d - 1)
         #  (a)
-        β -= 1//2
+        β -= 1 // 2
         #  (b)
-        y = rand(rng, Beta(k//2, β))
+        y = rand(rng, Beta(k // 2, β))
         #  (c)-(e)
         # w is directionally uniform vector of length √y
         @inbounds w = @views uplo === :L ? A[k + 1, 1:k] : A[1:k, k + 1]

@@ -1,5 +1,9 @@
-function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
-                         x::AbstractVector{<:Real})
+function multinom_rand!(
+        rng::AbstractRNG,
+        n::Int,
+        p::AbstractVector{<:Real},
+        x::AbstractVector{<:Real},
+    )
     k = length(p)
     length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
 
@@ -31,7 +35,7 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
         @inbounds x[k] = n
     else  # n must have been zero
         z = zero(eltype(x))
-        for j = i+1 : k
+        for j in (i + 1):k
             @inbounds x[j] = z
         end
     end
@@ -39,7 +43,7 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
     return x
 end
 
-struct MultinomialSampler{T<:Real} <: Sampleable{Multivariate,Discrete}
+struct MultinomialSampler{T <: Real} <: Sampleable{Multivariate, Discrete}
     n::Int
     prob::Vector{T}
     alias::AliasTable
@@ -49,8 +53,7 @@ function MultinomialSampler(n::Int, prob::Vector{<:Real})
     return MultinomialSampler(n, prob, AliasTable(prob))
 end
 
-function _rand!(rng::AbstractRNG, s::MultinomialSampler,
-                x::AbstractVector{<:Real})
+function _rand!(rng::AbstractRNG, s::MultinomialSampler, x::AbstractVector{<:Real})
     n = s.n
     k = length(s)
     if n^2 > k
@@ -59,7 +62,7 @@ function _rand!(rng::AbstractRNG, s::MultinomialSampler,
         # Use an alias table
         fill!(x, zero(eltype(x)))
         a = s.alias
-        for i = 1:n
+        for i in 1:n
             x[rand(rng, a)] += 1
         end
     end

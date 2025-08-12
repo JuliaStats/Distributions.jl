@@ -1,17 +1,17 @@
 #### naive sampling
 
-struct CategoricalDirectSampler{T<:Real,Ts<:AbstractVector{T}} <: Sampleable{Univariate,Discrete}
+struct CategoricalDirectSampler{T <: Real, Ts <: AbstractVector{T}} <:
+    Sampleable{Univariate, Discrete}
     prob::Ts
 
-    function CategoricalDirectSampler{T,Ts}(p::Ts) where {
-        T<:Real,Ts<:AbstractVector{T}}
+    function CategoricalDirectSampler{T, Ts}(p::Ts) where {T <: Real, Ts <: AbstractVector{T}}
         isempty(p) && throw(ArgumentError("p is empty."))
-        new{T,Ts}(p)
+        return new{T, Ts}(p)
     end
 end
 
-CategoricalDirectSampler(p::Ts) where {T<:Real,Ts<:AbstractVector{T}} =
-    CategoricalDirectSampler{T,Ts}(p)
+CategoricalDirectSampler(p::Ts) where {T <: Real, Ts <: AbstractVector{T}} =
+    CategoricalDirectSampler{T, Ts}(p)
 
 ncategories(s::CategoricalDirectSampler) = length(s.prob)
 

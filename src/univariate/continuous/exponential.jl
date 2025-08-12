@@ -21,27 +21,28 @@ External links
 * [Exponential distribution on Wikipedia](http://en.wikipedia.org/wiki/Exponential_distribution)
 
 """
-struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
+struct Exponential{T <: Real} <: ContinuousUnivariateDistribution
     θ::T        # note: scale not rate
     Exponential{T}(θ::T) where {T} = new{T}(θ)
 end
 
-function Exponential(θ::Real; check_args::Bool=true)
+function Exponential(θ::Real; check_args::Bool = true)
     @check_args Exponential (θ, θ > zero(θ))
     return Exponential{typeof(θ)}(θ)
 end
 
-Exponential(θ::Integer; check_args::Bool=true) = Exponential(float(θ); check_args=check_args)
+Exponential(θ::Integer; check_args::Bool = true) =
+    Exponential(float(θ); check_args = check_args)
 Exponential() = Exponential{Float64}(1.0)
 
 @distr_support Exponential 0.0 Inf
 
 ### Conversions
 convert(::Type{Exponential{T}}, θ::S) where {T <: Real, S <: Real} = Exponential(T(θ))
-function Base.convert(::Type{Exponential{T}}, d::Exponential) where {T<:Real}
+function Base.convert(::Type{Exponential{T}}, d::Exponential) where {T <: Real}
     return Exponential(T(d.θ))
 end
-Base.convert(::Type{Exponential{T}}, d::Exponential{T}) where {T<:Real} = d
+Base.convert(::Type{Exponential{T}}, d::Exponential{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -49,13 +50,13 @@ scale(d::Exponential) = d.θ
 rate(d::Exponential) = inv(d.θ)
 
 params(d::Exponential) = (d.θ,)
-partype(::Exponential{T}) where {T<:Real} = T
+partype(::Exponential{T}) where {T <: Real} = T
 
 #### Statistics
 
 mean(d::Exponential) = d.θ
 median(d::Exponential) = logtwo * d.θ
-mode(::Exponential{T}) where {T<:Real} = zero(T)
+mode(::Exponential{T}) where {T <: Real} = zero(T)
 
 var(d::Exponential) = d.θ^2
 skewness(::Exponential{T}) where {T} = T(2)
@@ -94,14 +95,14 @@ cquantile(d::Exponential, p::Real) = -xval(d, log(p))
 invlogcdf(d::Exponential, lp::Real) = -xval(d, log1mexp(lp))
 invlogccdf(d::Exponential, lp::Real) = -xval(d, lp)
 
-gradlogpdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -rate(d) : zero(T)
+gradlogpdf(d::Exponential{T}, x::Real) where {T <: Real} = x > 0 ? -rate(d) : zero(T)
 
-mgf(d::Exponential, t::Real) = 1/(1 - t * scale(d))
+mgf(d::Exponential, t::Real) = 1 / (1 - t * scale(d))
 function cgf(d::Exponential, t)
     μ = mean(d)
-    return - log1p(- t * μ)
+    return -log1p(-t * μ)
 end
-cf(d::Exponential, t::Real) = 1/(1 - t * im * scale(d))
+cf(d::Exponential, t::Real) = 1 / (1 - t * im * scale(d))
 
 
 #### Sampling
@@ -122,7 +123,12 @@ struct ExponentialStats <: SufficientStats
     ExponentialStats(sx::Real, sw::Real) = new(sx, sw)
 end
 
-suffstats(::Type{<:Exponential}, x::AbstractArray{T}) where {T<:Real} = ExponentialStats(sum(x), length(x))
-suffstats(::Type{<:Exponential}, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Real} = ExponentialStats(dot(x, w), sum(w))
+suffstats(::Type{<:Exponential}, x::AbstractArray{T}) where {T <: Real} =
+    ExponentialStats(sum(x), length(x))
+suffstats(
+    ::Type{<:Exponential},
+    x::AbstractArray{T},
+    w::AbstractArray{Float64},
+) where {T <: Real} = ExponentialStats(dot(x, w), sum(w))
 
 fit_mle(::Type{<:Exponential}, ss::ExponentialStats) = Exponential(ss.sx / ss.sw)

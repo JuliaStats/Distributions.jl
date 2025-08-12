@@ -1,4 +1,4 @@
-struct PoissBinAliasSampler <: Sampleable{Univariate,Discrete}
+struct PoissBinAliasSampler <: Sampleable{Univariate, Discrete}
     table::AliasTable
 end
 

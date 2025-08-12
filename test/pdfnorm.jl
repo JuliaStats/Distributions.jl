@@ -5,13 +5,13 @@ using QuadGK
 # norms of the distributions.  These methods aren't very robust because can't
 # deal with divergent norms, or discrete distributions with infinite support.
 numeric_norm(d::ContinuousUnivariateDistribution) =
-    quadgk(x -> pdf(d, x) ^ 2, support(d).lb, support(d).ub)[1]
+    quadgk(x -> pdf(d, x)^2, support(d).lb, support(d).ub)[1]
 
 function numeric_norm(d::DiscreteUnivariateDistribution)
     # When the distribution has infinite support, sum up to an arbitrary large
     # value.
     upper = isfinite(maximum(d)) ? round(Int, maximum(d)) : 100
-    return sum(pdf(d, k) ^ 2 for k in round(Int, minimum(d)):upper)
+    return sum(pdf(d, k)^2 for k in round(Int, minimum(d)):upper)
 end
 
 @testset "pdf L2 norm" begin
@@ -50,7 +50,9 @@ end
             @test pdfsquaredL2norm(d) ≈ numeric_norm(d)
         end
         # The norm doesn't depend on the mean
-        @test pdfsquaredL2norm(Cauchy(100, 1)) == pdfsquaredL2norm(Cauchy(-100, 1)) == pdfsquaredL2norm(Cauchy(0, 1))
+        @test pdfsquaredL2norm(Cauchy(100, 1)) ==
+            pdfsquaredL2norm(Cauchy(-100, 1)) ==
+            pdfsquaredL2norm(Cauchy(0, 1))
     end
 
     @testset "Chi" begin
@@ -83,7 +85,13 @@ end
     end
 
     @testset "Geometric" begin
-        for d in (Geometric(0.20), Geometric(0.25), Geometric(0.50), Geometric(0.75), Geometric(0.80))
+        for d in (
+                Geometric(0.2),
+                Geometric(0.25),
+                Geometric(0.5),
+                Geometric(0.75),
+                Geometric(0.8),
+            )
             @test pdfsquaredL2norm(d) ≈ numeric_norm(d)
         end
     end
@@ -93,7 +101,9 @@ end
             @test pdfsquaredL2norm(d) ≈ numeric_norm(d)
         end
         # The norm doesn't depend on the mean
-        @test pdfsquaredL2norm(Logistic(100, 1)) == pdfsquaredL2norm(Logistic(-100, 1)) == pdfsquaredL2norm(Logistic(0, 1))
+        @test pdfsquaredL2norm(Logistic(100, 1)) ==
+            pdfsquaredL2norm(Logistic(-100, 1)) ==
+            pdfsquaredL2norm(Logistic(0, 1))
     end
 
     @testset "Normal" begin
@@ -102,7 +112,9 @@ end
         end
         @test pdfsquaredL2norm(Normal(1, 0)) ≈ Inf
         # The norm doesn't depend on the mean
-        @test pdfsquaredL2norm(Normal(100, 1)) == pdfsquaredL2norm(Normal(-100, 1)) == pdfsquaredL2norm(Normal(0, 1))
+        @test pdfsquaredL2norm(Normal(100, 1)) ==
+            pdfsquaredL2norm(Normal(-100, 1)) ==
+            pdfsquaredL2norm(Normal(0, 1))
     end
 
     @testset "Poisson" begin

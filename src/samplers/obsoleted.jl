@@ -7,13 +7,13 @@
 ##### Draw Table #####
 
 # Store an alias table
-struct DiscreteDistributionTable <: Sampler{Univariate,Discrete}
+struct DiscreteDistributionTable <: Sampler{Univariate, Discrete}
     table::Vector{Vector{Int64}}
     bounds::Vector{Int64}
 end
 
 # TODO: Test if bit operations can speed up Base64 mod's and fld's
-function DiscreteDistributionTable(probs::Vector{T}) where T <: Real
+function DiscreteDistributionTable(probs::Vector{T}) where {T <: Real}
     # Cache the cardinality of the outcome set
     n = length(probs)
 
@@ -91,7 +91,7 @@ Base.show(io::IO, table::DiscreteDistributionTable) = @printf io "DiscreteDistri
 
 ##### Huffman Table ######
 
-abstract type HuffmanNode{T} <: Sampler{Univariate,Discrete} end
+abstract type HuffmanNode{T} <: Sampler{Univariate, Discrete} end
 
 struct HuffmanLeaf{T} <: HuffmanNode{T}
     value::T
@@ -103,13 +103,14 @@ struct HuffmanBranch{T} <: HuffmanNode{T}
     right::HuffmanNode{T}
     weight::UInt64
 end
-HuffmanBranch(ha::HuffmanNode{T},hb::HuffmanNode{T}) where {T} = HuffmanBranch(ha, hb, ha.weight + hb.weight)
+HuffmanBranch(ha::HuffmanNode{T}, hb::HuffmanNode{T}) where {T} =
+    HuffmanBranch(ha, hb, ha.weight + hb.weight)
 
-Base.isless(ha::HuffmanNode{T}, hb::HuffmanNode{T}) where {T} = isless(ha.weight,hb.weight)
-Base.show(io::IO, t::HuffmanNode{T}) where {T} = show(io,typeof(t))
+Base.isless(ha::HuffmanNode{T}, hb::HuffmanNode{T}) where {T} = isless(ha.weight, hb.weight)
+Base.show(io::IO, t::HuffmanNode{T}) where {T} = show(io, typeof(t))
 
-function Base.getindex(h::HuffmanBranch{T},u::UInt64) where T
-    while isa(h,HuffmanBranch{T})
+function Base.getindex(h::HuffmanBranch{T}, u::UInt64) where {T}
+    while isa(h, HuffmanBranch{T})
         if u < h.left.weight
             h = h.left
         else
@@ -117,41 +118,45 @@ function Base.getindex(h::HuffmanBranch{T},u::UInt64) where T
             h = h.right
         end
     end
-    h.value
+    return h.value
 end
 
 # build the huffman tree
 # could be slightly more efficient using a Deque.
-function huffman(values::AbstractVector{T},weights::AbstractVector{UInt64}) where T
-    leafs = [HuffmanLeaf{T}(values[i],weights[i]) for i = 1:length(weights)]
-    sort!(leafs; rev=true)
+function huffman(values::AbstractVector{T}, weights::AbstractVector{UInt64}) where {T}
+    leafs = [HuffmanLeaf{T}(values[i], weights[i]) for i in 1:length(weights)]
+    sort!(leafs; rev = true)
 
     branches = Vector{HuffmanBranch{T}}()
 
     while !isempty(leafs) || length(branches) > 1
-        left = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
-        right = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
-        pushfirst!(branches,HuffmanBranch(left,right))
+        left =
+            isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ?
+            pop!(leafs) : pop!(branches)
+        right =
+            isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ?
+            pop!(leafs) : pop!(branches)
+        pushfirst!(branches, HuffmanBranch(left, right))
     end
 
-    pop!(branches)
+    return pop!(branches)
 end
 
-function rand(h::HuffmanNode{T}) where T
+function rand(h::HuffmanNode{T}) where {T}
     w = h.weight
     # generate uniform UInt64 objects on the range 0:(w-1)
     # unfortunately we can't use Range objects, as they don't have sufficient length
     u = rand(UInt64)
-    if (w & (w-1)) == 0
+    if (w & (w - 1)) == 0
         # power of 2
-        u = u & (w-1)
+        u = u & (w - 1)
     else
         m = typemax(UInt64)
-        lim = m - (rem(m,w)+1)
+        lim = m - (rem(m, w) + 1)
         while u > lim
             u = rand(UInt64)
         end
-        u = rem(u,w)
+        u = rem(u, w)
     end
-    h[u]
+    return h[u]
 end

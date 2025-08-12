@@ -5,17 +5,17 @@ using Test
 using FiniteDifferences
 
 @testset "LKJCholesky" begin
-    function test_draw(d::LKJCholesky, x; check_uplo=true)
+    function test_draw(d::LKJCholesky, x; check_uplo = true)
         @test insupport(d, x)
         check_uplo && @test x.uplo == d.uplo
     end
-    function test_draws(d::LKJCholesky, xs; check_uplo=true, nkstests=1)
+    function test_draws(d::LKJCholesky, xs; check_uplo = true, nkstests = 1)
         @test all(x -> insupport(d, x), xs)
         check_uplo && @test all(x -> x.uplo == d.uplo, xs)
 
         p = d.d
         dmat = LKJ(p, d.η)
-        marginal = Distributions._marginal(dmat)    
+        marginal = Distributions._marginal(dmat)
         ndraws = length(xs)
         zs = Array{eltype(d)}(undef, p, p, ndraws)
         for k in 1:ndraws
@@ -23,11 +23,12 @@ using FiniteDifferences
         end
 
         @testset "LKJCholesky marginal moments" begin
-            @test mean(zs; dims=3)[:, :, 1] ≈ I atol=0.1
-            @test var(zs; dims=3)[:, :, 1] ≈ var(marginal) * (ones(p, p) - I) atol=0.1
+            @test mean(zs; dims = 3)[:, :, 1] ≈ I atol = 0.1
+            @test var(zs; dims = 3)[:, :, 1] ≈ var(marginal) * (ones(p, p) - I) atol = 0.1
             @testset for n in 2:5
-                for i in 1:p, j in 1:(i-1)
-                    @test moment(zs[i, j, :], n) ≈ moment(rand(marginal, ndraws), n) atol=0.1
+                for i in 1:p, j in 1:(i - 1)
+                    @test moment(zs[i, j, :], n) ≈ moment(rand(marginal, ndraws), n) atol =
+                        0.1
                 end
             end
         end
@@ -35,7 +36,7 @@ using FiniteDifferences
         @testset "LKJCholesky marginal KS test" begin
             α = 0.01
             L = sum(1:(p - 1))
-            for i in 1:p, j in 1:(i-1)
+            for i in 1:p, j in 1:(i - 1)
                 @test pvalue_kolmogorovsmirnoff(zs[i, j, :], marginal) >= α / L / nkstests
             end
         end
@@ -63,7 +64,7 @@ using FiniteDifferences
     function cholesky_vec_to_corr_vec(l)
         L = vec_to_stricttril(l)
         for i in axes(L, 1)
-            w = view(L, i, 1:(i-1))
+            w = view(L, i, 1:(i - 1))
             wnorm = norm(w)
             if wnorm > 1
                 w ./= wnorm
@@ -136,7 +137,9 @@ using FiniteDifferences
                 @test m isa Cholesky{eltype(d)}
                 @test Matrix(m) ≈ I
             else
-                @test_throws DomainError(η, "LKJCholesky: mode is defined only when η > 1.") mode(d)
+                @test_throws DomainError(η, "LKJCholesky: mode is defined only when η > 1.") mode(
+                    d,
+                )
             end
             m = mode(d; check_args = false)
             @test m isa Cholesky{eltype(d)}
@@ -150,11 +153,13 @@ using FiniteDifferences
             @test insupport(LKJCholesky(40, 2, 'U'), cholesky(rand(LKJ(40, 2))))
             @test insupport(LKJCholesky(40, 2), cholesky(rand(LKJ(40, 2))))
             @test !insupport(LKJCholesky(40, 2), cholesky(rand(LKJ(41, 2))))
-           for (d, η) in ((2, 4), (2, 1), (3, 1)), T in (Float32, Float64)
-                @test @inferred(logpdf(LKJCholesky(40, T(2)), cholesky(T.(rand(LKJ(41, 2)))))) === T(-Inf)
+            for (d, η) in ((2, 4), (2, 1), (3, 1)), T in (Float32, Float64)
+                @test @inferred(
+                    logpdf(LKJCholesky(40, T(2)), cholesky(T.(rand(LKJ(41, 2)))))
+                ) === T(-Inf)
             end
             z = rand(LKJ(40, 1))
-            z .+= exp(Symmetric(randn(size(z)))) .* 1e-8
+            z .+= exp(Symmetric(randn(size(z)))) .* 1.0e-8
             x = cholesky(z)
             @test !insupport(LKJCholesky(4, 2), x)
         end
@@ -192,7 +197,7 @@ using FiniteDifferences
             @testset for p in (2, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
                 d = LKJCholesky(p, η, uplo)
                 test_draw(d, rand(rng, d))
-                test_draws(d, rand(rng, d, 10^4); nkstests=nkstests)
+                test_draws(d, rand(rng, d, 10^4); nkstests = nkstests)
             end
             @test_broken rand(rng, LKJCholesky(5, Inf)) ≈ I
         end
@@ -215,19 +220,19 @@ using FiniteDifferences
                 # allocating
                 xs = Vector{typeof(x)}(undef, 10^4)
                 rand!(rng, d, xs)
-                test_draws(d, xs; nkstests=nkstests)
+                test_draws(d, xs; nkstests = nkstests)
 
                 F2 = cholesky(exp(Symmetric(randn(rng, p, p))))
-                xs2 = [deepcopy(F2) for _ in 1:10^4]
+                xs2 = [deepcopy(F2) for _ in 1:(10^4)]
                 xs2[1] = cholesky(exp(Symmetric(randn(rng, p + 1, p + 1))))
                 rand!(rng, d, xs2)
-                test_draws(d, xs2; nkstests=nkstests)
+                test_draws(d, xs2; nkstests = nkstests)
 
                 # non-allocating
                 F3 = cholesky(exp(Symmetric(randn(rng, p, p))))
-                xs3 = [deepcopy(F3) for _ in 1:10^4]
+                xs3 = [deepcopy(F3) for _ in 1:(10^4)]
                 rand!(rng, d, xs3)
-                test_draws(d, xs3; check_uplo = uplo == 'U', nkstests=nkstests)
+                test_draws(d, xs3; check_uplo = uplo == 'U', nkstests = nkstests)
             end
         end
     end
