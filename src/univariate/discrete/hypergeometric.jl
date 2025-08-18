@@ -89,6 +89,4 @@ entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))
 
 ## sampling
 
-function Random.rand(rng::AbstractRNG, dist::Hypergeometric)
-    rand(rng, HypergeometricSampler(dist))
-end
+sampler(dist::Hypergeometric) = HypergeometricSampler(dist)
