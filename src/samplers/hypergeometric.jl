@@ -98,9 +98,6 @@ struct HypergeometricSampler{T} <: Sampleable{Univariate,Discrete}
 
 end
 
-HypergeometricSampler(ns::Real, nf::Real, n::Real) =
-    HypergeometricSampler(Hypergeometric(ns, nf, n))
-
 struct H2PECache
     A::Float64
     xL::Float64
