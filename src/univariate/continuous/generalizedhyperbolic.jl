@@ -30,6 +30,7 @@ These parameters are actually stored in `struct GeneralizedHyperbolic{T<:Real}`.
 External links:
 
 * [Generalized hyperbolic distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalised_hyperbolic_distribution).
+* [`HyperbolicDistribution` in Wolfram language](https://reference.wolfram.com/language/ref/HyperbolicDistribution.html).
 """
 struct GeneralizedHyperbolic{T<:Real} <: ContinuousUnivariateDistribution
     α::T
@@ -95,9 +96,7 @@ params(d::GeneralizedHyperbolic, ::Val{:locscale}) = begin
 end
 partype(::GeneralizedHyperbolic{T}) where T = T
 
-minimum(::GeneralizedHyperbolic) = -Inf
-maximum(::GeneralizedHyperbolic) = Inf
-insupport(::GeneralizedHyperbolic, x::Real) = true
+@distr_support GeneralizedHyperbolic -Inf Inf
 
 "Fit quadratic `y = ax^2 + bx + c` through 3 points (x, y), return coefficients `(a, b)`."
 function _fit_quadratic(x1, y1, x2, y2, x3, y3)

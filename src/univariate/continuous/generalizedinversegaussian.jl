@@ -18,6 +18,7 @@ f(x; \mu, \lambda, \theta) =
 External links:
 
 * [Generalized Inverse Gaussian distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_inverse_Gaussian_distribution).
+* [`InverseGaussianDistribution` in Wolfram language](https://reference.wolfram.com/language/ref/InverseGaussianDistribution.html).
 """
 struct GeneralizedInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
@@ -246,5 +247,5 @@ function rand(rng::AbstractRNG, d::_GIG{<:Real, <:Real})
 
     tmp = λ/ω
     logGIG = log(tmp + sqrt(1 + tmp^2)) + X
-    exp(negative_lmb ? -logGIG : logGIG)
+    exp(ifelse(negative_lmb, -logGIG, logGIG))
 end
