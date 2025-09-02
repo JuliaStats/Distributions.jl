@@ -32,12 +32,10 @@ end
 GeneralizedInverseGaussian(μ::Real, λ::Real, θ::Real=-1/2; check_args::Bool=true) =
     GeneralizedInverseGaussian(promote(μ, λ, θ)...; check_args)
 
+@distr_support GeneralizedInverseGaussian 0.0 Inf
+
 params(d::GeneralizedInverseGaussian) = (d.μ, d.λ, d.θ)
 partype(::GeneralizedInverseGaussian{T}) where T = T
-
-minimum(::GeneralizedInverseGaussian) = 0.0
-maximum(::GeneralizedInverseGaussian) = Inf
-insupport(::GeneralizedInverseGaussian, x::Real) = x >= 0
 
 mode(d::GeneralizedInverseGaussian) = begin
     μ, λ, θ = params(d)
@@ -158,6 +156,8 @@ struct _GIG{T1<:Real, T2<:Real} <: ContinuousUnivariateDistribution
     end
 end
 
+params(d::_GIG) = (d.ω, d.λ)
+
 logpdf(d::_GIG, x::Real) =
     if x >= 0
         -log(2 * besselk(d.λ, d.ω)) + (d.λ - 1) * log(x) - d.ω/2 * (x + 1/x)
@@ -174,10 +174,18 @@ Sampling from the _2-parameter_ generalized inverse Gaussian distribution based 
 
 1. Devroye, Luc. 2014. “Random Variate Generation for the Generalized Inverse Gaussian Distribution.” Statistics and Computing 24 (2): 239–46. https://doi.org/10.1007/s11222-012-9367-z.
 """
-function rand(rng::AbstractRNG, d::_GIG)
-    λ, ω = d.λ, d.ω
-    negative_lmb = λ < 0
-    λ = abs(λ)
+function rand(rng::AbstractRNG, d::_GIG{<:Real, <:Real})
+    # ω, λ = params(d)
+    # negative_lmb = λ < 0
+    # λ = abs(λ)
+    # FIXME: `λ = abs(λ)` causes the code to be type-unstable and leads to massive slowdown.
+    # Benchmark: `@time rand(Distributions._GIG(.2,.7), 10^6);`
+    # - with `λ = abs(λ)`:            5.85 seconds, 90.96 M allocations
+    # - with `λ = abs(lmb)` as below: 0.41 seconds, 3 allocations
+
+    ω, lmb = params(d)
+    negative_lmb = lmb < 0
+    λ = abs(lmb)
 
     α = sqrt(ω^2 + λ^2) - λ
     ψ(x) = -α * (cosh(x) - 1) - λ * (exp(x) - x - 1)
