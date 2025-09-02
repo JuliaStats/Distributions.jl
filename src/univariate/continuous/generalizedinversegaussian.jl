@@ -135,6 +135,52 @@ rand(rng::AbstractRNG, d::GeneralizedInverseGaussian) = begin
     μ * rand(rng, _GIG(λ/μ, θ))
 end
 
+# ===== Fitting =====
+"""
+Sufficient statistics for `GeneralizedInverseGaussian`, containing:
+
+1. (weighted) sum of `log(x)`,
+2. (weighted) sum of `x`,
+3. (weighted) sum of `1/x`,
+4. sum of sample weights,
+
+where `x` are observed samples.
+"""
+struct GeneralizedInverseGaussianStats{T<:Real} <: SufficientStats
+    "(weighted) sum of `log(x)`"
+    slogx::T
+    "(weighted) sum of `x`"
+    sx::T
+    "(weighted) sum of `1/x`"
+    sinvx::T
+    "sum of sample weights"
+    sw::T
+end
+
+GeneralizedInverseGaussianStats(slogx::Real, sx::Real, sinvx::Real, sw::Real) =
+    GeneralizedInverseGaussianStats(promote(slogx, sx, sinvx, sw)...)
+
+suffstats(::Type{<:GeneralizedInverseGaussian}, x::AbstractVector{<:Real}) =
+    GeneralizedInverseGaussianStats(
+        sum(log, x), sum(x), sum(inv, x), length(x)
+    )
+
+function suffstats(::Type{<:GeneralizedInverseGaussian}, x::AbstractVector{T1}, w::AbstractVector{T2}) where {T1<:Real, T2<:Real}
+    n = length(x)
+    if length(w) != n
+        throw(DimensionMismatch("Inconsistent argument dimensions: got $n observations != $(length(w)) weights."))
+    end
+    T = promote_type(T1, T2)
+    slogx = sx = sinvx = sw = zero(T)
+    @inbounds @simd for i in eachindex(x)
+        slogx += w[i] * log(x[i])
+        sx += w[i] * x[i]
+        sinvx += w[i] / x[i]
+        sw += w[i]
+    end
+    GeneralizedInverseGaussianStats(slogx, sx, sinvx, sw)
+end
+
 # ===== Private two-parameter version =====
 """
     _GIG(λ, ω)

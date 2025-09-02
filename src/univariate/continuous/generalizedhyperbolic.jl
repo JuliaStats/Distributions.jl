@@ -131,6 +131,7 @@ function mode(d::GeneralizedHyperbolic)
     elseif λ ≈ 2
         μ + β / α / γ^2 * (α + sqrt(β^2 + (α * δ * γ)^2)) # Wolfram
     else
+        # FIXME: quadratic fit search should probably be factored into a separate function
         lo, hi = let # Bounds for the bracketing interval
             EX = mean(d)
             # eq. 2.27 from the paper: EX - upper < mode < EX - lower for β>0.
