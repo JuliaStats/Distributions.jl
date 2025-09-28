@@ -301,5 +301,5 @@ function rand(rng::AbstractRNG, d::Chernoff)
     F0 = ChernoffComputations._cdf(A/y[1])
     tau = 2*rand(rng)-1 # ~ U(-1,1)
     tauabs = abs(tau)
-    return quantile(Chernoff(), tauabs + (1-tauabs)*F0) * sign(tau)
+    return quantile(d, tauabs + (1-tauabs)*F0) * sign(tau)
 end
