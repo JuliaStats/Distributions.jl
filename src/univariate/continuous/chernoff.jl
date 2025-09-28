@@ -287,10 +287,7 @@ entropy(d::Chernoff) = -0.7515605300273104
 
 ### Random number generation
 
-struct ChernoffSampler <: Sampleable{Univariate, Continuous}
-end
-ChernoffSampler(::Chernoff) = ChernoffSampler()
-function rand(rng::AbstractRNG, d::ChernoffSampler)
+function rand(rng::AbstractRNG, d::Chernoff)
     A = ChernoffComputations.randA
     x = ChernoffComputations.randx
     y = ChernoffComputations.randy
@@ -313,5 +310,3 @@ function rand(rng::AbstractRNG, d::ChernoffSampler)
     tauabs = abs(tau)
     return quantile(Chernoff(), tauabs + (1-tauabs)*F0) * sign(tau)
 end
-sampler(d::Chernoff) = ChernoffSampler(d)
-rand(rng::AbstractRNG, d::Chernoff) = rand(rng, sampler(d))
