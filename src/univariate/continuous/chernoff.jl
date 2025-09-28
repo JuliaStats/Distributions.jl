@@ -249,8 +249,6 @@ pdf(d::Chernoff, x::Real) = ChernoffComputations._pdf(x)
 logpdf(d::Chernoff, x::Real) = log(ChernoffComputations.g(x))+log(ChernoffComputations.g(-x))+log(0.5)
 cdf(d::Chernoff, x::Real) = ChernoffComputations._cdf(x)
 
-# @quantile_newton Chernoff
-
 function quantile(d::Chernoff, tau::Real)
     precomputedquants = ChernoffComputations.precomputedquants
     (0 <= tau && tau <= 1) || throw(DomainError(tau, "illegal value of tau"))
