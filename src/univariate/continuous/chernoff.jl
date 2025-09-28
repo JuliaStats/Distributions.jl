@@ -150,6 +150,29 @@ module ChernoffComputations
     _cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1]
     _cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(_pdf, x, Inf)[1]
 
+    # some commonly used quantiles were precomputed
+    const precomputedquants=[
+        0.0 -Inf;
+        0.01 -1.171534341573129;
+        0.025 -0.9981810946684274;
+        0.05 -0.8450811886357725;
+        0.1 -0.6642351964332931;
+        0.2 -0.43982766604886553;
+        0.25 -0.353308035220429;
+        0.3 -0.2751512847290148;
+        0.4 -0.13319637678583637;
+        0.5 0.0;
+        0.6 0.13319637678583637;
+        0.7 0.2751512847290147;
+        0.75 0.353308035220429;
+        0.8 0.4398276660488655;
+        0.9 0.6642351964332931;
+        0.95 0.8450811886357724;
+        0.975 0.9981810946684272;
+        0.99 1.17153434157313;
+        1.0 Inf
+        ]
+
     # constants needed for the Ziggurat random sampling algorithm
     const randA = 0.03248227216266608
     const randx = [
@@ -226,51 +249,23 @@ pdf(d::Chernoff, x::Real) = ChernoffComputations._pdf(x)
 logpdf(d::Chernoff, x::Real) = log(ChernoffComputations.g(x))+log(ChernoffComputations.g(-x))+log(0.5)
 cdf(d::Chernoff, x::Real) = ChernoffComputations._cdf(x)
 
-@quantile_newton Chernoff
+# @quantile_newton Chernoff
 
-# function quantile(d::Chernoff, tau::Real)
-#     # some commonly used quantiles were precomputed
-#     precomputedquants=[
-#         0.0 -Inf;
-#         0.01 -1.171534341573129;
-#         0.025 -0.9981810946684274;
-#         0.05 -0.8450811886357725;
-#         0.1 -0.6642351964332931;
-#         0.2 -0.43982766604886553;
-#         0.25 -0.353308035220429;
-#         0.3 -0.2751512847290148;
-#         0.4 -0.13319637678583637;
-#         0.5 0.0;
-#         0.6 0.13319637678583637;
-#         0.7 0.2751512847290147;
-#         0.75 0.353308035220429;
-#         0.8 0.4398276660488655;
-#         0.9 0.6642351964332931;
-#         0.95 0.8450811886357724;
-#         0.975 0.9981810946684272;
-#         0.99 1.17153434157313;
-#         1.0 Inf
-#         ]
-#     (0.0 <= tau && tau <= 1.0) || throw(DomainError(tau, "illegal value of tau"))
-#     present = searchsortedfirst(precomputedquants[:, 1], tau)
-#     if present <= size(precomputedquants, 1)
-#         if tau == precomputedquants[present, 1]
-#             return precomputedquants[present, 2]
-#         end
-#     end
+function quantile(d::Chernoff, tau::Real)
+    precomputedquants = ChernoffComputations.precomputedquants
+    (0 <= tau && tau <= 1) || throw(DomainError(tau, "illegal value of tau"))
+    present = searchsortedfirst(precomputedquants[:, 1], tau)
+    if present <= size(precomputedquants, 1)
+        if tau == precomputedquants[present, 1]
+            return precomputedquants[present, 2]
+        end
+    end
 
-#     # one good approximation of the quantiles can be computed using Normal(0.0, stdapprox) with stdapprox = 0.52
-#     stdapprox = 0.52
-#     dnorm = Normal(0.0, 1.0)
-#     if tau < 0.001
-#         return -newton(x -> tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, 1.0 - tau)*stdapprox)
-
-#     end
-#     if tau > 0.999
-#         return newton(x -> 1.0 - tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)
-#     end
-#     return newton(x -> ChernoffComputations._cdf(x) - tau, ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)   # should consider replacing x-> construct for speed
-# end
+    # one good approximation of the quantiles can be computed using Normal(0.0, stdapprox) with stdapprox = 0.52
+    stdapprox = 0.52
+    dnorm = Normal(0.0, 1.0)
+    return quantile_newton(d, tau, quantile(dnorm, tau)*stdapprox)
+end
 
 minimum(d::Chernoff) = -Inf
 maximum(d::Chernoff) = Inf
