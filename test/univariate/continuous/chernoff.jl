@@ -1,5 +1,16 @@
 @testset "Chernoff tests" begin
     d = Chernoff()
+    @test extrema(d) == (-Inf, Inf)
+    @test mean(d) == 0
+    @test var(d) ≈ 0.26355964132470455
+    @test modes(d) == [0.0]
+    @test mode(d) == 0
+    @test skewness(d) == 0
+    @test kurtosis(d) ≈ -0.16172525511461888
+    @test kurtosis(d, true) ≈ kurtosis(d) 
+    @test kurtosis(d, false) ≈ kurtosis(d) + 3
+    @test entropy(d) ≈ -0.7515605300273104
+    @test rand(d) isa Float64
 
     cdftest = [
         0.005 0.5037916689930134;
@@ -154,5 +165,6 @@
     
     for i=1:size(pdftest, 1)
         @test isapprox(pdf(d, pdftest[i, 1]), pdftest[i, 2] ; atol = 1e-6)
+        @test isapprox(logpdf(d, pdftest[i, 1]), log(pdftest[i, 2]) ; atol = 1e-4)
     end
 end
