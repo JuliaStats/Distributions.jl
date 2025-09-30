@@ -59,7 +59,7 @@ struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogitNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    @check_args LogitNormal (σ, σ > zero(σ))
+    @check_args LogitNormal (σ, σ >= zero(σ))
     return LogitNormal{T}(μ, σ)
 end
 
@@ -111,44 +111,47 @@ end
 
 #### Evaluation
 
-#TODO check pd and logpdf
-function pdf(d::LogitNormal{T}, x::Real) where T<:Real
-    if zero(x) < x < one(x)
-        return normpdf(d.μ, d.σ, logit(x)) / (x * (1-x))
+function pdf(d::LogitNormal{T}, x::Real) where {T<:Real}
+    if x ≤ zero(x) || x ≥ oneunit(x)
+        logitx = oftype(float(x), -Inf)
+        z = oneunit(x * (1 - x))
     else
-        return T(0)
+        logitx = logit(x)
+        z = x * (1 - x)
+    end
+    return pdf(Normal{T}(d.μ, d.σ), logitx) / z
+end
+function logpdf(d::LogitNormal{T}, x::Real) where {T<:Real}
+    if x ≤ zero(x) || x ≥ one(x)
+        logitx = oftype(float(x), -Inf)
+        z = zero(float(x))
+    else
+        logitx = logit(x)
+        z = log(x * (1 - x))
+    end
+    return logpdf(Normal{T}(d.μ, d.σ), logitx) - z
+end
+
+for f in (:cdf, :ccdf, :logcdf, :logccdf)
+    @eval begin
+        function $f(d::LogitNormal{T}, x::Real) where {T<:Real}
+            return $f(Normal{T}(d.μ, d.σ), logit(clamp(x, zero(x), oneunit(x))))
+        end
+    end
+end
+for f in (:quantile, :cquantile, :invlogcdf, :invlogccdf)
+    @eval begin
+        function $f(d::LogitNormal{T}, q::Real) where {T}
+            return logistic($f(Normal{T}(d.μ, d.σ), q))
+        end
     end
 end
 
-function logpdf(d::LogitNormal{T}, x::Real) where T<:Real
-    if zero(x) < x < one(x)
-        lx = logit(x)
-        return normlogpdf(d.μ, d.σ, lx) - log(x) - log1p(-x)
-    else
-        return -T(Inf)
-    end
-end
-
-cdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-    x ≤ 0 ? zero(T) : x ≥ 1 ? one(T) : normcdf(d.μ, d.σ, logit(x))
-ccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-    x ≤ 0 ? one(T) : x ≥ 1 ? zero(T) : normccdf(d.μ, d.σ, logit(x))
-logcdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-    x ≤ 0 ? -T(Inf) : x ≥ 1 ? zero(T) : normlogcdf(d.μ, d.σ, logit(x))
-logccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-    x ≤ 0 ? zero(T) : x ≥ 1 ? -T(Inf) : normlogccdf(d.μ, d.σ, logit(x))
-
-quantile(d::LogitNormal, q::Real) = logistic(norminvcdf(d.μ, d.σ, q))
-cquantile(d::LogitNormal, q::Real) = logistic(norminvccdf(d.μ, d.σ, q))
-invlogcdf(d::LogitNormal, lq::Real) = logistic(norminvlogcdf(d.μ, d.σ, lq))
-invlogccdf(d::LogitNormal, lq::Real) = logistic(norminvlogccdf(d.μ, d.σ, lq))
-
-function gradlogpdf(d::LogitNormal, x::Real)
-    μ, σ = params(d)
-    _insupport = insupport(d, x)
-    _x = _insupport ? x : zero(x)
-    z = (μ - logit(_x) + σ^2 * (2 * _x - 1)) / (σ^2 * _x * (1 - _x))
-    return _insupport ? z : oftype(z, NaN)
+function gradlogpdf(d::LogitNormal{T}, x::Real) where {T}
+    outofsupport = x ≤ zero(x) || x ≥ oneunit(x)
+    y = outofsupport ? zero(x) : x
+    z = (gradlogpdf(Normal{T}(d.μ, d.σ), logit(y)) + 2 * y - 1) / (y * (1 - y))
+    return outofsupport ? zero(z) : z
 end
 
 # mgf(d::LogitNormal)
