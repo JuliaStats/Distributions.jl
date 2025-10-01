@@ -133,7 +133,7 @@ cquantile(d::LogNormal, q::Real) =  exp(StatsFuns.norminvccdf(d.μ, d.σ, q))
 invlogcdf(d::LogNormal, lq::Real) = exp(StatsFuns.norminvlogcdf(d.μ, d.σ, lq))
 invlogccdf(d::LogNormal, lq::Real) = exp(StatsFuns.norminvlogccdf(d.μ, d.σ, lq))
 
-function gradlogpdf(d::LogNormal{T}, x::Real) where {T<:Real}
+function gradlogpdf(d::LogNormal, x::Real)
     outofsupport = x ≤ zero(x)
     y = outofsupport ? one(x) : x
     z = ((d.μ - log(y)) / d.σ^2 - 1) / y
