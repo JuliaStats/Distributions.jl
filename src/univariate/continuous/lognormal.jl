@@ -123,15 +123,15 @@ function logpdf(d::LogNormal, x::Real)
     return StatsFuns.normlogpdf(d.μ, d.σ, logx) - b
 end
 
-for f in (:cdf, :ccdf, :logcdf, :logccdf)
-    g = Symbol(:norm, f)
-    @eval $f(d::LogNormal, x::Real) = StatsFuns.$g(d.μ, d.σ, x ≤ zero(x) ? log(zero(x)) : log(x))
-end
+cdf(d::LogNormal, x::Real) = StatsFuns.normcdf(d.μ, d.σ, log(max(x, zero(x))))
+ccdf(d::LogNormal, x::Real) = StatsFuns.normccdf(d.μ, d.σ, log(max(x, zero(x))))
+logcdf(d::LogNormal, x::Real) = StatsFuns.normlogcdf(d.μ, d.σ, log(max(x, zero(x))))
+logccdf(d::LogNormal, x::Real) = StatsFuns.normlogccdf(d.μ, d.σ, log(max(x, zero(x))))
 
-quantile(d::LogNormal, q::Real) =  exp(StatsFuns.invcdf(d.μ, d.σ, q))
-cquantile(d::LogNormal, q::Real) =  exp(StatsFuns.invccdf(d.μ, d.σ, q))
-invlogcdf(d::LogNormal, lq::Real) = exp(StatsFuns.invlogcdf(d.μ, d.σ, lq))
-invlogccdf(d::LogNormal, lq::Real) = exp(StatsFuns.invlogccdf(d.μ, d.σ, lq))
+quantile(d::LogNormal, q::Real) =  exp(StatsFuns.norminvcdf(d.μ, d.σ, q))
+cquantile(d::LogNormal, q::Real) =  exp(StatsFuns.norminvccdf(d.μ, d.σ, q))
+invlogcdf(d::LogNormal, lq::Real) = exp(StatsFuns.norminvlogcdf(d.μ, d.σ, lq))
+invlogccdf(d::LogNormal, lq::Real) = exp(StatsFuns.norminvlogccdf(d.μ, d.σ, lq))
 
 function gradlogpdf(d::LogNormal{T}, x::Real) where {T<:Real}
     outofsupport = x ≤ zero(x)
