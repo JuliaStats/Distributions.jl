@@ -111,7 +111,11 @@ end
 
 #### Evaluation
 
-function pdf(d::LogitNormal{T}, x::Real) where {T<:Real}
+# We directly use the StatsFuns API instead of going through `Normal(...)`
+# to avoid overhead introduced by the parameter checks of `Normal`
+# Ref https://github.com/JuliaStats/Distributions.jl/pull/2003
+
+function pdf(d::LogitNormal, x::Real)
     if x ≤ zero(x) || x ≥ oneunit(x)
         logitx = oftype(float(x), -Inf)
         z = oneunit(x * (1 - x))
@@ -119,9 +123,9 @@ function pdf(d::LogitNormal{T}, x::Real) where {T<:Real}
         logitx = logit(x)
         z = x * (1 - x)
     end
-    return pdf(Normal{T}(d.μ, d.σ), logitx) / z
+    return StatsFuns.normpdf(d.μ, d.σ, logitx) / z
 end
-function logpdf(d::LogitNormal{T}, x::Real) where {T<:Real}
+function logpdf(d::LogitNormal, x::Real)
     if x ≤ zero(x) || x ≥ one(x)
         logitx = oftype(float(x), -Inf)
         z = zero(float(x))
@@ -129,28 +133,23 @@ function logpdf(d::LogitNormal{T}, x::Real) where {T<:Real}
         logitx = logit(x)
         z = log(x * (1 - x))
     end
-    return logpdf(Normal{T}(d.μ, d.σ), logitx) - z
+    return StatsFuns.normlogpdf(d.μ, d.σ, logitx) - z
 end
 
-for f in (:cdf, :ccdf, :logcdf, :logccdf)
-    @eval begin
-        function $f(d::LogitNormal{T}, x::Real) where {T<:Real}
-            return $f(Normal{T}(d.μ, d.σ), logit(clamp(x, zero(x), oneunit(x))))
-        end
-    end
-end
-for f in (:quantile, :cquantile, :invlogcdf, :invlogccdf)
-    @eval begin
-        function $f(d::LogitNormal{T}, q::Real) where {T}
-            return logistic($f(Normal{T}(d.μ, d.σ), q))
-        end
-    end
-end
+cdf(d::LogitNormal, x::Real) = StatsFuns.normcdf(d.μ, d.σ, logit(clamp(x, zero(x), oneunit(x))))
+ccdf(d::LogitNormal, x::Real) = StatsFuns.normccdf(d.μ, d.σ, logit(clamp(x, zero(x), oneunit(x))))
+logcdf(d::LogitNormal, x::Real) = StatsFuns.normlogcdf(d.μ, d.σ, logit(clamp(x, zero(x), oneunit(x))))
+logccdf(d::LogitNormal, x::Real) = StatsFuns.normlogccdf(d.μ, d.σ, logit(clamp(x, zero(x), oneunit(x))))
 
-function gradlogpdf(d::LogitNormal{T}, x::Real) where {T}
+quantile(d::LogitNormal, q::Real) = logistic(StatsFuns.norminvcdf(d.μ, d.σ, q))
+cquantile(d::LogitNormal, q::Real) = logistic(StatsFuns.norminvccdf(d.μ, d.σ, q))
+invlogcdf(d::LogitNormal, lq::Real) = logistic(StatsFuns.norminvlogcdf(d.μ, d.σ, lq))
+invlogccdf(d::LogitNormal, lq::Real) = logistic(StatsFuns.norminvlogccdf(d.μ, d.σ, lq))
+
+function gradlogpdf(d::LogitNormal, x::Real)
     outofsupport = x ≤ zero(x) || x ≥ oneunit(x)
     y = outofsupport ? zero(x) : x
-    z = (gradlogpdf(Normal{T}(d.μ, d.σ), logit(y)) + 2 * y - 1) / (y * (1 - y))
+    z = ((d.μ - logit(y)) / d.σ^2 + 2 * y - 1) / (y * (1 - y))
     return outofsupport ? zero(z) : z
 end
 
