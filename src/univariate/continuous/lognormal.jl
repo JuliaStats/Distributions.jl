@@ -98,17 +98,21 @@ end
 
 #### Evaluation
 
-function pdf(d::LogNormal{T}, x::Real) where {T<:Real}
+# We directly use the StatsFuns API instead of going through `Normal(...)`
+# to avoid overhead introduced by the parameter checks of `Normal`
+# Ref https://github.com/JuliaStats/Distributions.jl/pull/2003
+
+function pdf(d::LogNormal, x::Real)
     if x ≤ zero(x)
         logx = log(zero(x))
         x = one(x)
     else
         logx = log(x)
     end
-    return pdf(Normal{T}(d.μ, d.σ), logx) / x
+    return StatsFuns.normpdf(d.μ, d.σ, logx) / x
 end
 
-function logpdf(d::LogNormal{T}, x::Real) where {T<:Real}
+function logpdf(d::LogNormal, x::Real)
     if x ≤ zero(x)
         logx = log(zero(x))
         b = zero(logx)
@@ -116,30 +120,23 @@ function logpdf(d::LogNormal{T}, x::Real) where {T<:Real}
         logx = log(x)
         b = logx
     end
-    return logpdf(Normal{T}(d.μ, d.σ), logx) - b
+    return StatsFuns.normlogpdf(d.μ, d.σ, logx) - b
 end
 
 for f in (:cdf, :ccdf, :logcdf, :logccdf)
-    @eval begin
-        function $f(d::LogNormal{T}, x::Real) where {T<:Real}
-            logx = x ≤ zero(x) ? log(zero(x)) : log(x)
-            return $f(Normal{T}(d.μ, d.σ), logx)
-        end
-    end
+    g = Symbol(:norm, f)
+    @eval $f(d::LogNormal, x::Real) = StatsFuns.$g(d.μ, d.σ, x ≤ zero(x) ? log(zero(x)) : log(x))
 end
 
-for f in (:quantile, :cquantile, :invlogcdf, :invlogccdf)
-    @eval begin
-        function $f(d::LogNormal{T}, q::Real) where {T<:Real}
-            return exp($f(Normal{T}(d.μ, d.σ), q))
-        end
-    end
-end
+quantile(d::LogNormal, q::Real) =  exp(StatsFuns.invcdf(d.μ, d.σ, q))
+cquantile(d::LogNormal, q::Real) =  exp(StatsFuns.invccdf(d.μ, d.σ, q))
+invlogcdf(d::LogNormal, lq::Real) = exp(StatsFuns.invlogcdf(d.μ, d.σ, lq))
+invlogccdf(d::LogNormal, lq::Real) = exp(StatsFuns.invlogccdf(d.μ, d.σ, lq))
 
 function gradlogpdf(d::LogNormal{T}, x::Real) where {T<:Real}
     outofsupport = x ≤ zero(x)
     y = outofsupport ? one(x) : x
-    z = (gradlogpdf(Normal{T}(d.μ, d.σ), log(y)) - 1) / y
+    z = ((d.μ - log(y)) / d.σ^2 - 1) / y
     return outofsupport ? zero(z) : z
 end
 
