@@ -2,8 +2,35 @@
 ###     T. Eltoft, Taesu Kim and Te-Won Lee, 
 ###     "On the multivariate Laplace distribution," 
 ###     in IEEE Signal Processing Letters, vol. 13, no. 5, pp. 300-303, May 2006, doi: 10.1109/LSP.2006.870353
+"""
 
+The [symmetric multivariate Laplace distribution](https://en.wikipedia.org/wiki/Multivariate_Laplace_distribution#Symmetric_multivariate_Laplace_distribution)
+is a multidimensional generalization of the *Laplace distribution*, as described in 
+T. Eltoft, Taesu Kim and Te-Won Lee, 
+"On the multivariate Laplace distribution," 
+in IEEE Signal Processing Letters, vol. 13, no. 5, pp. 300-303, May 2006, doi: 10.1109/LSP.2006.870353.
+The symmetric multivariate Laplace distribution is defined by three parameters:
+- ``\lambda``, which is a positive real number used to define an exponential distribution `Exp(λ)`
+- ``\\boldsymbol{\\Gamma}``, which is a k-by-k positive definite matrix with `det(Γ)=1` (as per the assumptions in the source paper)
+- ``\\boldsymbol{\\mu}``, which is a k-dimensional real-valued vector
+The expected valued of the symmetric multivariate Laplace distribution is simply ``\\boldsymbol{\\mu}``,
+whereas the covariance ``\\boldsymbol{\\Sigma} = \lambda \\boldsymbol{\\Gamma}``.
 
+The symmetric multivariate Laplace distribution can be created by specifying either a ``\\boldsymbol{\\mu}`` and a ``\\boldsymbol{\\Sigma}`` 
+(analogously to a `MvNormal`) and the ``\lambda`` and ``\\boldsymbol{\\Gamma}`` are calculated internally,
+or by specifying all three parameters, ``\\boldsymbol{\\mu}``, ``\lambda`` and ``\\boldsymbol{\\Gamma}``.
+
+The probability density function of
+a k-dimensional symmetric multivariate Laplace distribution with parameters ``\\boldsymbol{\\mu}``,  ``\lambda`` and ``\\boldsymbol{\\Gamma}`` is:
+```math
+f(\\mathbf{x}; \\boldsymbol{\\mu}, \\lambda, \\boldsymbol{\\Gamma}) = \\frac{1}{(2 \\pi)^{d/2}} \\frac{2}{\\lambda}
+\frac{\\mathrm{K}_{(d/2)-1}\\left(\\sqrt{\\frac{2}{\\lambda}q(\\mathbf{x})}\\right)}{\\left(\\sqrt{\\frac{2}{\\lambda}q(\\mathbf{x})}\\right)^{(d/2)-1}}
+```
+where ``\\mathrm{K}_m (y)`` is the Bessel function of the second kind of order ``m`` evaluated at ``y`` and
+```math
+q(\\mathbf{x} =  (\\mathbf{x} - \\boldsymbol{\\mu})^T \\Gamma^{-1} (\\mathbf{x} - \\boldsymbol{\\mu})
+```
+"""
 struct SymmetricMvLaplace{T<:Real,Cov<:AbstractPDMat,iCov<:AbstractMatrix,Mean<:AbstractVector} <: ContinuousMultivariateDistribution
     μ::Mean
     Γ::Cov
