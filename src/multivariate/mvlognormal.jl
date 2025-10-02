@@ -14,7 +14,6 @@
 #   - _logpdf(d,x)      Evaluate logarithm of pdf
 #   - _pdf(d,x)         Evaluate the pdf
 #   - mean(d)           Mean of the distribution
-#   - median(d)         Median of the distribution
 #   - mode(d)           Mode of the distribution
 #   - var(d)            Vector of element-wise variance
 #   - cov(d)            Covariance matrix
@@ -58,13 +57,6 @@ function _location!(::Type{D},::Type{Val{:mean}},mn::AbstractVector,S::AbstractM
     μ
 end
 
-function _location!(::Type{D},::Type{Val{:median}},md::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
-    @simd for i=1:length(md)
-      @inbounds μ[i] = log(md[i])
-    end
-    μ
-end
-
 function _location!(::Type{D},::Type{Val{:mode}},mo::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
     @simd for i=1:length(mo)
       @inbounds μ[i] = log(mo[i]) + S[i,i]
@@ -72,7 +64,7 @@ function _location!(::Type{D},::Type{Val{:mode}},mo::AbstractVector,S::AbstractM
     μ
 end
 
-###Functions to calculate location and scale for a distribution with desired :mean, :median or :mode and covariance
+###Functions to calculate location and scale for a distribution with desired :mean or :mode and covariance
 """
     location!{D<:AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix,μ::AbstractVector)
 
@@ -91,12 +83,11 @@ Calculate the location vector (the mean of the underlying normal distribution).
 
 - If `s == :meancov`, then m is taken as the mean, and S the covariance matrix of a
   lognormal distribution.
-- If `s == :mean | :median | :mode`, then m is taken as the mean, median or
+- If `s == :mean | :mode`, then m is taken as the mean or
   mode of the lognormal respectively, and S is interpreted as the scale matrix
   (the covariance of the underlying normal distribution).
 
-It is not possible to analytically calculate the location vector from e.g., median + covariance,
-or from mode + covariance.
+It is not possible to analytically calculate the location vector from e.g. from mode + covariance.
 """
 function location(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix) where D<:AbstractMvLogNormal
     @assert size(S) == (length(m),length(m))
@@ -210,16 +201,9 @@ scale(d::MvLogNormal) = cov(d.normal)
 mean(d::MvLogNormal) = exp.(mean(d.normal) .+ var(d.normal)/2)
 
 """
-    median(d::MvLogNormal)
-
-Return the median vector of the lognormal distribution. which is strictly smaller than the mean.
-"""
-median(d::MvLogNormal) = exp.(mean(d.normal))
-
-"""
     mode(d::MvLogNormal)
 
-Return the mode vector of the lognormal distribution, which is strictly smaller than the mean and median.
+Return the mode vector of the lognormal distribution, which is strictly smaller than the mean.
 """
 mode(d::MvLogNormal) = exp.(mean(d.normal) .- var(d.normal))
 function cov(d::MvLogNormal)
