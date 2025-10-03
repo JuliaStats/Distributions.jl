@@ -124,8 +124,8 @@ function suffstats(::Type{<:Poisson}, x::AbstractArray{T}, w::AbstractArray{Floa
     sx = 0.
     tw = 0.
     for i in eachindex(x, w)
-        @inbounds wi = w[i]
-        @inbounds sx += x[i] * wi
+        wi = w[i]
+        sx += x[i] * wi
         tw += wi
     end
     PoissonStats(sx, tw)
