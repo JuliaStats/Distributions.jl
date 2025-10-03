@@ -36,7 +36,7 @@ end
 
 ### generic methods for SymmetricMvLaplace
 length(d::SymmetricMvLaplace) = length(d.μ)
-params(d::SymmetricMvLaplace) = (d.μ, d.Σ)
+params(d::SymmetricMvLaplace) = (d.μ, d.λ, d.Γ)
 
 insupport(d::SymmetricMvLaplace, x::AbstractVector) =
     length(d) == length(x) && all(isfinite, x)
@@ -57,7 +57,7 @@ function SymmetricMvLaplace(μ::AbstractVector{<:Real}, λ::Real, Γ::AbstractPD
     λ > 0 || throw(ArgumentError("λ is not a positive real number."))
 
     R = Base.promote_eltype(μ, λ, Γ)
-    _μ, _λ, _Γ = convert(AbstractArray{R}, μ), convert(R, λ), convert(AbstractArray{R}, Σ)
+    _μ, _λ, _Γ = convert(AbstractArray{R}, μ), convert(R, λ), convert(AbstractArray{R}, Γ)
     _iΓ = inv(_Γ) 
     SymmetricMvLaplace{R,typeof(_Γ), typeof(_iΓ), typeof(_μ)}(_μ, _Γ, _iΓ, _λ)
 end
@@ -106,15 +106,14 @@ Base.eltype(::Type{<:SymmetricMvLaplace{T}}) where {T} = T
 
 function _rand!(rng::AbstractRNG, d::SymmetricMvLaplace, x::VecOrMat)
     unwhiten!(d.Γ, randn!(rng, x))
-    x .*= sqrt.(rand(Exponential(d.λ), 1, size(x,2)))
+    x .*= sqrt.(rand(rng, Exponential(d.λ), 1, size(x,2)))
     x .+=  d.μ
     return x
 end
 
 function _logpdf(d::SymmetricMvLaplace, x::AbstractArray)
-    dim_half = length(d) / 2
-    _2byλ = 2/d.λ
+    _d = length(d) / 2
     xdif = x - d.μ
-    _qs = sqrt(_2byλ * dot(xdif, d.iΓ, xdif))
-    return log(2π^(-dim_half)) + log(_2byλ) + bessely(dim_half-1, _qs) - log(_qs^(dim_half - 1))
+    q = dot(xdif, d.iΓ, xdif)
+    return _d * log(2π) + log(2/d.λ) + log(besselk(_d-1, sqrt(2/d.λ * q))) + 0.5*(_d-1)*log(0.5*d.λ*q)
 end
