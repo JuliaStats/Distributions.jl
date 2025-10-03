@@ -1,19 +1,21 @@
 # finite mixture models
 
 """
+    AbstractMixtureModel <: Distribution
 
-  All subtypes of `AbstractMixtureModel` should implement the following methods:
+All subtypes of `AbstractMixtureModel` should implement the following methods:
 
-  - ncomponents(d): the number of components
+  - `ncomponents(d)`: the number of components
 
-  - component(d, k):  return the k-th component
+  - `component(d, k)`:  return the k-th component
 
-  - probs(d):       return a vector of prior probabilities over components.
+  - `probs(d)`:       return a vector of prior probabilities over components.
 """
 abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
 
 """
-MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+    MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+
 A mixture of distributions, parametrized on:
 * `VF,VS` variate and support
 * `C` distribution family of the mixture
@@ -184,7 +186,7 @@ function mean(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            BLAS.axpy!(pi, mean(c), m)
+            axpy!(pi, mean(c), m)
         end
     end
     return m
@@ -234,19 +236,19 @@ function cov(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            BLAS.axpy!(pi, mean(c), m)
-            BLAS.axpy!(pi, cov(c), V)
+            axpy!(pi, mean(c), m)
+            axpy!(pi, cov(c), V)
         end
     end
     for i = 1:K
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            # todo: use more in-place operations
-            md = mean(c) - m
-            BLAS.axpy!(pi, md*md', V)
+            md .= mean(c) .- m
+            BLAS.syr!('U', Float64(pi), md, V)
         end
     end
+    LinearAlgebra.copytri!(V, 'U')
     return V
 end
 
@@ -301,7 +303,7 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
             else
                 pdf!(t, component(d, i), x)
             end
-            BLAS.axpy!(pi, t, r)
+            axpy!(pi, t, r)
         end
     end
     return r
