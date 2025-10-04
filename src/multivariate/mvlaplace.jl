@@ -26,7 +26,7 @@ where ``\\mathrm{K}_m (y)`` is the Bessel function of the second kind of order `
 ```math
 q(\\mathbf{x} =  (\\mathbf{x} - \\boldsymbol{\\mu})^T \\Gamma^{-1} (\\mathbf{x} - \\boldsymbol{\\mu})
 ```
-Note that the density function becomes undefined as ``x\\rightarrow\mu`` because ``\\mathrm{K}_m (y)`` approaches
+Note that the density function becomes undefined as ``x\\rightarrow\\boldsymbol{\\mu}`` because ``\\mathrm{K}_m (y)`` approaches
 infinity as ``y`` approaches zero. This feature is not unique to the formulation from Eltoft et al., but is also present in
 the (slightly different) version presented in https://en.wikipedia.org/wiki/Multivariate_Laplace_distribution.
 """
