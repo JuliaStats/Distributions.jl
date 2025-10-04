@@ -10,10 +10,10 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
 
     while i < km1 && n > 0
         i += 1
-        @inbounds pi = p[i]
+        pi = p[i]
         if pi < rp
             xi = rand(rng, Binomial(n, Float64(pi / rp)))
-            @inbounds x[i] = xi
+            x[i] = xi
             n -= xi
             rp -= pi
         else
@@ -21,18 +21,18 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
             # from Binomial. Just assign remaining counts
             # to xi.
 
-            @inbounds x[i] = n
+            x[i] = n
             n = 0
             # rp = 0.0 (no need for this, as rp is no longer needed)
         end
     end
 
     if i == km1
-        @inbounds x[k] = n
+        x[k] = n
     else  # n must have been zero
         z = zero(eltype(x))
         for j = i+1 : k
-            @inbounds x[j] = z
+            x[j] = z
         end
     end
 
