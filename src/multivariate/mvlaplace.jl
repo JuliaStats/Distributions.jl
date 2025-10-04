@@ -26,6 +26,9 @@ where ``\\mathrm{K}_m (y)`` is the Bessel function of the second kind of order `
 ```math
 q(\\mathbf{x} =  (\\mathbf{x} - \\boldsymbol{\\mu})^T \\Gamma^{-1} (\\mathbf{x} - \\boldsymbol{\\mu})
 ```
+Note that the density function becomes undefined as ``x\\rightarrow\mu`` because ``\\mathrm{K}_m (y)`` approaches
+infinity as ``y`` approaches zero. This feature is not unique to the formulation from Eltoft et al., but is also present in
+the (slightly different) version presented in https://en.wikipedia.org/wiki/Multivariate_Laplace_distribution.
 """
 struct SymmetricMvLaplace{T<:Real,Cov<:AbstractPDMat,iCov<:AbstractMatrix,Mean<:AbstractVector} <: ContinuousMultivariateDistribution
     μ::Mean
@@ -115,5 +118,5 @@ function _logpdf(d::SymmetricMvLaplace, x::AbstractArray)
     _d = length(d) / 2
     xdif = x - d.μ
     q = dot(xdif, d.iΓ, xdif)
-    return _d * log(2π) + log(2/d.λ) + log(besselk(_d-1, sqrt(2/d.λ * q))) + 0.5*(_d-1)*log(0.5*d.λ*q)
+    return -_d * log(2π) + log(2/d.λ) + log(besselk(_d-1, sqrt(2/d.λ * q))) - 0.5*(_d-1)*log(0.5*d.λ*q)
 end

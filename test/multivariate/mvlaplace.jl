@@ -54,36 +54,39 @@ end
 end
 
 @testset "Symmetric MvLaplace basic functions" begin
+    d_dim = 2
     for t in (Float32, Float64)
         @testset "Type: $t" begin
-            mu = t.(ones(3))
+            mu = t.(zeros(d_dim))
             λ = t.(1)
-            Γ = t.(I(3))
+            Γ = t.(I(d_dim))
             d = SymmetricMvLaplace(mu, λ, Γ)
     
-            @test length(d) == 3
+            @test length(d) == d_dim
             @test params(d) == (mu, λ, Γ)
-            @test maximum(d) == [Inf, Inf, Inf]
-            @test minimum(d) == [-Inf, -Inf, -Inf]
+            @test maximum(d) == repeat([Inf], d_dim)
+            @test minimum(d) == repeat([-Inf], d_dim)
             @test mode(d) == mu
             @test modes(d) == [mu]
             @test var(d) == diag(λ*Γ)
             @test eltype(d) == t
             @test partype(d) == t
-            @test insupport(d, rand(3))
+            @test insupport(d, rand(2))
 
             s = rand(d, 10)
-            @test size(s) == (3, 10)
+            @test size(s) == (2, 10)
             @test eltype(s) == t
             @test isfinite(loglikelihood(d, s))
 
-            l = Laplace(1, 0.707)
+            l = Laplace(0, 0.707)
             s_d = rand(d, 10_000_000)
             qs = collect(0.01:0.01:0.99)
             q_d = quantile.(Ref(s_d[1,:]), qs)
             q_l = quantile.(Ref(l), qs)
             @test all(isapprox.(q_d, q_l; atol=1e-2)) ### tolerance a bit high as tails are heavy and a bit stochastic
-            ### probably need to come up with some logpdf correctness tests too
+            ### below rhs calculated by pen and paper
+            @test isapprox(logpdf(d, [1; 1]), log(1/π * besselk(0, 2))) 
+            @test isapprox(logpdf(d, [2; 2]), log(1/π * besselk(0, 4)))
         end
     end
 end
