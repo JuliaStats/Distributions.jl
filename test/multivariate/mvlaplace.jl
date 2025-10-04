@@ -39,6 +39,7 @@ end
     @testset "Providing mu, lambda and Gamma" begin
         mu = [1., 2., 3.]
         C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+        Csym = C'*C
         L = det(C)^(1/size(C,1))
         G = 1/L * C
         @test typeof(SymmetricMvLaplace(mu, L, PDMat(Array{Float32}(G)))) == typeof(SymmetricMvLaplace(mu, L, PDMat(G)))
@@ -47,8 +48,10 @@ end
 
         L9 = det(9*I(3))^(1/3)
         L025 = det(0.25f0*I(3))^(1/3)
+        LC = det(Csym)^(1/3)
         @test SymmetricMvLaplace(mu, L9, I) === SymmetricMvLaplace(mu, L9, Diagonal(Fill(1, length(mu))))
         @test SymmetricMvLaplace(mu, L025, I) === SymmetricMvLaplace(mu, L025, Diagonal(Fill(1, length(mu))))
+        @test SymmetricMvLaplace(mu, LC, 1/LC*Symmetric(Csym)) == SymmetricMvLaplace(mu, LC, 1/LC * Csym)
     end
 end
 
@@ -69,6 +72,7 @@ end
             @test var(d) == diag(λ*Γ)
             @test eltype(d) == t
             @test partype(d) == t
+            @test insupport(d, rand(3))
 
             s = rand(d, 10)
             @test size(s) == (3, 10)
