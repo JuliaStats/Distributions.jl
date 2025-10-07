@@ -106,13 +106,9 @@ function kldivergence(p::AbstractMvNormal, q::AbstractMvNormal)
     # This is the generic implementation for AbstractMvNormal, you might need to specialize for your type
     length(p) == length(q) ||
         throw(DimensionMismatch("Distributions p and q have different dimensions $(length(p)) and $(length(q))"))
-    # logdetcov is used separately from _cov for any potential optimization done there
-    return (tr(_cov(q) \ _cov(p)) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p)) / 2
+    # logdetcov is used for any potential optimization done there
+    return (tr(cov(q) \ cov(p)) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p)) / 2
 end
-
-# This is a workaround to take advantage of the PDMats objects for MvNormal and avoid copies as Matrix
-# TODO: Remove this once `cov(::MvNormal)` returns the PDMats object
-_cov(d::AbstractMvNormal) = cov(d)
 
 """
     invcov(d::AbstractMvNormal)
@@ -146,7 +142,7 @@ function _logpdf!(r::AbstractArray{<:Real}, d::AbstractMvNormal, x::AbstractMatr
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
-        @inbounds r[i] = c0 - r[i]/2
+        r[i] = c0 - r[i]/2
     end
     r
 end
@@ -256,10 +252,9 @@ params(d::MvNormal) = (d.μ, d.Σ)
 @inline partype(d::MvNormal{T}) where {T<:Real} = T
 
 var(d::MvNormal) = diag(d.Σ)
-cov(d::MvNormal) = Matrix(d.Σ)
-_cov(d::MvNormal) = d.Σ
+cov(d::MvNormal) = d.Σ
 
-invcov(d::MvNormal) = Matrix(inv(d.Σ))
+invcov(d::MvNormal) = inv(d.Σ)
 logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
@@ -282,7 +277,7 @@ end
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     for i in eachindex(x)
-        @inbounds x[i] = randn(rng, eltype(x))
+        x[i] = randn(rng, eltype(x))
     end
     unwhiten!(d.Σ, x)
     x .+= d.μ
@@ -396,7 +391,7 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
         zj = view(z,:,j)
         swj = sqrt(w[j])
         for i = 1:d
-            @inbounds zj[i] = swj * (xj[i] - m[i])
+            zj[i] = swj * (xj[i] - m[i])
         end
     end
     s2 = z * z'
@@ -437,7 +432,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     for j = 1:n
         cj = sqrt(w[j])
         for i = 1:m
-            @inbounds z[i,j] = (x[i,j] - mu[i]) * cj
+            z[i,j] = (x[i,j] - mu[i]) * cj
         end
     end
     C = BLAS.syrk('U', 'N', inv_sw, z)
@@ -453,7 +448,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
     va = zeros(Float64, m)
     for j = 1:n
         for i = 1:m
-            @inbounds va[i] += abs2(x[i,j] - mu[i])
+            va[i] += abs2(x[i,j] - mu[i])
         end
     end
     lmul!(inv(n), va)
@@ -470,9 +465,9 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
 
     va = zeros(Float64, m)
     for j = 1:n
-        @inbounds wj = w[j]
+        wj = w[j]
         for i = 1:m
-            @inbounds va[i] += abs2(x[i,j] - mu[i]) * wj
+            va[i] += abs2(x[i,j] - mu[i]) * wj
         end
     end
     lmul!(inv_sw, va)
@@ -488,7 +483,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
     for j = 1:n
         va_j = 0.
         for i = 1:m
-            @inbounds va_j += abs2(x[i,j] - mu[i])
+            va_j += abs2(x[i,j] - mu[i])
         end
         va += va_j
     end
@@ -506,10 +501,10 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractVect
 
     va = 0.
     for j = 1:n
-        @inbounds wj = w[j]
+        wj = w[j]
         va_j = 0.
         for i = 1:m
-            @inbounds va_j += abs2(x[i,j] - mu[i]) * wj
+            va_j += abs2(x[i,j] - mu[i]) * wj
         end
         va += va_j
     end
