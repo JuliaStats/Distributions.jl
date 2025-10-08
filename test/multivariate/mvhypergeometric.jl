@@ -53,6 +53,17 @@ using Test
     @test all(x .<= m)
     @test insupport(d2, x)
 
+    # random sampling with a large category
+    m = [2, 1000]
+    n = 5
+    d3 = MvHypergeometric(m, n)
+    x = rand(d3)
+    @test isa(x, Vector{Int})
+    @test sum(x) == n
+    @test all(x .>= 0)
+    @test all(x .<= m)
+    @test insupport(d3, x)
+
     # log pdf
     x = [2, 1, 1]
     @test pdf(d, x) ≈ 2/7
