@@ -283,8 +283,6 @@ export
 # type system
 include("common.jl")
 
-
-
 # implementation helpers
 include("utils.jl")
 include("eachvariate.jl")
