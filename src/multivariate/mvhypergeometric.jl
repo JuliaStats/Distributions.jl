@@ -42,13 +42,13 @@ params(d::MvHypergeometric) = (d.m, d.n)
 
 mean(d::MvHypergeometric) = d.n .* d.m ./ sum(d.m)
 
-function var(d::MvHypergeometric) 
+function var(d::MvHypergeometric)
     m = nelements(d)
     k = length(m)
     n = ntrials(d)
     M = sum(m)
     p = m / M
-    f = n * (M - n) / (M-1)
+    f = n * (M - n) / (M - 1)
 
     v = Vector{Real}(undef, k)
     for i = 1:k
@@ -58,27 +58,27 @@ function var(d::MvHypergeometric)
     v
 end
 
-function cov(d::MvHypergeometric) 
+function cov(d::MvHypergeometric)
     m = nelements(d)
     k = length(m)
     n = ntrials(d)
     M = sum(m)
     p = m / M
-    f = n * (M - n) / (M-1)
+    f = n * (M - n) / (M - 1)
 
     C = Matrix{Real}(undef, k, k)
     for j = 1:k
         pj = p[j]
         for i = 1:j-1
-            @inbounds C[i,j] = - f * p[i] * pj
+            @inbounds C[i, j] = -f * p[i] * pj
         end
 
-        @inbounds C[j,j] = f * pj * (1-pj)
+        @inbounds C[j, j] = f * pj * (1 - pj)
     end
 
     for j = 1:k-1
         for i = j+1:k
-            @inbounds C[i,j] = C[j,i]
+            @inbounds C[i, j] = C[j, i]
         end
     end
     C
@@ -105,7 +105,7 @@ function _logpdf(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
     m = nelements(d)
     M = sum(m)
     n = ntrials(d)
-    insupport(d,x) || return -Inf
+    insupport(d, x) || return -Inf
     s = -logabsbinomial(M, n)[1]
     for i = 1:length(m)
         @inbounds xi = x[i]
@@ -117,7 +117,7 @@ end
 
 # Sampling is performed by sequentially sampling each entry from the
 # hypergeometric distribution
-_rand!(rng::AbstractRNG, d::MvHypergeometric, x::AbstractVector{Int}) = 
+_rand!(rng::AbstractRNG, d::MvHypergeometric, x::AbstractVector{Int}) =
     mvhypergeom_rand!(rng, nelements(d), ntrials(d), x)
 
 
