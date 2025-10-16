@@ -35,14 +35,14 @@ function qqbuild(x::AbstractVector, d::UnivariateDistribution)
     n = length(x)
     grid = ppoints(n)
     qx = quantile(x, grid)
-    qd = quantile.(Ref(d), grid)
+    qd = map(Base.Fix1(quantile, d), grid)
     return QQPair(qx, qd)
 end
 
 function qqbuild(d::UnivariateDistribution, x::AbstractVector)
     n = length(x)
     grid = ppoints(n)
-    qd = quantile.(Ref(d), grid)
+    qd = map(Base.Fix1(quantile, d), grid)
     qx = quantile(x, grid)
     return QQPair(qd, qx)
 end

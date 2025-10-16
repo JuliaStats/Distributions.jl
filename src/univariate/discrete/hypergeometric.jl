@@ -38,6 +38,7 @@ end
 
 @distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
+partype(::Hypergeometric) = Int
 
 ### Parameters
 
@@ -75,7 +76,7 @@ function kurtosis(d::Hypergeometric)
     a/b
 end
 
-entropy(d::Hypergeometric) = entropy(pdf.(Ref(d), support(d)))
+entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))
 
 ### Evaluation & Sampling
 

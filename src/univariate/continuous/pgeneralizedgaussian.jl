@@ -108,17 +108,37 @@ end
 # The CDF of the Gamma distribution provides this, with the necessary 1/Γ(a) normalization.
 function cdf(d::PGeneralizedGaussian, x::Real)
     μ, α, p = params(d)
-    v = cdf(Gamma(inv(p), 1), (abs(x - μ) / α)^p)
-    return (1 + copysign(v, x - μ)) / 2
+    return _normcdf_pgeneralizedgaussian(p, (x - μ) / α)
 end
+function ccdf(d::PGeneralizedGaussian, x::Real)
+    μ, α, p = params(d)
+    return _normcdf_pgeneralizedgaussian(p, (μ - x) / α)
+end
+function _normcdf_pgeneralizedgaussian(p::Real, z::Real)
+    r = abs(z)^p
+    d = Gamma(inv(p), 1)
+    if z < 0
+        return ccdf(d, r) / 2
+    else
+        return (1 + cdf(d, r)) / 2
+    end
+end
+
 function logcdf(d::PGeneralizedGaussian, x::Real)
     μ, α, p = params(d)
-    Δ = x - μ
-    logv = logcdf(Gamma(inv(p), 1), (abs(Δ) / α)^p)
-    if Δ < 0
-        return log1mexp(logv) - logtwo
+    return _normlogcdf_pgeneralizedgaussian(p, (x - μ) / α)
+end
+function logccdf(d::PGeneralizedGaussian, x::Real)
+    μ, α, p = params(d)
+    return _normlogcdf_pgeneralizedgaussian(p, (μ - x) / α)
+end
+function _normlogcdf_pgeneralizedgaussian(p::Real, z::Real)
+    r = abs(z)^p
+    d = Gamma(inv(p), 1)
+    if z < 0
+        return logccdf(d, r) - logtwo
     else
-        return log1pexp(logv) - logtwo
+        return log1pexp(logcdf(d, r)) - logtwo
     end
 end
 
@@ -141,7 +161,7 @@ function rand(rng::AbstractRNG, d::PGeneralizedGaussian)
     inv_p = inv(d.p)
     g = Gamma(inv_p, 1)
     z = d.α * rand(rng, g)^inv_p
-    if rand(rng) < 0.5
+    if rand(rng, Bool)
         return d.μ - z
     else
         return d.μ + z

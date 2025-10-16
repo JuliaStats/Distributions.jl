@@ -62,6 +62,7 @@ stdlogx(d::LogNormal) = d.σ
 mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + σ^2/2))
 median(d::LogNormal) = exp(d.μ)
 mode(d::LogNormal) = ((μ, σ) = params(d); exp(μ - σ^2))
+partype(::LogNormal{T}) where {T<:Real} = T
 
 function var(d::LogNormal)
     (μ, σ) = params(d)
@@ -97,6 +98,10 @@ end
 
 #### Evaluation
 
+# We directly use the StatsFuns API instead of going through `Normal(...)`
+# to avoid overhead introduced by the parameter checks of `Normal`
+# Ref https://github.com/JuliaStats/Distributions.jl/pull/2003
+
 function pdf(d::LogNormal, x::Real)
     if x ≤ zero(x)
         logx = log(zero(x))
@@ -104,7 +109,7 @@ function pdf(d::LogNormal, x::Real)
     else
         logx = log(x)
     end
-    return pdf(Normal(d.μ, d.σ), logx) / x
+    return StatsFuns.normpdf(d.μ, d.σ, logx) / x
 end
 
 function logpdf(d::LogNormal, x::Real)
@@ -115,38 +120,23 @@ function logpdf(d::LogNormal, x::Real)
         logx = log(x)
         b = logx
     end
-    return logpdf(Normal(d.μ, d.σ), logx) - b
+    return StatsFuns.normlogpdf(d.μ, d.σ, logx) - b
 end
 
-function cdf(d::LogNormal, x::Real)
-    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
-    return cdf(Normal(d.μ, d.σ), logx)
-end
+cdf(d::LogNormal, x::Real) = StatsFuns.normcdf(d.μ, d.σ, log(max(x, zero(x))))
+ccdf(d::LogNormal, x::Real) = StatsFuns.normccdf(d.μ, d.σ, log(max(x, zero(x))))
+logcdf(d::LogNormal, x::Real) = StatsFuns.normlogcdf(d.μ, d.σ, log(max(x, zero(x))))
+logccdf(d::LogNormal, x::Real) = StatsFuns.normlogccdf(d.μ, d.σ, log(max(x, zero(x))))
 
-function ccdf(d::LogNormal, x::Real)
-    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
-    return ccdf(Normal(d.μ, d.σ), logx)
-    end
-
-function logcdf(d::LogNormal, x::Real)
-    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
-    return logcdf(Normal(d.μ, d.σ), logx)
-end
-
-function logccdf(d::LogNormal, x::Real)
-    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
-    return logccdf(Normal(d.μ, d.σ), logx)
-end
-
-quantile(d::LogNormal, q::Real) = exp(quantile(Normal(params(d)...), q))
-cquantile(d::LogNormal, q::Real) = exp(cquantile(Normal(params(d)...), q))
-invlogcdf(d::LogNormal, lq::Real) = exp(invlogcdf(Normal(params(d)...), lq))
-invlogccdf(d::LogNormal, lq::Real) = exp(invlogccdf(Normal(params(d)...), lq))
+quantile(d::LogNormal, q::Real) =  exp(StatsFuns.norminvcdf(d.μ, d.σ, q))
+cquantile(d::LogNormal, q::Real) =  exp(StatsFuns.norminvccdf(d.μ, d.σ, q))
+invlogcdf(d::LogNormal, lq::Real) = exp(StatsFuns.norminvlogcdf(d.μ, d.σ, lq))
+invlogccdf(d::LogNormal, lq::Real) = exp(StatsFuns.norminvlogccdf(d.μ, d.σ, lq))
 
 function gradlogpdf(d::LogNormal, x::Real)
     outofsupport = x ≤ zero(x)
     y = outofsupport ? one(x) : x
-    z = (gradlogpdf(Normal(d.μ, d.σ), log(y)) - 1) / y
+    z = ((d.μ - log(y)) / d.σ^2 - 1) / y
     return outofsupport ? zero(z) : z
 end
 
@@ -156,7 +146,14 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::LogNormal) = exp(randn(rng) * d.σ + d.μ)
+xval(d::LogNormal, z::Real) = exp(muladd(d.σ, z, d.μ))
+
+rand(rng::AbstractRNG, d::LogNormal) = xval(d, randn(rng))
+function rand!(rng::AbstractRNG, d::LogNormal, A::AbstractArray{<:Real})
+    randn!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 ## Fitting
 

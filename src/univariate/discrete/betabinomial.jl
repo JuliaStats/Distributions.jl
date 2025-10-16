@@ -103,12 +103,15 @@ for f in (:ccdf, :logcdf, :logccdf)
     end
 end
 
-entropy(d::BetaBinomial) = entropy(Categorical(pdf.(Ref(d),support(d))))
-median(d::BetaBinomial) = median(Categorical(pdf.(Ref(d),support(d)))) - 1
-mode(d::BetaBinomial) = argmax(pdf.(Ref(d),support(d))) - 1
-modes(d::BetaBinomial) = modes(Categorical(pdf.(Ref(d),support(d)))) .- 1
+# Shifted categorical distribution corresponding to `BetaBinomial`
+_categorical(d::BetaBinomial) = Categorical(map(Base.Fix1(pdf, d), support(d)))
 
-quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(Ref(d), support(d))), p) - 1
+entropy(d::BetaBinomial) = entropy(_categorical(d))
+median(d::BetaBinomial) = median(_categorical(d)) - 1
+mode(d::BetaBinomial) = mode(_categorical(d)) - 1
+modes(d::BetaBinomial) = modes(_categorical(d)) .- 1
+
+quantile(d::BetaBinomial, p::Float64) = quantile(_categorical(d), p) - 1
 
 #### Sampling
 

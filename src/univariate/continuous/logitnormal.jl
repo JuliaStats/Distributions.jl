@@ -59,7 +59,7 @@ struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogitNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    @check_args LogitNormal (σ, σ > zero(σ))
+    @check_args LogitNormal (σ, σ >= zero(σ))
     return LogitNormal{T}(μ, σ)
 end
 
@@ -111,44 +111,46 @@ end
 
 #### Evaluation
 
-#TODO check pd and logpdf
-function pdf(d::LogitNormal{T}, x::Real) where T<:Real
-    if zero(x) < x < one(x)
-        return normpdf(d.μ, d.σ, logit(x)) / (x * (1-x))
+# We directly use the StatsFuns API instead of going through `Normal(...)`
+# to avoid overhead introduced by the parameter checks of `Normal`
+# Ref https://github.com/JuliaStats/Distributions.jl/pull/2003
+
+function pdf(d::LogitNormal, x::Real)
+    if x ≤ zero(x) || x ≥ oneunit(x)
+        logitx = oftype(float(x), -Inf)
+        z = oneunit(x * (1 - x))
     else
-        return T(0)
+        logitx = logit(x)
+        z = x * (1 - x)
     end
+    return StatsFuns.normpdf(d.μ, d.σ, logitx) / z
+end
+function logpdf(d::LogitNormal, x::Real)
+    if x ≤ zero(x) || x ≥ one(x)
+        logitx = oftype(float(x), -Inf)
+        z = zero(float(x))
+    else
+        logitx = logit(x)
+        z = log(x * (1 - x))
+    end
+    return StatsFuns.normlogpdf(d.μ, d.σ, logitx) - z
 end
 
-function logpdf(d::LogitNormal{T}, x::Real) where T<:Real
-    if zero(x) < x < one(x)
-        lx = logit(x)
-        return normlogpdf(d.μ, d.σ, lx) - log(x) - log1p(-x)
-    else
-        return -T(Inf)
-    end
-end
+cdf(d::LogitNormal, x::Real) = StatsFuns.normcdf(d.μ, d.σ, logit(clamp(x, zero(x), oneunit(x))))
+ccdf(d::LogitNormal, x::Real) = StatsFuns.normccdf(d.μ, d.σ, logit(clamp(x, zero(x), oneunit(x))))
+logcdf(d::LogitNormal, x::Real) = StatsFuns.normlogcdf(d.μ, d.σ, logit(clamp(x, zero(x), oneunit(x))))
+logccdf(d::LogitNormal, x::Real) = StatsFuns.normlogccdf(d.μ, d.σ, logit(clamp(x, zero(x), oneunit(x))))
 
-cdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-    x ≤ 0 ? zero(T) : x ≥ 1 ? one(T) : normcdf(d.μ, d.σ, logit(x))
-ccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-    x ≤ 0 ? one(T) : x ≥ 1 ? zero(T) : normccdf(d.μ, d.σ, logit(x))
-logcdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-    x ≤ 0 ? -T(Inf) : x ≥ 1 ? zero(T) : normlogcdf(d.μ, d.σ, logit(x))
-logccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-    x ≤ 0 ? zero(T) : x ≥ 1 ? -T(Inf) : normlogccdf(d.μ, d.σ, logit(x))
-
-quantile(d::LogitNormal, q::Real) = logistic(norminvcdf(d.μ, d.σ, q))
-cquantile(d::LogitNormal, q::Real) = logistic(norminvccdf(d.μ, d.σ, q))
-invlogcdf(d::LogitNormal, lq::Real) = logistic(norminvlogcdf(d.μ, d.σ, lq))
-invlogccdf(d::LogitNormal, lq::Real) = logistic(norminvlogccdf(d.μ, d.σ, lq))
+quantile(d::LogitNormal, q::Real) = logistic(StatsFuns.norminvcdf(d.μ, d.σ, q))
+cquantile(d::LogitNormal, q::Real) = logistic(StatsFuns.norminvccdf(d.μ, d.σ, q))
+invlogcdf(d::LogitNormal, lq::Real) = logistic(StatsFuns.norminvlogcdf(d.μ, d.σ, lq))
+invlogccdf(d::LogitNormal, lq::Real) = logistic(StatsFuns.norminvlogccdf(d.μ, d.σ, lq))
 
 function gradlogpdf(d::LogitNormal, x::Real)
-    μ, σ = params(d)
-    _insupport = insupport(d, x)
-    _x = _insupport ? x : zero(x)
-    z = (μ - logit(_x) + σ^2 * (2 * _x - 1)) / (σ^2 * _x * (1 - _x))
-    return _insupport ? z : oftype(z, NaN)
+    outofsupport = x ≤ zero(x) || x ≥ oneunit(x)
+    y = outofsupport ? zero(x) : x
+    z = ((d.μ - logit(y)) / d.σ^2 + 2 * y - 1) / (y * (1 - y))
+    return outofsupport ? zero(z) : z
 end
 
 # mgf(d::LogitNormal)
@@ -157,7 +159,14 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::LogitNormal) = logistic(randn(rng) * d.σ + d.μ)
+xval(d::LogitNormal, z::Real) = logistic(muladd(d.σ, z, d.μ))
+
+rand(rng::AbstractRNG, d::LogitNormal) = xval(d, randn(rng))
+function rand!(rng::AbstractRNG, d::LogitNormal, A::AbstractArray{<:Real})
+    randn!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 ## Fitting
 

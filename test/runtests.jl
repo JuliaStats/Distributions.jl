@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "aqua",
     "univariate/continuous/loglogistic",
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
@@ -22,11 +23,13 @@ const tests = [
     "truncated/discrete_uniform",
     "censored",
     "univariate/continuous/normal",
+    "univariate/continuous/normalcanon",
     "univariate/continuous/laplace",
     "univariate/continuous/cauchy",
     "univariate/continuous/uniform",
     "univariate/continuous/lognormal",
     "multivariate/mvnormal",
+    "multivariate/mvlogitnormal",
     "multivariate/mvlognormal",
     "types", # extra file compared to /src
     "utils",
@@ -61,6 +64,7 @@ const tests = [
     "qq",
     "univariate/continuous/pgeneralizedgaussian",
     "product",
+    "namedtuple/productnamedtuple",
     "univariate/discrete/discretenonparametric",
     "univariate/continuous/chernoff",
     "univariate_bounds", # extra file compared to /src
@@ -83,6 +87,7 @@ const tests = [
     "univariate/continuous/noncentralchisq",
     "univariate/continuous/weibull",
     "pdfnorm",
+    "univariate/continuous/pareto",
     "univariate/continuous/rician",
     "functionals",
     "density_interface",
@@ -96,6 +101,7 @@ const tests = [
     "eachvariate",
     "univariate/continuous/triangular",
     "statsapi",
+    "univariate/continuous/inversegaussian",
 
     ### missing files compared to /src:
     # "common",
@@ -137,15 +143,12 @@ const tests = [
     # "univariate/continuous/generalizedextremevalue",
     # "univariate/continuous/generalizedpareto",
     # "univariate/continuous/inversegamma",
-    # "univariate/continuous/inversegaussian",
     # "univariate/continuous/ksdist",
     # "univariate/continuous/ksonesided",
     # "univariate/continuous/levy",
     # "univariate/continuous/noncentralbeta",
     # "univariate/continuous/noncentralf",
-    # "univariate/continuous/normalcanon",
     # "univariate/continuous/normalinversegaussian",
-    # "univariate/continuous/pareto",
     # "univariate/continuous/rayleigh",
     # "univariate/continuous/studentizedrange",
     # "univariate/continuous/symtriangular",
@@ -175,8 +178,3 @@ include("testutils.jl")
         include("$t.jl")
     end
 end
-
-# print method ambiguities
-println("Potentially stale exports: ")
-display(Test.detect_ambiguities(Distributions))
-println()

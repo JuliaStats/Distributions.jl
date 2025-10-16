@@ -124,14 +124,21 @@ using FiniteDifferences
     end
 
     @testset "properties" begin
-        @testset for p in (4, 5), η in (2, 3.5), uplo in ('L', 'U')
+        @testset for p in (4, 5), η in (0.5, 1, 2, 3.5), uplo in ('L', 'U')
             d = LKJCholesky(p, η, uplo)
             @test d.d == p
             @test size(d) == (p, p)
             @test Distributions.params(d) == (d.d, d.η, d.uplo)
             @test partype(d) <: Float64
 
-            m = mode(d)
+            if η > 1
+                m = mode(d)
+                @test m isa Cholesky{eltype(d)}
+                @test Matrix(m) ≈ I
+            else
+                @test_throws DomainError(η, "LKJCholesky: mode is defined only when η > 1.") mode(d)
+            end
+            m = mode(d; check_args = false)
             @test m isa Cholesky{eltype(d)}
             @test Matrix(m) ≈ I
         end
@@ -181,6 +188,7 @@ using FiniteDifferences
         nkstests = 4 # use for appropriate Bonferroni correction for KS test
 
         @testset "rand" begin
+            @test rand(LKJCholesky(1, 0.5)).factors == ones(1, 1)
             @testset for p in (2, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
                 d = LKJCholesky(p, η, uplo)
                 test_draw(d, rand(rng, d))
