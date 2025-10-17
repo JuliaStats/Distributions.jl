@@ -12,7 +12,6 @@ import ForwardDiff
 
 const tests = [
     "aqua",
-    "univariate/continuous/loglogistic",
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
     "univariate/discrete/dirac",
@@ -82,7 +81,7 @@ const tests = [
     "univariate/continuous/gumbel",
     "univariate/continuous/lindley",
     "univariate/continuous/logistic",
-    # "univariate/continuous/loglogistic",
+    "univariate/continuous/loglogistic",
     "univariate/continuous/johnsonsu",
     "univariate/continuous/noncentralchisq",
     "univariate/continuous/weibull",
