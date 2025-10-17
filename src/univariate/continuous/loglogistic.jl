@@ -1,7 +1,7 @@
 """
     LogLogistic(α, β)
 
-The *log logistic distribution* with scale `α` and shape `β` is the distribution of a random variable whose logarithm has a [`Logistic`](@ref) distribution. 
+The *log-logistic distribution* with scale `α` and shape `β` is the distribution of a random variable whose logarithm has a [`Logistic`](@ref) distribution. 
 If ``X \\sim \\operatorname{LogLogistic}(\\alpha, \\beta)`` then ``log(X) \\sim \\operatorname{Logistic}(log(\\alpha), 1/\\beta)``. The probability density function is 
 
 ```math
@@ -21,7 +21,6 @@ External links
 
 * [Log logistic distribution on Wikipedia](https://en.wikipedia.org/wiki/Log-logistic_distribution)
 """
-
 struct LogLogistic{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
@@ -42,70 +41,81 @@ LogLogistic() = LogLogistic(1.0, 1.0, check_args=false)
 #### Coversions
 convert(::Type{LogLogistic{T}}, d::LogLogistic{T}) where {T<:Real} = d
 convert(::Type{LogLogistic{T}}, d::LogLogistic) where {T<:Real} = LogLogistic{T}(T(d.α), T(d.β))
-#### Parameters 
 
+#### Parameters
 params(d::LogLogistic) = (d.α, d.β)
 partype(::LogLogistic{T}) where {T} = T
 
 #### Statistics 
 
 median(d::LogLogistic) = d.α
-function mean(d::LogLogistic{T}) where T<:Real
-	if d.β ≤ 1
-        ArgumentError("mean is defined only when β > 1") 	
+function mean(d::LogLogistic)
+    (; α, β) = d
+	if !(β > 1)
+        ArgumentError("the mean of a log-logistic distribution is defined only when its shape β > 1") 	
 	end
-    return d.α/sinc(1/d.β)
+    return α/sinc(inv(β))
 end
 
-function mode(d::LogLogistic{T}) where T<:Real
-	if d.β ≤ 1
-		ArgumentError("mode is defined only when β > 1")
-	end 
-	return d.α*((d.β-1)/(d.β+1))^(1/d.β)
+function mode(d::LogLogistic)
+    (; α, β) = d
+    return α*(max(β - 1, 0) / (β + 1))^inv(β)
 end
 
-function var(d::LogLogistic{T}) where T<:Real
-	if d.β ≤ 2
-		ArgumentError("var is defined only when β > 2") 
+function var(d::LogLogistic)
+    (; α, β) = d
+	if !(β > 2)
+        ArgumentError("the variance of a log-logistic distribution is defined only when its shape β > 2") 	
 	end
-    b = π/d.β
-	return d.α^2 * (2*b/sin(2*b)-b^2/(sin(b))^2)
+    invβ = inv(β)
+	return α^2 * (inv(sinc(2 * invβ)) - inv(sinc(invβ))^2)
 end
 
+entropy(d::LogLogistic) = log(d.α / d.β) + 2
 
 #### Evaluation
-function pdf(d::LogLogistic{T}, x::Real) where T<:Real
-    # use built-in impletation to evaluate the density 
-    # of loglogistic at x 
-    # Y = log(X)
-    # Y ~ logistic(log(θ), 1/ϕ)
-    x >= 0 ? pdf(Logistic(log(d.α), 1/d.β), log(x)) / x : zero(T)
+
+function pdf(d::LogLogistic, x::Real)
+    (; α, β) = d
+    insupport = x > 0
+    _x = insupport ? x : zero(x)
+    xoαβ = (_x / α)^β
+    res = (β / x) / ((1 + xoαβ) * (1 + inv(xoαβ)))
+    return insupport ? res : zero(res)
+end
+function logpdf(d::LogLogistic, x::Real)
+    (; α, β) = d
+    insupport = x > 0
+    _x = insupport ? x : zero(x)
+    βlogxoα = β * log(_x / α)
+    res = log(β / x) - (log1pexp(βlogxoα) + log1pexp(-βlogxoα))
+    return insupport ? res : oftype(res, -Inf)
 end
 
-function logpdf(d::LogLogistic{T}, x::Real) where T<:Real
-    x >= 0 ? logpdf(Logistic(log(d.α), 1/d.β), log(x)) + log(x) : -T(Inf)
-end
+cdf(d::LogLogistic, x::Real) = inv(1 + (max(x, 0) / d.α)^(-d.β))
+ccdf(d::LogLogistic, x::Real) = inv(1 + (max(x, 0) / d.α)^d.β)
 
-function cdf(d::LogLogistic{T}, x::Real) where T<:Real
-    x >= 0 ? cdf(Logistic(log(d.α), 1/d.β), log(x)) : zero(T)
-end
+logcdf(d::LogLogistic, x::Real) = -log1pexp(-d.β * log(max(x, 0) / d.α))
+logccdf(d::LogLogistic, x::Real) = -log1pexp(d.β * log(max(x, 0) / d.α))
 
-function logcdf(d::LogLogistic{T}, x::Real) where T<:Real
-    x >= 0 ? logcdf(Logistic(log(d.α), 1/d.β), log(x)) : -T(Inf)
-end
+quantile(d::LogLogistic, p::Real) = d.α * (p / (1 - p))^inv(d.β)
+cquantile(d::LogLogistic, p::Real) = d.α * ((1 - p) / p)^inv(d.β)
 
-function ccdf(d::LogLogistic{T}, x::Real) where T<:Real
-    x >= 0 ? ccdf(Logistic(log(d.α), 1/d.β), log(x)) : one(T)
-end
-
-function logccdf(d::LogLogistic{T}, x::Real) where T<:Real
-    x >= 0 ? logccdf(Logistic(log(d.α), 1/d.β), log(x)) : zero(T)
-end
-
+invlogcdf(d::LogLogistic, lp::Real) = d.α * expm1(-lp)^(-inv(d.β))
+invlogccdf(d::LogLogistic, lp::Real) = d.α * expm1(-lp)^inv(d.β)
 
 #### Sampling
+
 function rand(rng::AbstractRNG, d::LogLogistic)
     u = rand(rng)
-    r = u / (1 - u)
-    return r^(1/d.β)*d.α
+    return d.α * (u / (1 - u))^(inv(d.β))
+end
+function rand!(rng::AbstractRNG, d::LogLogistic, A::AbstractArray{<:Real})
+    rand!(rng, A)
+    let α = d.α, invβ = inv(d.β)
+        map!(A, A) do u
+            return α * (u / (1 - u))^invβ
+        end
+    end
+    return A
 end
