@@ -320,17 +320,17 @@ plotdensity((0, 20), Lindley, (1.5,)) # hide
 ```
 
 ```@docs
-logistic
+Logistic
 ```
 ```@example plotdensity
-plotdensity((-4, 8), logistic, (2, 1)) # hide
+plotdensity((-4, 8), Logistic, (2, 1)) # hide
 ```
 
 ```@docs
-loglogistic
+LogLogistic
 ```
 ```@example plotdensity
-plotdensity((0, 2), logistic, (1, 1)) # hide
+plotdensity((0, 2), LogLogistic, (1, 1)) # hide
 ```
 
 ```@docs
