@@ -11,7 +11,7 @@ BetaBinomial <- R6Class("BetaBinomial",
             self$n <- n
             self$alpha <- a
             self$beta <- b
-            self$probs <- dbbinom(0:n, self$n, self$alpha, self$beta)
+            self$probs <- extraDistr::dbbinom(0:n, self$n, self$alpha, self$beta)
         },
         supp = function() { c(0, self$n) },
         properties = function() {
@@ -29,8 +29,8 @@ BetaBinomial <- R6Class("BetaBinomial",
                  skewness = (u+2*n)*(b-a)/(u+2) * sqrt((u+1)/v1),
                  kurtosis = kur.orig-3)
         },
-        pdf = function(x, log=FALSE){ dbbinom(x, self$n, self$alpha, self$beta, log=log) },
-        cdf = function(x) { pbbinom(x, self$n, self$alpha, self$beta) },
-        quan = function(v) { qcat(v, self$probs) - 1 }
+        pdf = function(x, log=FALSE){ extraDistr::dbbinom(x, self$n, self$alpha, self$beta, log=log) },
+        cdf = function(x) { extraDistr::pbbinom(x, self$n, self$alpha, self$beta) },
+        quan = function(v) { extraDistr::qcat(v, self$probs) - 1 }
     )
 )
