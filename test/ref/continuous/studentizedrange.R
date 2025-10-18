@@ -14,6 +14,13 @@ StudentizedRange <- R6Class("StudentizedRange",
             d1 <- self$nu
             k <- self$k
         },
+        pdf = function(x, log=FALSE) {
+            if (log) {
+                ptukey(x, self$k, self$nu, log=TRUE) + log(pracma::fderiv(ptukey, x, n=1, nmeans=self$k, df=self$nu, log=TRUE))
+            } else {
+                pracma::fderiv(ptukey, x, n=1, nmeans=self$k, df=self$nu, log=FALSE)
+            }
+        },
         cdf = function(x) { ptukey(x, self$k, self$nu) },
         quan = function(v) { qtukey(v, self$k, self$nu) }
     )

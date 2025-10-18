@@ -9,9 +9,8 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
     for dct in R
         ex = Meta.parse(dct["expr"])
-        @assert ex.head == :call
-        dsym = ex.args[1]
-        dname = string(dsym)
+        @assert Meta.isexpr(ex, :call) && !isempty(ex.args)
+        dname = string(ex.args[1])
 
         # test whether it is included in the selected list
         # or all are selected (when selected is empty)
@@ -20,15 +19,11 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         end
 
         # perform testing
-        println("    testing $(ex)")
-        dtype = eval(dsym)
+        println("    testing ", ex)
+        dtype = eval(Meta.parse(dct["dtype"]))
+        @test dtype <: UnivariateDistribution
         d = eval(ex)
-        if dsym == :truncated
-            @test isa(d, Truncated{Normal{Float64}})
-        else
-            @test dtype isa Type && dtype <: UnivariateDistribution
-            @test d isa dtype
-        end
+        @test d isa dtype
 
         # verification and testing
         verify_and_test(dtype, d, dct, n_tsamples)
@@ -48,16 +43,13 @@ _json_value(x::AbstractString) =
     error("Invalid numerical value: $x")
 
 
-function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct::AbstractDict, n_tsamples::Int)
+function verify_and_test(D::Type, d::UnivariateDistribution, dct::AbstractDict, n_tsamples::Int)
     # verify properties
     #
     # Note: properties include all applicable params and stats
     #
 
-    # D can be a function
-    if isa(D, Type)
-        @assert isa(d, D)
-    end
+    @test d isa D
 
     # test various constructors for promotion, all-Integer args, etc.
     pars = params(d)
@@ -68,20 +60,22 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         typeof, (S, T) -> T <: Distribution ? promote_type(S, partype(T)) : (T <: Nothing ? S : promote_type(S, eltype(T))), pars; init = Union{})
     
     # promotion constructor:
-    float_pars = map(x -> isa(x, AbstractFloat), pars)
-    if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated))
-        mixed_pars = Any[pars...]
-        first_float = findfirst(float_pars)
-        mixed_pars[first_float] = Float32(mixed_pars[first_float])
+    if !(D <: Distributions.Truncated)
+        float_pars = map(x -> isa(x, AbstractFloat), pars)
+        if length(pars) > 1 && sum(float_pars) > 1
+            mixed_pars = Any[pars...]
+            first_float = findfirst(float_pars)
+            mixed_pars[first_float] = Float32(mixed_pars[first_float])
 
-        @test typeof(D(mixed_pars...)) == typeof(d)
-    end
+            @test typeof(D(mixed_pars...)) == typeof(d)
+        end
 
-    # conversions
-    if D isa Type && !isconcretetype(D)
-        @test convert(D{partype(d)}, d) === d
-        d32 = convert(D{Float32}, d)
-        @test d32 isa D{Float32}
+        # conversions
+        if !isconcretetype(D)
+            @test convert(D{partype(d)}, d) === d
+            d32 = convert(D{Float32}, d)
+            @test d32 isa D{Float32}
+        end
     end
 
     # verify properties (params & stats)
