@@ -2,9 +2,9 @@
 function poissonpvec(μ::Float64, n::Int)
     # Poisson probabilities, from 0 to n
     pv = Vector{Float64}(undef, n+1)
-    @inbounds pv[1] = p = exp(-μ)
+    pv[1] = p = exp(-μ)
     for i = 1:n
-        @inbounds pv[i+1] = (p *= (μ / i))
+        pv[i+1] = (p *= (μ / i))
     end
     return pv
 end

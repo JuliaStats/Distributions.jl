@@ -70,7 +70,7 @@ function median(d::Categorical{T}) where {T<:Real}
     i = 0
     while cp < 1/2 && i <= k
         i += 1
-        @inbounds cp += p[i]
+        cp += p[i]
     end
     i
 end
@@ -127,7 +127,7 @@ end
 
 function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}) where T<:Integer
     for i = 1 : length(x)
-        @inbounds xi = x[i]
+        xi = x[i]
         h[xi] += 1.   # cannot use @inbounds, as no guarantee that x[i] is in bound
     end
     h
@@ -139,8 +139,8 @@ function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::Abs
         throw(DimensionMismatch("Inconsistent array lengths."))
     end
     for i = 1 : n
-        @inbounds xi = x[i]
-        @inbounds wi = w[i]
+        xi = x[i]
+        wi = w[i]
         h[xi] += wi   # cannot use @inbounds, as no guarantee that x[i] is in bound
     end
     h

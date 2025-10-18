@@ -1,7 +1,7 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 authors = ["JuliaStats"]
-version = "0.25.118"
+version = "0.25.122"
 
 [deps]
 AliasTables = "66dad0bd-aa9a-41b7-9441-69ab47430ed8"
@@ -44,7 +44,7 @@ ForwardDiff = "0.10, 1"
 JSON = "0.21"
 LinearAlgebra = "<0.0.1, 1"
 OffsetArrays = "1"
-PDMats = "0.10, 0.11"
+PDMats = "0.11.35"
 Printf = "<0.0.1, 1"
 QuadGK = "2"
 Random = "<0.0.1, 1"
