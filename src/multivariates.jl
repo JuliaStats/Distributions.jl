@@ -48,7 +48,7 @@ function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix) wh
     size(X) == (length(d),n) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1:n
-        @inbounds r[i] = insupport(d, view(X, :, i))
+        r[i] = insupport(d, view(X, :, i))
     end
     return r
 end
@@ -113,11 +113,11 @@ function cor(d::MultivariateDistribution)
 
     for j = 1:n
         for i = 1:j-1
-            @inbounds R[i, j] = R[j, i]
+            R[i, j] = R[j, i]
         end
         R[j, j] = 1.0
         for i = j+1:n
-            @inbounds R[i, j] = C[i, j] / sqrt(C[i, i] * C[j, j])
+            R[i, j] = C[i, j] / sqrt(C[i, i] * C[j, j])
         end
     end
 

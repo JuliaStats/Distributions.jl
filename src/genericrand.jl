@@ -27,7 +27,7 @@ rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
 # default fallback (redefined for univariate distributions)
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate})
     Base.depwarn("Please implement `rand(rng::AbstractRNG, s::$(typeof(s)))`. The default fallback will be removed", :rand)
-    return @inbounds rand!(rng, s, Array{eltype(s)}(undef, size(s)))
+    return rand!(rng, s, Array{eltype(s)}(undef, size(s)))
 end
 
 # multiple samples
@@ -47,7 +47,7 @@ end
 # this is a workaround for sampleables that incorrectly base `eltype` on the parameters
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
     Base.depwarn("Please implement `rand(rng::AbstractRNG, s::$(typeof(s))`. The default fallback will be removed", :rand)
-    return @inbounds rand!(rng, s, Array{float(eltype(s))}(undef, size(s)))
+    return rand!(rng, s, Array{float(eltype(s))}(undef, size(s)))
 end
 
 """
@@ -102,7 +102,7 @@ function _rand!(
     s::Sampleable{<:ArrayLikeVariate},
     x::AbstractArray{<:Real},
 )
-    @inbounds for xi in eachvariate(x, variate_form(typeof(s)))
+    for xi in eachvariate(x, variate_form(typeof(s)))
         rand!(rng, s, xi)
     end
     return x
@@ -114,7 +114,7 @@ Base.@propagate_inbounds function rand!(
     x::AbstractArray{<:AbstractArray{<:Real,N}},
 ) where {N}
     sz = size(s)
-    allocate = !all(isassigned(x, i) && size(@inbounds x[i]) == sz for i in eachindex(x))
+    allocate = !all(isassigned(x, i) && size(x[i]) == sz for i in eachindex(x))
     return rand!(rng, s, x, allocate)
 end
 
@@ -149,11 +149,11 @@ function _rand!(
     allocate::Bool,
 ) where {N}
     if allocate
-        @inbounds for i in eachindex(x)
+        for i in eachindex(x)
             x[i] = rand(rng, s)
         end
     else
-        @inbounds for xi in x
+        for xi in x
             rand!(rng, s, xi)
         end
     end

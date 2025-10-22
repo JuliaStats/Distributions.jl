@@ -165,7 +165,7 @@ _logpdf(d::FillArrayOfUnivariateDistribution{2}, x::AbstractMatrix{<:Real}) = __
 function __logpdf(
     d::FillArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}
 ) where {N}
-    return @inbounds loglikelihood(first(d.dists), x)
+    return loglikelihood(first(d.dists), x)
 end
 
 # sampling for arrays of distributions
@@ -179,7 +179,7 @@ end
     A::AbstractArray{<:Real,N},
 ) where {N,M}
     @boundscheck size(A) == size(d)
-    @inbounds for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
+    for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
         rand!(rng, di, Ai)
     end
     return A
@@ -195,7 +195,7 @@ function __logpdf(
 ) where {N,M}
     # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
     # to compute `sum(logpdf.(d.dists, eachvariate))`
-    @inbounds broadcasted = Broadcast.broadcasted(
+    broadcasted = Broadcast.broadcasted(
         logpdf, d.dists, eachvariate(x, ArrayLikeVariate{M}),
     )
     return sum(Broadcast.instantiate(broadcasted))
@@ -220,7 +220,7 @@ end
     A::AbstractArray{<:Real,N},
 ) where {N,M}
     @boundscheck size(A) == size(d)
-    @inbounds rand!(rng, sampler(first(d.dists)), A)
+    rand!(rng, sampler(first(d.dists)), A)
     return A
 end
 
@@ -242,7 +242,7 @@ function __logpdf(
     d::ProductDistribution{N,M,<:FillArrays.AbstractFill},
     x::AbstractArray{<:Real,N},
 ) where {N,M}
-    return @inbounds loglikelihood(first(d.dists), x)
+    return loglikelihood(first(d.dists), x)
 end
 
 """

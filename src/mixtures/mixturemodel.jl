@@ -295,7 +295,7 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     p = probs(d)
     fill!(r, 0.0)
     t = Array{eltype(p)}(undef, size(r))
-    @inbounds for i in eachindex(p)
+    for i in eachindex(p)
         pi = p[i]
         if pi > 0.0
             if d isa UnivariateMixture
@@ -321,7 +321,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     n = length(r)
     Lp = Matrix{eltype(p)}(undef, n, K)
     m = fill(-Inf, n)
-    @inbounds for i in eachindex(p)
+    for i in eachindex(p)
         pi = p[i]
         if pi > 0.0
             lpri = log(pi)
@@ -346,7 +346,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     end
 
     fill!(r, 0.0)
-    @inbounds for i = 1:K
+    for i = 1:K
         if p[i] > 0.0
             lp_i = view(Lp, :, i)
             for j = 1:n
@@ -355,7 +355,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
         end
     end
 
-    @inbounds for j = 1:n
+    for j = 1:n
         r[j] = log(r[j]) + m[j]
     end
     return r

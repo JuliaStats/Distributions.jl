@@ -39,14 +39,14 @@ end
     p = spl.p
     x[1] = w
     s = 0.0
-    @inbounds for i = 2:p
+    for i = 2:p
         x[i] = xi = randn(rng)
         s += abs2(xi)
     end
 
     # normalize x[2:p]
     r = sqrt((1.0 - abs2(w)) / s)
-    @inbounds for i = 2:p
+    for i = 2:p
         x[i] *= r
     end
 
@@ -101,7 +101,7 @@ function _vmf_householder_vec(μ::Vector{Float64})
     s = sqrt(-2*v[1])
     v[1] /= s
 
-    @inbounds for i in 2:p
+    for i in 2:p
         v[i] = μ[i] / s
     end
 

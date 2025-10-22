@@ -255,12 +255,12 @@ See also: [`logpdf`](@ref).
             ntuple(i -> size(x, i), Val(N)) == size(d) ||
                 throw(DimensionMismatch("inconsistent array dimensions"))
         end
-        return @inbounds map(Base.Fix1(pdf, d), eachvariate(x, variate_form(typeof(d))))
+        return map(Base.Fix1(pdf, d), eachvariate(x, variate_form(typeof(d))))
     end
 end
 
 function _pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
-    return exp(@inbounds logpdf(d, x))
+    return exp(logpdf(d, x))
 end
 
 """
@@ -296,7 +296,7 @@ See also: [`pdf`](@ref), [`gradlogpdf`](@ref).
             ntuple(i -> size(x, i), Val(N)) == size(d) ||
                 throw(DimensionMismatch("inconsistent array dimensions"))
         end
-        return @inbounds map(Base.Fix1(logpdf, d), eachvariate(x, variate_form(typeof(d))))
+        return map(Base.Fix1(logpdf, d), eachvariate(x, variate_form(typeof(d))))
     end
 end
 
@@ -413,7 +413,7 @@ function _pdf!(
     d::Distribution{<:ArrayLikeVariate},
     x::AbstractArray{<:Real},
 )
-    @inbounds logpdf!(out, d, x)
+    logpdf!(out, d, x)
     map!(exp, out, out)
     return out
 end
@@ -463,7 +463,7 @@ function _logpdf!(
     d::Distribution{<:ArrayLikeVariate},
     x::AbstractArray{<:Real},
 )
-    @inbounds map!(Base.Fix1(logpdf, d), out, eachvariate(x, variate_form(typeof(d))))
+    map!(Base.Fix1(logpdf, d), out, eachvariate(x, variate_form(typeof(d))))
     return out
 end
 
@@ -492,7 +492,7 @@ Base.@propagate_inbounds @inline function loglikelihood(
             ntuple(i -> size(x, i), Val(N)) == size(d) ||
                 throw(DimensionMismatch("inconsistent array dimensions"))
         end
-        return @inbounds sum(Base.Fix1(logpdf, d), eachvariate(x, ArrayLikeVariate{N}))
+        return sum(Base.Fix1(logpdf, d), eachvariate(x, ArrayLikeVariate{N}))
     end
 end
 Base.@propagate_inbounds function loglikelihood(
