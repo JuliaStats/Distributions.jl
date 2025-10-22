@@ -180,13 +180,11 @@ function mean(d::UnivariateMixture)
 end
 
 function mean(d::MultivariateMixture)
-    K = ncomponents(d)
     p = probs(d)
-    m = zeros(length(d))
-    for i = 1:K
-        pi = p[i]
+    m = similar(p, float(eltype(d)), axes(d))
+    fill!(m, 0.0)
+    for (c, pi) in zip(components(d), p)
         if pi > 0.0
-            c = component(d, i)
             axpy!(pi, mean(c), m)
         end
     end
@@ -223,33 +221,50 @@ function var(d::UnivariateMixture)
 end
 
 function var(d::MultivariateMixture)
-    return diag(cov(d))
+    p = probs(d)
+    ax = axes(d)
+    m = similar(p, ax)
+    md = similar(p, ax)
+    v = similar(p, ax)
+    fill!(m, 0.0)
+    fill!(v, 0.0)
+
+    for (c, pi) in zip(components(d), p)
+        if pi > 0.0
+            axpy!(pi, mean(c), m)
+            axpy!(pi, var(c), v)
+        end
+    end
+    for (c, pi) in zip(components(d), p)
+        if pi > 0.0
+            md .= mean(c) .- m
+            @. v += pi * abs2(md)
+        end
+    end
+    return v
 end
 
 function cov(d::MultivariateMixture)
-    K = ncomponents(d)
     p = probs(d)
-    m = zeros(length(d))
-    md = zeros(length(d))
-    V = zeros(length(d),length(d))
+    ax = axes(d)
+    m = similar(p, ax)
+    md = similar(p, ax)
+    V = similar(p, (ax[1], ax[1]))
+    fill!(m, 0.0)
+    fill!(V, 0.0)
 
-    for i = 1:K
-        pi = p[i]
+    for (c, pi) in zip(components(d), p)
         if pi > 0.0
-            c = component(d, i)
             axpy!(pi, mean(c), m)
             axpy!(pi, cov(c), V)
         end
     end
-    for i = 1:K
-        pi = p[i]
+    for (c, pi) in zip(components(d), p)
         if pi > 0.0
-            c = component(d, i)
             md .= mean(c) .- m
-            BLAS.syr!('U', Float64(pi), md, V)
+            @. V += pi * md * md'
         end
     end
-    LinearAlgebra.copytri!(V, 'U')
     return V
 end
 
