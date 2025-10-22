@@ -152,7 +152,7 @@ end
 _rand!(rng::AbstractRNG, d::Multinomial, x::AbstractVector{<:Real}) =
     multinom_rand!(rng, ntrials(d), probs(d), x)
 
-sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))
+sampler(d::Multinomial) = MultinomialSampler(ntrials(d), convert(Vector, probs(d)))
 
 
 ## Fit model
