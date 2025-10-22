@@ -43,6 +43,7 @@ end
 
 ncategories(d::Multinomial) = length(d.p)
 length(d::Multinomial) = ncategories(d)
+Base.axes(d::Multinomial) = axes(d.p)
 probs(d::Multinomial) = d.p
 ntrials(d::Multinomial) = d.n
 

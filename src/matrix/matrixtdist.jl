@@ -100,6 +100,8 @@ end
 
 size(d::MatrixTDist) = size(d.M)
 
+Base.axes(d::MatrixTDist) = axes(d.M)
+
 rank(d::MatrixTDist) = minimum( size(d) )
 
 insupport(d::MatrixTDist, X::Matrix) = isreal(X) && size(X) == size(d)

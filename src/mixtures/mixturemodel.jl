@@ -159,6 +159,7 @@ end
 The length of each sample (only for `Multivariate`).
 """
 length(d::MultivariateMixture) = length(d.components[1])
+Base.axes(d::MultivariateMixture) = axes(d.components[1])
 size(d::MatrixvariateMixture) = size(d.components[1])
 
 ncomponents(d::MixtureModel) = length(d.components)

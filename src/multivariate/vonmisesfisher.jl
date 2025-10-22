@@ -51,6 +51,7 @@ convert(::Type{VonMisesFisher{T}}, μ::Vector, κ, logCκ) where {T<:Real} =  Vo
 ### Basic properties
 
 length(d::VonMisesFisher) = length(d.μ)
+Base.axes(d::VonMisesFisher) = axes(d.μ)
 
 meandir(d::VonMisesFisher) = d.μ
 concentration(d::VonMisesFisher) = d.κ

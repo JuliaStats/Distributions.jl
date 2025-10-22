@@ -44,11 +44,15 @@ function Dirichlet(d::Integer, alpha::Real; check_args::Bool=true)
     return Dirichlet{typeof(alpha)}(Fill(alpha, d); check_args=false)
 end
 
+Base.axes(d::Dirichlet) = axes(d.alpha)
+
 struct DirichletCanon{T<:Real,Ts<:AbstractVector{T}}
     alpha::Ts
 end
 
 length(d::DirichletCanon) = length(d.alpha)
+
+Base.axes(d::DirichletCanon) = axes(d.alpha)
 
 Base.eltype(::Type{<:Dirichlet{T}}) where {T} = T
 

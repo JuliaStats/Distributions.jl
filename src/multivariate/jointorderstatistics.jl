@@ -71,6 +71,7 @@ function _are_ranks_valid(ranks::AbstractRange, n)
 end
 
 length(d::JointOrderStatistics) = length(d.ranks)
+Base.axes(d::JointOrderStatistics) = axes(d.ranks)
 function insupport(d::JointOrderStatistics, x::AbstractVector)
     length(d) == length(x) || return false
     xi, state = iterate(x) # at least one element!

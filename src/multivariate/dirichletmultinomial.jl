@@ -51,6 +51,7 @@ Base.show(io::IO, d::DirichletMultinomial) = show(io, d, (:n, :α,))
 
 # Parameters
 ncategories(d::DirichletMultinomial) = length(d.α)
+Base.axes(d::DirichletMultinomial) = axes(d.α)
 length(d::DirichletMultinomial) = ncategories(d)
 ntrials(d::DirichletMultinomial) = d.n
 params(d::DirichletMultinomial) = (d.n, d.α)
