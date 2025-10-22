@@ -84,8 +84,8 @@ function insupport(d::JointOrderStatistics, x::AbstractVector)
     end
     return true
 end
-minimum(d::JointOrderStatistics) = Fill(minimum(d.dist), length(d))
-maximum(d::JointOrderStatistics) = Fill(maximum(d.dist), length(d))
+minimum(d::JointOrderStatistics) = Fill(minimum(d.dist), axes(d))
+maximum(d::JointOrderStatistics) = Fill(maximum(d.dist), axes(d))
 
 params(d::JointOrderStatistics) = tuple(params(d.dist)..., d.n, d.ranks)
 partype(d::JointOrderStatistics) = partype(d.dist)
