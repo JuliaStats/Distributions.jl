@@ -60,11 +60,9 @@ params(d::DirichletMultinomial) = (d.n, d.α)
 # Statistics
 mean(d::DirichletMultinomial) = d.α .* (d.n / d.α0)
 function var(d::DirichletMultinomial{T}) where T <: Real
-    v = fill(d.n * (d.n + d.α0) / (1 + d.α0), length(d))
+    v0 = d.n * (d.n + d.α0) / (1 + d.α0)
     p = d.α / d.α0
-    for i in eachindex(v)
-        v[i] *= p[i] * (1 - p[i])
-    end
+    v = @. v0 * p * (1 - p)
     v
 end
 function cov(d::DirichletMultinomial{<:Real})
