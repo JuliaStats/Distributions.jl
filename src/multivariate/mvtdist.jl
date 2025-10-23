@@ -87,6 +87,7 @@ mvtdist(df::Real, Σ::Matrix{<:Real}) = MvTDist(df, Σ)
 # Basic statistics
 
 length(d::GenericMvTDist) = d.dim
+Base.axes(d::GenericMvTDist) = axes(d.μ)
 
 mean(d::GenericMvTDist) = d.df>1 ? d.μ : NaN
 mode(d::GenericMvTDist) = d.μ
