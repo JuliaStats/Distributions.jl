@@ -502,7 +502,7 @@ Get the probability of failure.
 """
 failprob(d::DiscreteUnivariateDistribution)
 
-# Temporary fix to handle RFunctions dependencies
+# Temporary fix to handle Rmath dependencies
 """
     @rand_rdist(::Distribution)
 
