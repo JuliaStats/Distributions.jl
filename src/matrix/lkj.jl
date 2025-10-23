@@ -152,7 +152,7 @@ end
 
     #  Section 3.2 in LKJ (2009 JMA)
     #  1. Initialization
-    fill!(R, oneunit(float(η)))
+    fill!(R, true)
     d > 1 || return R
     β = η + 0.5d - 1
     u = rand(rng, Beta(β, β))
