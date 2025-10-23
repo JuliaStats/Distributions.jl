@@ -26,8 +26,15 @@ Base.length(s::VonMisesFisherSampler) = length(s.v)
     return x
 end
 
-
-function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector)
+# Currently, the VonMisesFisherSampler is written for `Float64`
+# TODO: Generalize to other number types
+function rand(rng::AbstractRNG, spl::VonMisesFisherSampler)
+    x = Vector{Float64}(undef, length(spl))
+    @inbounds rand!(rng, spl, x)
+    return x
+end
+@inline function rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector{<:Real})
+    @boundscheck length(spl) == length(x)
     w = _vmf_genw(rng, spl)
     p = spl.p
     x[1] = w

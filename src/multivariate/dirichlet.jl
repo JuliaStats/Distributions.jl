@@ -50,8 +50,6 @@ end
 
 length(d::DirichletCanon) = length(d.alpha)
 
-Base.eltype(::Type{<:Dirichlet{T}}) where {T} = T
-
 #### Conversions
 convert(::Type{Dirichlet{T}}, cf::DirichletCanon) where {T<:Real} =
     Dirichlet(convert(AbstractVector{T}, cf.alpha))
@@ -154,18 +152,25 @@ end
 
 # sampling
 
-function _rand!(rng::AbstractRNG,
-                d::Union{Dirichlet,DirichletCanon},
-                x::AbstractVector{<:Real})
+function rand(rng::AbstractRNG, d::Union{Dirichlet,DirichletCanon})
+    x = map(αi -> rand(rng, Gamma(αi)), d.alpha)
+    return lmul!(inv(sum(x)), x)
+end
+function rand(rng::AbstractRNG, d::Dirichlet{<:Real,<:FillArrays.AbstractFill{<:Real}})
+    x = rand(rng, Gamma(FillArrays.getindex_value(d.alpha)), length(d))
+    return lmul!(inv(sum(x)), x)
+end
+
+@inline function rand!(rng::AbstractRNG, d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{<:Real})
+    @boundscheck length(d) == length(x)
     for (i, αi) in zip(eachindex(x), d.alpha)
         x[i] = rand(rng, Gamma(αi))
     end
     lmul!(inv(sum(x)), x) # this returns x
 end
 
-function _rand!(rng::AbstractRNG,
-                d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
-                x::AbstractVector{<:Real}) where {T<:Real}
+@inline function rand!(rng::AbstractRNG, d::Dirichlet{T,<:FillArrays.AbstractFill{T}}, x::AbstractVector{<:Real}) where {T<:Real}
+    @boundscheck length(d) == length(x)
     rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
     lmul!(inv(sum(x)), x) # this returns x
 end
