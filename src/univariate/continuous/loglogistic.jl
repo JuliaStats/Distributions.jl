@@ -9,8 +9,7 @@ f(x; \\alpha, \\beta) = \\frac{(\\alpha / \\beta)x/\\beta()^(\\alpha - 1)}{(1 + 
 ```
 
 ```julia
-LogLogistic()            # Log-logistic distribution with unit scale and unit shape
-LogLogistic(α,β)         # Log-logistic distribution with scale α and shape β
+LogLogistic(α, β)        # Log-logistic distribution with scale α and shape β
 
 params(d)                # Get the parameters, i.e. (α, β)
 scale(d)                 # Get the scale parameter, i.e. α
@@ -32,9 +31,7 @@ function LogLogistic(α::T, β::T; check_args=true) where {T <: Real}
     return LogLogistic{T}(α, β)
 end
 
-LogLogistic(α::Real, β::Real) = LogLogistic(promote(α,β)...)
-LogLogistic(α::Integer, β::Integer) = LogLogistic(float(α), float(β))
-LogLogistic() = LogLogistic(1.0, 1.0, check_args=false) 
+LogLogistic(α::Real, β::Real) = LogLogistic(promote(α, β)...)
 
 @distr_support LogLogistic 0.0 Inf
 
@@ -88,7 +85,7 @@ function logpdf(d::LogLogistic, x::Real)
     insupport = x > 0
     _x = insupport ? x : zero(x)
     βlogxoα = β * log(_x / α)
-    res = log(β / x) - (log1pexp(βlogxoα) + log1pexp(-βlogxoα))
+    res = log(β / _x) - (log1pexp(βlogxoα) + log1pexp(-βlogxoα))
     return insupport ? res : oftype(res, -Inf)
 end
 
