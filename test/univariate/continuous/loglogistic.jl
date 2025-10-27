@@ -8,6 +8,7 @@ import Optim
         for T1 in (Int, Float32, Float64), T2 in (Int, Float32, Float64)
            d = @inferred(LogLogistic(T1(1), T2(2)))
            @test d isa LogLogistic{promote_type(T1, T2)}
+           @test partype(d) === promote_type(T1, T2)
            @test d.α == 1
            @test d.β == 2
 
@@ -15,6 +16,7 @@ import Optim
            @test_throws ArgumentError LogLogistic(T1(-1), T2(2); check_args=true)
            d = @inferred(LogLogistic(T1(-1), T2(2); check_args=false))
            @test d isa LogLogistic{promote_type(T1, T2)}
+           @test partype(d) === promote_type(T1, T2)
            @test d.α == -1
            @test d.β == 2
 
@@ -22,6 +24,7 @@ import Optim
            @test_throws ArgumentError LogLogistic(T1(1), T2(-2); check_args=true)
            d = @inferred(LogLogistic(T1(1), T2(-2); check_args=false))
            @test d isa LogLogistic{promote_type(T1, T2)}
+           @test partype(d) === promote_type(T1, T2)
            @test d.α == 1
            @test d.β == -2
         end
