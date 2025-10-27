@@ -1,11 +1,13 @@
 """
     LogLogistic(α, β)
 
-The *log-logistic distribution* with scale `α` and shape `β` is the distribution of a random variable whose logarithm has a [`Logistic`](@ref) distribution. 
-If ``X \\sim \\operatorname{LogLogistic}(\\alpha, \\beta)`` then ``log(X) \\sim \\operatorname{Logistic}(log(\\alpha), 1/\\beta)``. The probability density function is 
+The *log-logistic distribution* with scale ``\\alpha`` and shape ``\\beta`` is the distribution of a random variable whose logarithm has a [`Logistic`](@ref) distribution. 
+
+If ``X \\sim \\operatorname{LogLogistic}(\\alpha, \\beta)`` then ``\\log(X) \\sim \\operatorname{Logistic}(\\log(\\alpha), 1/\\beta)``.
+The probability density function is 
 
 ```math
-f(x; \\alpha, \\beta) = \\frac{(\\alpha / \\beta)x/\\beta()^(\\alpha - 1)}{(1 + (x/\\beta)^\\alpha)^2}, \\beta > 0, \\alpha > 0
+f(x; \\alpha, \\beta) = \\frac{(\\beta / \\alpha){(x/\\alpha)}^{\\beta - 1}}{{(1 + {(x/\\alpha)}^\\beta)}^2}, \\qquad \\alpha > 0, \\beta > 0.
 ```
 
 ```julia
@@ -18,7 +20,7 @@ shape(d)                 # Get the shape parameter, i.e. β
 
 External links
 
-* [Log logistic distribution on Wikipedia](https://en.wikipedia.org/wiki/Log-logistic_distribution)
+* [Log-logistic distribution on Wikipedia](https://en.wikipedia.org/wiki/Log-logistic_distribution)
 """
 struct LogLogistic{T<:Real} <: ContinuousUnivariateDistribution
     α::T
