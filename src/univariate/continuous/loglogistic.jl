@@ -26,12 +26,12 @@ struct LogLogistic{T<:Real} <: ContinuousUnivariateDistribution
     LogLogistic{T}(α::T,β::T) where {T} = new{T}(α,β)
 end
 
-function LogLogistic(α::T, β::T; check_args=true) where {T <: Real}
+function LogLogistic(α::T, β::T; check_args::Bool=true) where {T <: Real}
     check_args && @check_args(LogLogistic, α > zero(α) && β > zero(β))
     return LogLogistic{T}(α, β)
 end
 
-LogLogistic(α::Real, β::Real) = LogLogistic(promote(α, β)...)
+LogLogistic(α::Real, β::Real; check_args::Bool = true) = LogLogistic(promote(α, β)...; check_args)
 
 @distr_support LogLogistic 0.0 Inf
 
@@ -49,7 +49,7 @@ median(d::LogLogistic) = d.α
 function mean(d::LogLogistic)
     (; α, β) = d
 	if !(β > 1)
-        ArgumentError("the mean of a log-logistic distribution is defined only when its shape β > 1") 	
+        throw(ArgumentError("the mean of a log-logistic distribution is defined only when its shape β > 1"))
 	end
     return α/sinc(inv(β))
 end
@@ -62,7 +62,7 @@ end
 function var(d::LogLogistic)
     (; α, β) = d
 	if !(β > 2)
-        ArgumentError("the variance of a log-logistic distribution is defined only when its shape β > 2") 	
+        throw(ArgumentError("the variance of a log-logistic distribution is defined only when its shape β > 2"))
 	end
     invβ = inv(β)
 	return α^2 * (inv(sinc(2 * invβ)) - inv(sinc(invβ))^2)
@@ -77,7 +77,7 @@ function pdf(d::LogLogistic, x::Real)
     insupport = x > 0
     _x = insupport ? x : zero(x)
     xoαβ = (_x / α)^β
-    res = (β / x) / ((1 + xoαβ) * (1 + inv(xoαβ)))
+    res = (β / _x) / ((1 + xoαβ) * (1 + inv(xoαβ)))
     return insupport ? res : zero(res)
 end
 function logpdf(d::LogLogistic, x::Real)

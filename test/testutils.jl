@@ -626,6 +626,7 @@ allow_test_stats(d::UnivariateDistribution) = true
 allow_test_stats(d::NoncentralBeta) = false
 allow_test_stats(::StudentizedRange) = false
 allow_test_stats(::LogitNormal) = false # `mean` is not defined since it has no analytical solution
+allow_test_stats(d::LogLogistic) = d.β > 2 # second moment is only defined if shape β > 2
 
 function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Float64})
     # using Monte Carlo methods

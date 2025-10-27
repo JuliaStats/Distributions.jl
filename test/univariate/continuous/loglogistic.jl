@@ -1,12 +1,75 @@
 using Distributions
 using Test
 
+import Optim
+
 @testset "LogLogistic" begin
+    @testset "Constructors" begin
+        for T1 in (Int, Float32, Float64), T2 in (Int, Float32, Float64)
+           d = @inferred(LogLogistic(T1(1), T2(2)))
+           @test d isa LogLogistic{promote_type(T1, T2)}
+           @test d.α == 1
+           @test d.β == 2
+
+           @test_throws ArgumentError LogLogistic(T1(-1), T2(2))
+           @test_throws ArgumentError LogLogistic(T1(-1), T2(2); check_args=true)
+           d = @inferred(LogLogistic(T1(-1), T2(2); check_args=false))
+           @test d isa LogLogistic{promote_type(T1, T2)}
+           @test d.α == -1
+           @test d.β == 2
+
+           @test_throws ArgumentError LogLogistic(T1(1), T2(-2))
+           @test_throws ArgumentError LogLogistic(T1(1), T2(-2); check_args=true)
+           d = @inferred(LogLogistic(T1(1), T2(-2); check_args=false))
+           @test d isa LogLogistic{promote_type(T1, T2)}
+           @test d.α == 1
+           @test d.β == -2
+        end
+    end
+
     @testset "Conversion" begin
         d = LogLogistic(1.0, 2.0)
         @test convert(LogLogistic{Float64}, d) === d
         @test convert(LogLogistic{Float32}, d) isa LogLogistic{Float32}
         @test convert(LogLogistic{Float32}, d) == d
+    end
+
+    @testset "median" begin
+        for α in (0.5, 1, 2, 3), β in (0.5, 1, 2, 3)
+            d = LogLogistic(α, β)
+            @test median(d) ≈ quantile(d, 1//2)
+        end
+    end
+
+    @testset "mode" begin
+        for α in (0.5, 1, 2, 3), β in (0.5, 1, 2, 3)
+            d = LogLogistic(α, β)
+            opt = Optim.maximize(Base.Fix1(logpdf, d), 0.0, 10.0)
+            @test mode(d) ≈ Optim.maximizer(opt) rtol = 1e-8 atol = 1e-12
+        end
+    end
+
+    @testset "mean" begin
+        for α in (0.5, 1, 2, 3), β in (0.5, 1, 2, 3)
+            d = LogLogistic(α, β)
+            if β > 1
+                @test mean(d) ≈ Distributions.expectation(identity, d)
+            else
+                @test_throws ArgumentError("the mean of a log-logistic distribution is defined only when its shape β > 1") mean(d)
+            end
+        end
+    end
+
+    @testset "variance" begin
+        for α in (0.5, 1, 2, 3), β in (0.5, 1, 2, 3)
+            d = LogLogistic(α, β)
+            if β > 2
+                m = mean(d)
+                @test var(d) ≈ Distributions.expectation(x -> (x - m)^2, d)
+            else
+                @test_throws ArgumentError("the variance of a log-logistic distribution is defined only when its shape β > 2") var(d)
+            end
+        end
     end
 
     # Values computed with WolframAlpha
@@ -50,6 +113,13 @@ using Test
         @test logccdf(LogLogistic(1, 1), 1) ≈ -log(2)
         @test logccdf(LogLogistic(2, 2), 1) ≈ log(0.8)
         @test logccdf(LogLogistic(2, 2), 4) ≈ log(0.2)
+    end
+
+    @testset "entropy" begin
+        for α in (0.5, 1, 2, 3), β in (0.5, 1, 2, 3)
+            d = LogLogistic(α, β)
+            @test entropy(d) ≈ -Distributions.expectation(Base.Fix1(logpdf, d), d) rtol = 1e-6
+        end
     end
 
     @testset "Default tests" begin
