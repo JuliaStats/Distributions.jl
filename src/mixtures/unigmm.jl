@@ -26,9 +26,9 @@ probs(d::UnivariateGMM) = probs(d.prior)
 mean(d::UnivariateGMM) = dot(d.means, probs(d))
 
 function rand(rng::AbstractRNG, d::UnivariateGMM)
-    k = rand(rng, d.prior)
-    μ = d.means[k]
-    σ = d.stds[k]
+    koffset = rand(rng, d.prior) - 1
+    μ = d.means[begin+koffset]
+    σ = d.stds[begin+koffset]
     return muladd(randn(rng, float(Base.promote_typeof(μ, σ))), σ, μ)
 end
 
@@ -41,19 +41,17 @@ struct UnivariateGMMSampler{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Re
 end
 
 function rand(rng::AbstractRNG, s::UnivariateGMMSampler)
-    k = rand(rng, s.psampler)
-    μ = d.means[k]
-    σ = d.stds[k]
+    koffset = rand(rng, s.psampler) - 1
+    μ = d.means[begin+koffset]
+    σ = d.stds[begin+koffset]
     return muladd(randn(rng, float(Base.promote_typeof(μ, σ))), σ, μ)
 end
 function rand!(rng::AbstractRNG, s::UnivariateGMMSampler, x::AbstractArray{<:Real})
-    psampler = s.psampler
-    means = s.means
-    stds = s.stds
+    (; means, stds, psampler) = s
     randn!(rng, x)
     for i in eachindex(x)
-        k = rand(rng, psampler)
-        x[i] = muladd(x[i], stds[k], means[k])
+        koffset = rand(rng, psampler) - 1
+        x[i] = muladd(x[i], stds[begin+koffset], means[begin+koffset])
     end
     return x
 end

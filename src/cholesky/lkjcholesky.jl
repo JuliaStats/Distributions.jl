@@ -238,19 +238,9 @@ function _lkj_cholesky_onion_tri!(
     # We handle this separately, to increase performance and since `rand(Beta(Inf, Inf))` is not well defined.
     if η == Inf
         if uplo === 'L'
-            for j in 1:d
-                A[j, j] = 1
-                for i in (j+1):d
-                    A[i, j] = 0
-                end
-            end
+            copyto!(LowerTriangular(A), I)
         else
-            for j in 1:d
-                for i in 1:(j - 1)
-                    A[i, j] = 0
-                end
-                A[j, j] = 1
-            end
+            copyto!(UpperTriangular(A), I)
         end
         return A
     end

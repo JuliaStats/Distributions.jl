@@ -131,12 +131,6 @@ function rand(rng::AbstractRNG, d::JointOrderStatistics)
         x = rand(rng, d.dist, n)
         sort!(x)
     else
-        # use exponential generation method with inversion, where for gaps in the ranks, we
-        # use the fact that the sum Y of k IID variables xₘ ~ Exp(1) is Y ~ Gamma(k, 1).
-        # Lurie, D., and H. O. Hartley. "Machine-generation of order statistics for Monte
-        # Carlo computations." The American Statistician 26.1 (1972): 26-27.
-        # this is slow if length(d.ranks) is close to n and quantile for d.dist is expensive,
-        # but this branch is probably taken when length(d.ranks) is small or much smaller than n.
         xi = rand(rng, d.dist) # this is only used to obtain the type of samples from `d.dist`
         x = Vector{typeof(xi)}(undef, length(d.ranks))
         rand!(rng, d, x)

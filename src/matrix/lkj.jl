@@ -138,15 +138,7 @@ end
     η = d.η
     d = d.d
     if η == Inf
-        for j in 1:d
-            for i in 1:(j - 1)
-                R[i, j] = 0
-            end
-            R[j, j] = 1
-            for i in (j + 1):d
-                R[i, j] = 0
-            end
-        end
+        copyto!(R, I)
         return R
     end
 
