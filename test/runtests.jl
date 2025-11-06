@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "aqua",
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
     "univariate/discrete/dirac",
@@ -21,11 +22,13 @@ const tests = [
     "truncated/discrete_uniform",
     "censored",
     "univariate/continuous/normal",
+    "univariate/continuous/normalcanon",
     "univariate/continuous/laplace",
     "univariate/continuous/cauchy",
     "univariate/continuous/uniform",
     "univariate/continuous/lognormal",
     "multivariate/mvnormal",
+    "multivariate/mvlogitnormal",
     "multivariate/mvlognormal",
     "types", # extra file compared to /src
     "utils",
@@ -55,6 +58,7 @@ const tests = [
     "qq",
     "univariate/continuous/pgeneralizedgaussian",
     "product",
+    "namedtuple/productnamedtuple",
     "univariate/discrete/discretenonparametric",
     "univariate/continuous/chernoff",
     "univariate_bounds", # extra file compared to /src
@@ -70,10 +74,13 @@ const tests = [
     "univariate/continuous/exponential",
     "univariate/continuous/gamma",
     "univariate/continuous/gumbel",
+    "univariate/continuous/lindley",
     "univariate/continuous/logistic",
+    "univariate/continuous/johnsonsu",
     "univariate/continuous/noncentralchisq",
     "univariate/continuous/weibull",
     "pdfnorm",
+    "univariate/continuous/pareto",
     "univariate/continuous/rician",
     "functionals",
     "density_interface",
@@ -81,8 +88,13 @@ const tests = [
     "univariate/continuous/skewedexponentialpower",
     "univariate/discrete/discreteuniform",
     "univariate/continuous/tdist",
+    "univariate/orderstatistic",
+    "multivariate/jointorderstatistics",
     "multivariate/product",
     "eachvariate",
+    "univariate/continuous/triangular",
+    "statsapi",
+    "univariate/continuous/inversegaussian",
 
     ### missing files compared to /src:
     # "common",
@@ -124,20 +136,16 @@ const tests = [
     # "univariate/continuous/generalizedextremevalue",
     # "univariate/continuous/generalizedpareto",
     # "univariate/continuous/inversegamma",
-    # "univariate/continuous/inversegaussian",
     # "univariate/continuous/ksdist",
     # "univariate/continuous/ksonesided",
     # "univariate/continuous/levy",
     # "univariate/continuous/noncentralbeta",
     # "univariate/continuous/noncentralf",
-    # "univariate/continuous/normalcanon",
     # "univariate/continuous/normalinversegaussian",
-    # "univariate/continuous/pareto",
     # "univariate/continuous/rayleigh",
     # "univariate/continuous/studentizedrange",
     # "univariate/continuous/symtriangular",
     # "univariate/continuous/tdist",
-    # "univariate/continuous/triangular",
     # "univariate/continuous/triweight",
     # "univariate/continuous/noncentralf",
     # "univariate/discrete/geometric",
@@ -155,7 +163,7 @@ printstyled("Running tests:\n", color=:blue)
 
 Random.seed!(345679)
 
-# to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
+# to reduce redundancy, we might break this file down into separate `$t * "_utils.jl"` files
 include("testutils.jl")
 
 @testset "Distributions" begin
@@ -163,8 +171,3 @@ include("testutils.jl")
         include("$t.jl")
     end
 end
-
-# print method ambiguities
-println("Potentially stale exports: ")
-display(Test.detect_ambiguities(Distributions))
-println()

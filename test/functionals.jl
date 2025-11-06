@@ -4,7 +4,7 @@ struct CholeskyMvNormal{M,T} <: Distributions.AbstractMvNormal
     L::T
 end
 
-# Constructor for diagonal covariance matrices used in the tests belows
+# Constructor for diagonal covariance matrices used in the tests below
 function CholeskyMvNormal(m::Vector, Σ::Diagonal)
     L = Diagonal(map(sqrt, Σ.diag))
     return CholeskyMvNormal{typeof(m),typeof(L)}(m, L)

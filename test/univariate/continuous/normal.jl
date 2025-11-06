@@ -1,4 +1,4 @@
-using Test, Distributions, ForwardDiff
+using Test, Distributions, StatsFuns, ForwardDiff, OffsetArrays
 
 isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 
@@ -17,9 +17,19 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test -Inf === logpdf(Normal(), Inf)
     @test iszero(logcdf(Normal(0, 0), 0))
     @test iszero(logcdf(Normal(), Inf))
-    @test logdiffcdf(Normal(), Float32(5), Float32(3)) ≈ -6.607938594596893 rtol=1e-12
-    @test logdiffcdf(Normal(), Float32(5), Float64(3)) ≈ -6.607938594596893 rtol=1e-12
-    @test logdiffcdf(Normal(), Float64(5), Float64(3)) ≈ -6.607938594596893 rtol=1e-12
+    @test @inferred(logdiffcdf(Normal(), 5f0, 3f0)) ≈ -6.607938594596893 rtol=1e-12
+    @test @inferred(logdiffcdf(Normal(), 5f0, 3.0)) ≈ -6.607938594596893 rtol=1e-12
+    @test @inferred(logdiffcdf(Normal(), 5.0, 3.0)) ≈ -6.607938594596893 rtol=1e-12
+    @test_throws ArgumentError logdiffcdf(Normal(), 3, 5)
+
+    # Arguments in the tails
+    logdiffcdf_big(d::Normal, x::Real, y::Real) = logsubexp(logcdf(d, big(y)), logcdf(d, big(x)))
+    for d in (Normal(), Normal(2.1, 0.1)), (a, b) in ((15, 10), (115, 100), (1015, 1000))
+        for (x, y) in ((a, b), (-b, -a))
+            @test isfinite(@inferred(logdiffcdf(d, x, y)))
+            @test logdiffcdf(d, x, y) ≈ logdiffcdf_big(d, x, y)
+        end
+    end
     let d = Normal(Float64(0), Float64(1)), x = Float64(-60), y = Float64(-60.001)
         float_res = logdiffcdf(d, x, y)
         big_x = BigFloat(x; precision=100)
@@ -193,3 +203,23 @@ end
 # affine transformations
 test_affine_transformations(Normal, randn(), randn()^2)
 test_affine_transformations(NormalCanon, randn()^2, randn()^2)
+
+@testset "Normal suffstats and OffsetArrays" begin
+    a = rand(Normal(), 11)
+    wa = 1.0:11.0
+
+    resulta = @inferred(suffstats(Normal, a))
+
+    resultwa = @inferred(suffstats(Normal, a, wa))
+
+    b = OffsetArray(a, -5:5)
+    wb = OffsetArray(wa, -5:5)
+
+    resultb = @inferred(suffstats(Normal, b))
+    @test resulta == resultb
+
+    resultwb = @inferred(suffstats(Normal, b, wb))
+    @test resultwa == resultwb
+
+    @test_throws DimensionMismatch suffstats(Normal, b, wa)
+end

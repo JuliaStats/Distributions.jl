@@ -59,7 +59,6 @@ isplatykurtic(::UnivariateDistribution)
 isleptokurtic(::UnivariateDistribution)
 ismesokurtic(::UnivariateDistribution)
 entropy(::UnivariateDistribution)
-entropy(::UnivariateDistribution, ::Bool)
 entropy(::UnivariateDistribution, ::Real)
 mgf(::UnivariateDistribution, ::Any)
 cgf(::UnivariateDistribution, ::Any)
@@ -73,6 +72,7 @@ pdfsquaredL2norm
 insupport(::UnivariateDistribution, x::Any)
 pdf(::UnivariateDistribution, ::Real)
 logpdf(::UnivariateDistribution, ::Real)
+gradlogpdf(::Distribution, ::Any)
 loglikelihood(::UnivariateDistribution, ::AbstractArray)
 cdf(::UnivariateDistribution, ::Real)
 logcdf(::UnivariateDistribution, ::Real)
@@ -273,6 +273,13 @@ plotdensity((0, 5), InverseGaussian, (1, 1)) # hide
 ```
 
 ```@docs
+JohnsonSU
+```
+```@example plotdensity
+plotdensity((-20, 20), JohnsonSU, (0.0, 1.0, 0.0, 1.0)) # hide
+```
+
+```@docs
 Kolmogorov
 ```
 ```@example plotdensity
@@ -282,6 +289,13 @@ plotdensity((0, 2), Kolmogorov) # hide
 ```@docs
 KSDist
 KSOneSided
+```
+
+```@docs
+Kumaraswamy
+```
+```@example plotdensity
+plotdensity((0, 1), Kumaraswamy, (2, 5)) # hide
 ```
 
 ```@docs
@@ -296,6 +310,13 @@ Levy
 ```
 ```@example plotdensity
 plotdensity((0, 20), Levy, (0, 1)) # hide
+```
+
+```@docs
+Lindley
+```
+```@example plotdensity
+plotdensity((0, 20), Lindley, (1.5,)) # hide
 ```
 
 ```@docs

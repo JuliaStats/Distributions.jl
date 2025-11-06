@@ -52,6 +52,15 @@ ncategories(d::Categorical) = support(d).stop
 params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
 partype(::Categorical{T}) where {T<:Real} = T
 
+function Base.isapprox(c1::Categorical, c2::Categorical; kwargs...)
+    # support are of type Base.OneTo, so comparing the cardinality of the support
+    # is sufficient
+    # we explicitly redefine the method for `DiscreteNonParametric` which also compares
+    # the support since `isapprox(::OneTo, ::OneTo)` is broken on Julia 1.6 (issue #1675)
+    return length(support(c1)) == length(support(c2)) &&
+        isapprox(probs(c1), probs(c2); kwargs...)
+end
+
 ### Statistics
 
 function median(d::Categorical{T}) where {T<:Real}
@@ -61,7 +70,7 @@ function median(d::Categorical{T}) where {T<:Real}
     i = 0
     while cp < 1/2 && i <= k
         i += 1
-        @inbounds cp += p[i]
+        cp += p[i]
     end
     i
 end
@@ -80,7 +89,7 @@ function pdf(d::Categorical, x::Real)
     return insupport(d, x) ? ps[round(Int, x)] : zero(eltype(ps))
 end
 
-function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
+function _pdf!(r::AbstractArray{<:Real}, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
     vfirst = round(Int, first(rgn))
     vlast = round(Int, last(rgn))
     vl = max(vfirst, 1)
@@ -118,7 +127,7 @@ end
 
 function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}) where T<:Integer
     for i = 1 : length(x)
-        @inbounds xi = x[i]
+        xi = x[i]
         h[xi] += 1.   # cannot use @inbounds, as no guarantee that x[i] is in bound
     end
     h
@@ -130,8 +139,8 @@ function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::Abs
         throw(DimensionMismatch("Inconsistent array lengths."))
     end
     for i = 1 : n
-        @inbounds xi = x[i]
-        @inbounds wi = w[i]
+        xi = x[i]
+        wi = w[i]
         h[xi] += wi   # cannot use @inbounds, as no guarantee that x[i] is in bound
     end
     h

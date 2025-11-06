@@ -27,7 +27,7 @@ abstract type AbstractMvLogNormal <: ContinuousMultivariateDistribution end
 
 function insupport(::Type{D},x::AbstractVector{T}) where {T<:Real,D<:AbstractMvLogNormal}
     for i=1:length(x)
-      @inbounds 0.0<x[i]<Inf ? continue : (return false)
+      0.0<x[i]<Inf ? continue : (return false)
     end
     true
 end
@@ -37,7 +37,7 @@ assertinsupport(::Type{D},m::AbstractVector) where {D<:AbstractMvLogNormal} = @a
 ###Internal functions to calculate scale and location for a desired average and covariance
 function _location!(::Type{D},::Type{Val{:meancov}},mn::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
     @simd for i=1:length(mn)
-      @inbounds μ[i] = log(mn[i]/sqrt(1+S[i,i]/mn[i]/mn[i]))
+      μ[i] = log(mn[i]/sqrt(1+S[i,i]/mn[i]/mn[i]))
     end
     μ
 end
@@ -45,7 +45,7 @@ end
 function _scale!(::Type{D},::Type{Val{:meancov}},mn::AbstractVector,S::AbstractMatrix,Σ::AbstractMatrix) where D<:AbstractMvLogNormal
     for j=1:length(mn)
       @simd for i=j:length(mn)
-        @inbounds Σ[i,j] = Σ[j,i] = log(1 + S[j,i]/mn[i]/mn[j])
+        Σ[i,j] = Σ[j,i] = log(1 + S[j,i]/mn[i]/mn[j])
       end
     end
     Σ
@@ -53,21 +53,21 @@ end
 
 function _location!(::Type{D},::Type{Val{:mean}},mn::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
     @simd for i=1:length(mn)
-      @inbounds μ[i] = log(mn[i]) - S[i,i]/2
+      μ[i] = log(mn[i]) - S[i,i]/2
     end
     μ
 end
 
 function _location!(::Type{D},::Type{Val{:median}},md::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
     @simd for i=1:length(md)
-      @inbounds μ[i] = log(md[i])
+      μ[i] = log(md[i])
     end
     μ
 end
 
 function _location!(::Type{D},::Type{Val{:mode}},mo::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
     @simd for i=1:length(mo)
-      @inbounds μ[i] = log(mo[i]) + S[i,i]
+      μ[i] = log(mo[i]) + S[i,i]
     end
     μ
 end

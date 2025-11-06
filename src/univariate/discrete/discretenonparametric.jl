@@ -63,13 +63,13 @@ Get the vector of probabilities associated with the support of `d`.
 """
 probs(d::DiscreteNonParametric)  = d.p
 
-==(c1::D, c2::D) where D<:DiscreteNonParametric =
-    (support(c1) == support(c2) || all(support(c1) .== support(c2))) &&
-    (probs(c1) == probs(c2) || all(probs(c1) .== probs(c2)))
-
-Base.isapprox(c1::D, c2::D) where D<:DiscreteNonParametric =
-    (support(c1) ≈ support(c2) || all(support(c1) .≈ support(c2))) &&
-    (probs(c1) ≈ probs(c2) || all(probs(c1) .≈ probs(c2)))
+function Base.isapprox(c1::DiscreteNonParametric, c2::DiscreteNonParametric; kwargs...)
+    support_c1 = support(c1)
+    support_c2 = support(c2)
+    return length(support_c1) == length(support_c2) &&
+        isapprox(support_c1, support_c2; kwargs...) &&
+        isapprox(probs(c1), probs(c2); kwargs...)
+end
 
 # Sampling
 
@@ -81,7 +81,7 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric)
     cp = p[1]
     i = 1
     while cp <= draw && i < n
-        @inbounds cp += p[i +=1]
+        cp += p[i +=1]
     end
     return x[i]
 end
@@ -122,11 +122,11 @@ function cdf(d::DiscreteNonParametric, x::Real)
     stop_idx = searchsortedlast(support(d), x)
     s = zero(P)
     if stop_idx < div(n, 2)
-        @inbounds for i in 1:stop_idx
+        for i in 1:stop_idx
             s += ps[i]
         end
     else
-        @inbounds for i in (stop_idx + 1):n
+        for i in (stop_idx + 1):n
             s += ps[i]
         end
         s = 1 - s
@@ -148,12 +148,12 @@ function ccdf(d::DiscreteNonParametric, x::Real)
     stop_idx = searchsortedlast(support(d), x)
     s = zero(P)
     if stop_idx < div(n, 2)
-        @inbounds for i in 1:stop_idx
+        for i in 1:stop_idx
             s += ps[i]
         end
         s = 1 - s
     else
-        @inbounds for i in (stop_idx + 1):n
+        for i in (stop_idx + 1):n
             s += ps[i]
         end
     end
@@ -170,7 +170,7 @@ function quantile(d::DiscreteNonParametric, q::Real)
     cp = p[1]
     while cp < q && i < k #Note: is i < k necessary?
         i += 1
-        @inbounds cp += p[i]
+        cp += p[i]
     end
     x[i]
 end
@@ -256,7 +256,7 @@ function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {
     ps[1] += 1.
 
     xprev = x[1]
-    @inbounds for i = 2:N
+    for i = 2:N
         xi = x[i]
         if xi != xprev
             n += 1
@@ -292,7 +292,7 @@ function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T},
     ps[1] += w[1]
 
     xprev = x[1]
-    @inbounds for i = 2:N
+    for i = 2:N
         xi = x[i]
         wi = w[i]
         if xi != xprev

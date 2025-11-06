@@ -1,19 +1,21 @@
 # finite mixture models
 
 """
+    AbstractMixtureModel <: Distribution
 
-  All subtypes of `AbstractMixtureModel` should implement the following methods:
+All subtypes of `AbstractMixtureModel` should implement the following methods:
 
-  - ncomponents(d): the number of components
+  - `ncomponents(d)`: the number of components
 
-  - component(d, k):  return the k-th component
+  - `component(d, k)`:  return the k-th component
 
-  - probs(d):       return a vector of prior probabilities over components.
+  - `probs(d)`:       return a vector of prior probabilities over components.
 """
 abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
 
 """
-MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+    MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+
 A mixture of distributions, parametrized on:
 * `VF,VS` variate and support
 * `C` distribution family of the mixture
@@ -184,7 +186,7 @@ function mean(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            BLAS.axpy!(pi, mean(c), m)
+            axpy!(pi, mean(c), m)
         end
     end
     return m
@@ -193,7 +195,7 @@ end
 """
     var(d::UnivariateMixture)
 
-Compute the overall variance (only for ``UnivariateMixture``).
+Compute the overall variance (only for `UnivariateMixture`).
 """
 function var(d::UnivariateMixture)
     K = ncomponents(d)
@@ -234,19 +236,19 @@ function cov(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            BLAS.axpy!(pi, mean(c), m)
-            BLAS.axpy!(pi, cov(c), V)
+            axpy!(pi, mean(c), m)
+            axpy!(pi, cov(c), V)
         end
     end
     for i = 1:K
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            # todo: use more in-place operations
-            md = mean(c) - m
-            BLAS.axpy!(pi, md*md', V)
+            md .= mean(c) .- m
+            BLAS.syr!('U', Float64(pi), md, V)
         end
     end
+    LinearAlgebra.copytri!(V, 'U')
     return V
 end
 
@@ -293,15 +295,15 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     p = probs(d)
     fill!(r, 0.0)
     t = Array{eltype(p)}(undef, size(r))
-    @inbounds for i in eachindex(p)
+    for i in eachindex(p)
         pi = p[i]
         if pi > 0.0
             if d isa UnivariateMixture
-                t .= pdf.(component(d, i), x)
+                t .= Base.Fix1(pdf, component(d, i)).(x)
             else
                 pdf!(t, component(d, i), x)
             end
-            BLAS.axpy!(pi, t, r)
+            axpy!(pi, t, r)
         end
     end
     return r
@@ -319,14 +321,14 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     n = length(r)
     Lp = Matrix{eltype(p)}(undef, n, K)
     m = fill(-Inf, n)
-    @inbounds for i in eachindex(p)
+    for i in eachindex(p)
         pi = p[i]
         if pi > 0.0
             lpri = log(pi)
             lp_i = view(Lp, :, i)
             # compute logpdf in batch and store
             if d isa UnivariateMixture
-                lp_i .= logpdf.(component(d, i), x)
+                lp_i .= Base.Fix1(logpdf, component(d, i)).(x)
             else
                 logpdf!(lp_i, component(d, i), x)
             end
@@ -344,7 +346,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     end
 
     fill!(r, 0.0)
-    @inbounds for i = 1:K
+    for i = 1:K
         if p[i] > 0.0
             lp_i = view(Lp, :, i)
             for j = 1:n
@@ -353,7 +355,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
         end
     end
 
-    @inbounds for j = 1:n
+    for j = 1:n
         r[j] = log(r[j]) + m[j]
     end
     return r
@@ -362,14 +364,14 @@ end
 pdf(d::UnivariateMixture, x::Real) = _mixpdf1(d, x)
 logpdf(d::UnivariateMixture, x::Real) = _mixlogpdf1(d, x)
 
-_pdf!(r::AbstractArray, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
-_pdf!(r::AbstractArray, d::UnivariateMixture, x::AbstractArray) = _mixpdf!(r, d, x)
-_logpdf!(r::AbstractArray, d::UnivariateMixture, x::AbstractArray) = _mixlogpdf!(r, d, x)
+_pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
+_pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixpdf!(r, d, x)
+_logpdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixlogpdf!(r, d, x)
 
-_pdf(d::MultivariateMixture, x::AbstractVector) = _mixpdf1(d, x)
-_logpdf(d::MultivariateMixture, x::AbstractVector) = _mixlogpdf1(d, x)
-_pdf!(r::AbstractArray, d::MultivariateMixture, x::AbstractMatrix) = _mixpdf!(r, d, x)
-_logpdf!(r::AbstractArray, d::MultivariateMixture, x::AbstractMatrix) = _mixlogpdf!(r, d, x)
+_pdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixpdf1(d, x)
+_logpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixlogpdf1(d, x)
+_pdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixpdf!(r, d, x)
+_logpdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixlogpdf!(r, d, x)
 
 
 ## component-wise pdf and logpdf
@@ -398,7 +400,7 @@ function _cwise_pdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
         if d isa UnivariateMixture
-            view(r,:,i) .= pdf.(Ref(component(d, i)), X)
+            view(r,:,i) .= Base.Fix1(pdf, component(d, i)).(X)
         else
             pdf!(view(r,:,i),component(d, i), X)
         end
@@ -412,7 +414,7 @@ function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
         if d isa UnivariateMixture
-            view(r,:,i) .= logpdf.(Ref(component(d, i)), X)
+            view(r,:,i) .= Base.Fix1(logpdf, component(d, i)).(X)
         else
             logpdf!(view(r,:,i), component(d, i), X)
         end
@@ -477,9 +479,9 @@ rand(rng::AbstractRNG, d::MixtureModel{Univariate}) =
 
 # multivariate mixture sampler for a vector
 _rand!(rng::AbstractRNG, s::MixtureSampler{Multivariate}, x::AbstractVector{<:Real}) =
-    @inbounds rand!(rng, s.csamplers[rand(rng, s.psampler)], x)
+    rand!(rng, s.csamplers[rand(rng, s.psampler)], x)
 # if only a single sample is requested, no alias table is created
 _rand!(rng::AbstractRNG, d::MixtureModel{Multivariate}, x::AbstractVector{<:Real}) =
-    @inbounds rand!(rng, component(d, rand(rng, d.prior)), x)
+    rand!(rng, component(d, rand(rng, d.prior)), x)
 
 sampler(d::MixtureModel) = MixtureSampler(d)

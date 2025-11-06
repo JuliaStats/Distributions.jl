@@ -99,7 +99,10 @@ function cdf(d::InverseGaussian, x::Real)
     y = max(x, 0)
     u = sqrt(λ / y)
     v = y / μ
-    z = normcdf(u * (v - 1)) + exp(2λ / μ) * normcdf(-u * (v + 1))
+    # 2λ/μ and normlogcdf(-u*(v+1)) are similar magnitude, opp. sign
+    # truncating to [0, 1] as an additional precaution
+    # Ref https://github.com/JuliaStats/Distributions.jl/issues/1873
+    z = clamp(normcdf(u * (v - 1)) + exp(2λ / μ + normlogcdf(-u * (v + 1))), 0, 1)
 
     # otherwise `NaN` is returned for `+Inf`
     return isinf(x) && x > 0 ? one(z) : z
@@ -110,7 +113,10 @@ function ccdf(d::InverseGaussian, x::Real)
     y = max(x, 0)
     u = sqrt(λ / y)
     v = y / μ
-    z = normccdf(u * (v - 1)) - exp(2λ / μ) * normcdf(-u * (v + 1))
+    # 2λ/μ and normlogcdf(-u*(v+1)) are similar magnitude, opp. sign
+    # truncating to [0, 1] as an additional precaution
+    # Ref https://github.com/JuliaStats/Distributions.jl/issues/1873
+    z = clamp(normccdf(u * (v - 1)) - exp(2λ / μ + normlogcdf(-u * (v + 1))), 0, 1)
 
     # otherwise `NaN` is returned for `+Inf`
     return isinf(x) && x > 0 ? zero(z) : z
@@ -190,7 +196,7 @@ function suffstats(::Type{<:InverseGaussian}, x::AbstractVector{<:Real}, w::Abst
     sx = zero(T)
     sinvx = zero(T)
     sw = zero(T)
-    @inbounds @simd for i in eachindex(x)
+    @simd for i in eachindex(x)
         sx += w[i]*x[i]
         sinvx += w[i]/x[i]
         sw += w[i]

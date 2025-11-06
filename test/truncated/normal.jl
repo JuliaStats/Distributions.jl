@@ -28,6 +28,18 @@ rng = MersenneTwister(123)
     # https://github.com/JuliaStats/Distributions.jl/issues/624
     @test rand(truncated(Normal(+Inf, 1), 0, 1)) ≈ 1
     @test rand(truncated(Normal(-Inf, 1), 0, 1)) ≈ 0
+    # Type stability
+    for T in (Float32, Float64)
+        t = truncated(Normal(T(1.5), T(4.1)), 0, 1)
+        m = @inferred mode(t)
+        μ = @inferred mean(t)
+        σ = @inferred std(t)
+        @test m === T(1)
+        @test μ ≈ 0.50494725270783081889610661619986770485973643194141
+        @test μ isa T
+        @test σ ≈ 0.28836356398830993140576947440881738258157196701554
+        @test σ isa T
+    end
 end
 @testset "Truncated normal $trunc" begin
     trunc = truncated(Normal(0, 1), -2, 2)

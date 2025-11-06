@@ -95,11 +95,11 @@ function cov(d::Dirichlet)
         αj = α[j]
         αjc = αj * c
         for i in 1:(j-1)
-            @inbounds C[i,j] = C[j,i]
+            C[i,j] = C[j,i]
         end
-        @inbounds C[j,j] = (α0 - αj) * αjc
+        C[j,j] = (α0 - αj) * αjc
         for i in (j+1):k
-            @inbounds C[i,j] = - α[i] * αjc
+            C[i,j] = - α[i] * αjc
         end
     end
 
@@ -158,7 +158,7 @@ function _rand!(rng::AbstractRNG,
                 d::Union{Dirichlet,DirichletCanon},
                 x::AbstractVector{<:Real})
     for (i, αi) in zip(eachindex(x), d.alpha)
-        @inbounds x[i] = rand(rng, Gamma(αi))
+        x[i] = rand(rng, Gamma(αi))
     end
     lmul!(inv(sum(x)), x) # this returns x
 end
@@ -193,7 +193,7 @@ function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64})
     slogp = zeros(K)
     for i = 1:n
         for k = 1:K
-            @inbounds slogp[k] += log(P[k,i])
+            slogp[k] += log(P[k,i])
         end
     end
     DirichletStats(slogp, n)
@@ -211,10 +211,10 @@ function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
     slogp = zeros(K)
 
     for i = 1:n
-        @inbounds wi = w[i]
+        wi = w[i]
         tw += wi
         for k = 1:K
-            @inbounds slogp[k] += log(P[k,i]) * wi
+            slogp[k] += log(P[k,i]) * wi
         end
     end
     DirichletStats(slogp, tw)
@@ -229,8 +229,8 @@ function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
 
     α0 = 0.
     for k = 1:K
-        @inbounds μk = μ[k]
-        @inbounds γk = γ[k]
+        μk = μ[k]
+        γk = γ[k]
         ak = (μk - γk) / (γk - μk * μk)
         α0 += ak
     end
@@ -262,12 +262,12 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64
     tw = 0.0
 
     for i in 1:n
-        @inbounds wi = w[i]
+        wi = w[i]
         tw += wi
         for k in 1:K
             pk = P[k, i]
-            @inbounds μ[k] += pk * wi
-            @inbounds γ[k] += pk * pk * wi
+            μ[k] += pk * wi
+            γ[k] += pk * pk * wi
         end
     end
 
@@ -310,12 +310,12 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
         iqs = 0.
 
         for k = 1:K
-            @inbounds ak = α[k]
-            @inbounds g[k] = gk = digam_α0 - digamma(ak) + elogp[k]
-            @inbounds iq[k] = - 1.0 / trigamma(ak)
+            ak = α[k]
+            g[k] = gk = digam_α0 - digamma(ak) + elogp[k]
+            iq[k] = - 1.0 / trigamma(ak)
 
-            @inbounds b += gk * iq[k]
-            @inbounds iqs += iq[k]
+            b += gk * iq[k]
+            iqs += iq[k]
 
             agk = abs(gk)
             if agk > gnorm
@@ -327,8 +327,8 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
         # update α
 
         for k = 1:K
-            @inbounds α[k] -= (g[k] - b) * iq[k]
-            @inbounds if α[k] < 1.0e-12
+            α[k] -= (g[k] - b) * iq[k]
+            if α[k] < 1.0e-12
                 α[k] = 1.0e-12
             end
         end
@@ -374,63 +374,4 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
     α = isempty(init) ? dirichlet_mle_init(P, w) : init
     elogp = mean_logp(suffstats(Dirichlet, P, w))
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol, debug=debug)
-end
-
-## Differentiation
-function ChainRulesCore.frule((_, Δalpha)::Tuple{Any,Any}, ::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
-    d = DT(alpha; check_args=check_args)
-    ∂alpha0 = sum(Δalpha)
-    digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
-    ∂lmnB = sum(Broadcast.instantiate(Broadcast.broadcasted(Δalpha, alpha) do Δalphai, alphai
-        Δalphai * (SpecialFunctions.digamma(alphai) - digamma_alpha0)
-    end))
-    Δd = ChainRulesCore.Tangent{typeof(d)}(; alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
-    return d, Δd
-end
-
-function ChainRulesCore.rrule(::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
-    d = DT(alpha; check_args=check_args)
-    digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
-    function Dirichlet_pullback(_Δd)
-        Δd = ChainRulesCore.unthunk(_Δd)
-        Δalpha = Δd.alpha .+ Δd.alpha0 .+ Δd.lmnB .* (SpecialFunctions.digamma.(alpha) .- digamma_alpha0)
-        return ChainRulesCore.NoTangent(), Δalpha
-    end
-    return d, Dirichlet_pullback
-end
-
-function ChainRulesCore.frule((_, Δd, Δx)::Tuple{Any,Any,Any}, ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
-    Ω = _logpdf(d, x)
-    ∂alpha = sum(Broadcast.instantiate(Broadcast.broadcasted(Δd.alpha, Δx, d.alpha, x) do Δalphai, Δxi, alphai, xi
-        xlogy(Δalphai, xi) + (alphai - 1) * Δxi / xi
-    end))
-    ∂lmnB = -Δd.lmnB
-    ΔΩ = ∂alpha + ∂lmnB
-    if !isfinite(Ω)
-        ΔΩ = oftype(ΔΩ, NaN)
-    end
-    return Ω, ΔΩ
-end
-
-function ChainRulesCore.rrule(::typeof(_logpdf), d::T, x::AbstractVector{<:Real}) where {T<:Dirichlet}
-    Ω = _logpdf(d, x)
-    isfinite_Ω = isfinite(Ω)
-    alpha = d.alpha
-    function _logpdf_Dirichlet_pullback(_ΔΩ)
-        ΔΩ = ChainRulesCore.unthunk(_ΔΩ)
-        ∂alpha = _logpdf_Dirichlet_∂alphai.(x, ΔΩ, isfinite_Ω)
-        ∂lmnB = isfinite_Ω ? -float(ΔΩ) : oftype(float(ΔΩ), NaN)
-        Δd = ChainRulesCore.Tangent{T}(; alpha=∂alpha, lmnB=∂lmnB)
-        Δx = _logpdf_Dirichlet_Δxi.(ΔΩ, alpha, x, isfinite_Ω)
-        return ChainRulesCore.NoTangent(), Δd, Δx
-    end
-    return Ω, _logpdf_Dirichlet_pullback
-end
-function _logpdf_Dirichlet_∂alphai(xi, ΔΩi, isfinite::Bool)
-    ∂alphai = xlogy.(ΔΩi, xi)
-    return isfinite ? ∂alphai : oftype(∂alphai, NaN)
-end
-function _logpdf_Dirichlet_Δxi(ΔΩi, alphai, xi, isfinite::Bool)
-    Δxi = ΔΩi * (alphai - 1) / xi
-    return isfinite ? Δxi : oftype(Δxi, NaN)
 end

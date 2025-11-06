@@ -23,6 +23,7 @@ using Distributions: Product
     @test eltype(d_product) === eltype(ds[1])
     @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf.(ds, x))
     @test mean(d_product) == mean.(ds)
+    @test std(d_product) == std.(ds)
     @test var(d_product) == var.(ds)
     @test cov(d_product) == Diagonal(var.(ds))
     @test entropy(d_product) ≈ sum(entropy.(ds))
@@ -46,6 +47,7 @@ end
     @test eltype(d_product) === eltype(ds[1])
     @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf.(ds, x))
     @test mean(d_product) == mean.(ds)
+    @test std(d_product) == std.(ds)
     @test var(d_product) == var.(ds)
     @test cov(d_product) == Diagonal(var.(ds))
     @test entropy(d_product) == sum(entropy.(ds))
@@ -67,8 +69,7 @@ end
 
     for a in ([0, 1], [-0.5, 0.5])
         # Construct independent distributions and `Product` distribution from these.
-        support = fill(a, N)
-        ds = DiscreteNonParametric.(support, Ref([0.5, 0.5]))
+        ds = [DiscreteNonParametric(copy(a), [0.5, 0.5]) for _ in 1:N]
         x = rand.(ds)
         d_product = product_distribution(ds)
         @test d_product isa Product
@@ -77,6 +78,7 @@ end
         @test eltype(d_product) === eltype(ds[1])
         @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf.(ds, x))
         @test mean(d_product) == mean.(ds)
+        @test std(d_product) == std.(ds)
         @test var(d_product) == var.(ds)
         @test cov(d_product) == Diagonal(var.(ds))
         @test entropy(d_product) == sum(entropy.(ds))

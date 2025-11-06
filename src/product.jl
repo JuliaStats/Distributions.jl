@@ -12,7 +12,9 @@ struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVar
     size::Dims{N}
 
     function ProductDistribution{N,M,D}(dists::D) where {N,M,D}
-        isempty(dists) && error("product distribution must consist of at least one distribution")
+        if isempty(dists)
+            throw(ArgumentError("a product distribution must consist of at least one distribution"))
+        end
         return new{N,M,D,_product_valuesupport(dists),_product_eltype(dists)}(
             dists,
             _product_size(dists),
@@ -20,11 +22,11 @@ struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVar
     end
 end
 
-function ProductDistribution(dists::AbstractArray{<:Distribution{ArrayLikeVariate{M}},N}) where {M,N}
+function ProductDistribution(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}},N}) where {M,N}
     return ProductDistribution{M + N,M,typeof(dists)}(dists)
 end
 
-function ProductDistribution(dists::NTuple{N,Distribution{ArrayLikeVariate{M}}}) where {M,N}
+function ProductDistribution(dists::Tuple{Distribution{<:ArrayLikeVariate{M}},Vararg{Distribution{<:ArrayLikeVariate{M}}}}) where {M}
     return ProductDistribution{M + 1,M,typeof(dists)}(dists)
 end
 
@@ -54,10 +56,10 @@ function _product_size(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}
     size_dists = size(dists)
     return ntuple(i -> i <= M ? size_d[i] : size_dists[i-M], Val(M + N))
 end
-function _product_size(dists::NTuple{N,Distribution{<:ArrayLikeVariate{M}}}) where {M,N}
+function _product_size(dists::Tuple{Distribution{<:ArrayLikeVariate{M}},Vararg{Distribution{<:ArrayLikeVariate{M}}, N}}) where {M,N}
     size_d = size(first(dists))
     all(size(d) == size_d for d in dists) || error("all distributions must be of the same size")
-    return ntuple(i -> i <= M ? size_d[i] : N, Val(M + 1))
+    return ntuple(i -> i <= M ? size_d[i] : N + 1, Val(M + 1))
 end
 
 ## aliases
@@ -81,6 +83,8 @@ cov(d::ProductDistribution) = Diagonal(vec(var(d)))
 ## For product distributions of univariate distributions
 mean(d::ArrayOfUnivariateDistribution) = map(mean, d.dists)
 mean(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(mean, d.dists))
+std(d::ArrayOfUnivariateDistribution) = map(std, d.dists)
+std(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(std, d.dists))
 var(d::ArrayOfUnivariateDistribution) = map(var, d.dists)
 var(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(var, d.dists))
 
@@ -112,7 +116,7 @@ function _rand!(
     d::ArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
 ) where {N}
-    @inbounds for (i, di) in zip(eachindex(x), d.dists)
+    for (i, di) in zip(eachindex(x), d.dists)
         x[i] = rand(rng, di)
     end
     return x
@@ -137,7 +141,7 @@ function _rand!(
     d::FillArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
 ) where {N}
-    return @inbounds rand!(rng, sampler(first(d.dists)), x)
+    return rand!(rng, sampler(first(d.dists)), x)
 end
 
 # more efficient implementation of `_logpdf` for `Fill` array of univariate distributions
@@ -151,7 +155,7 @@ _logpdf(d::FillArrayOfUnivariateDistribution{2}, x::AbstractMatrix{<:Real}) = __
 function __logpdf(
     d::FillArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}
 ) where {N}
-    return @inbounds loglikelihood(first(d.dists), x)
+    return loglikelihood(first(d.dists), x)
 end
 
 # `_rand! for arrays of distributions
@@ -160,14 +164,14 @@ function _rand!(
     d::ProductDistribution{N,M},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
-    @inbounds for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
+    for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
         rand!(rng, di, Ai)
     end
     return A
 end
 
 # `_logpdf` for arrays of distributions
-# we have to fix a method ambiguity
+# we have to fix some method ambiguities
 _logpdf(d::ProductDistribution{N}, x::AbstractArray{<:Real,N}) where {N} = __logpdf(d, x)
 _logpdf(d::ProductDistribution{2}, x::AbstractMatrix{<:Real}) = __logpdf(d, x)
 function __logpdf(
@@ -176,7 +180,7 @@ function __logpdf(
 ) where {N,M}
     # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
     # to compute `sum(logpdf.(d.dists, eachvariate))`
-    @inbounds broadcasted = Broadcast.broadcasted(
+    broadcasted = Broadcast.broadcasted(
         logpdf, d.dists, eachvariate(x, ArrayLikeVariate{M}),
     )
     return sum(Broadcast.instantiate(broadcasted))
@@ -188,7 +192,7 @@ function _rand!(
     d::ProductDistribution{N,M,<:Fill},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
-    @inbounds rand!(rng, sampler(first(d.dists)), A)
+    rand!(rng, sampler(first(d.dists)), A)
     return A
 end
 
@@ -210,7 +214,7 @@ function __logpdf(
     d::ProductDistribution{N,M,<:Fill},
     x::AbstractArray{<:Real,N},
 ) where {N,M}
-    return @inbounds loglikelihood(first(d.dists), x)
+    return loglikelihood(first(d.dists), x)
 end
 
 """

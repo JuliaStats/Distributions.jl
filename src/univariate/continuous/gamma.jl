@@ -105,7 +105,6 @@ function rand(rng::AbstractRNG, d::Gamma)
         # TODO: shape(d) = 0.5 : use scaled chisq
         return rand(rng, GammaIPSampler(d))
     elseif shape(d) == 1.0
-        θ = 
         return rand(rng, Exponential{partype(d)}(scale(d)))
     else
         return rand(rng, GammaMTSampler(d))
@@ -152,9 +151,9 @@ function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{Float6
     sx = zero(T)
     slogx = zero(T)
     tw = zero(T)
-    for i = 1:n
-        @inbounds xi = x[i]
-        @inbounds wi = w[i]
+    for i in eachindex(x, w)
+        xi = x[i]
+        wi = w[i]
         sx += wi * xi
         slogx += wi * log(xi)
         tw += wi

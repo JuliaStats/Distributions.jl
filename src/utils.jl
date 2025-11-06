@@ -90,14 +90,20 @@ function check_args(f::F, check::Bool) where {F}
     nothing
 end
 
-ChainRulesCore.@non_differentiable check_args(::Any, ::Bool)
-
 ##### Utility functions
 
 isunitvec(v::AbstractVector) = (norm(v) - 1.0) < 1.0e-12
 
 isprobvec(p::AbstractVector{<:Real}) =
     all(x -> x ≥ zero(x), p) && isapprox(sum(p), one(eltype(p)))
+
+sqrt!!(x::AbstractVector{<:Real}) = map(sqrt, x)
+function sqrt!!(x::Vector{<:Real})
+    for i in eachindex(x)
+        x[i] = sqrt(x[i])
+    end
+    return x
+end
 
 # get a type wide enough to represent all a distributions's parameters
 # (if the distribution is parametric)

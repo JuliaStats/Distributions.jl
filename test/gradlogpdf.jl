@@ -9,7 +9,7 @@ using Test
 @test isapprox(gradlogpdf(Chisq(7.0), 12.0)       , -0.29166666666666663, atol=1.0e-8)
 @test isapprox(gradlogpdf(Exponential(2.0), 7.0)  , -0.5                , atol=1.0e-8)
 @test isapprox(gradlogpdf(Gamma(9.0, 0.5), 11.0)  , -1.2727272727272727 , atol=1.0e-8)
-@test isapprox(gradlogpdf(Gumbel(3.5, 1.0), 4.0)  , -1.6065306597126334 , atol=1.0e-8)
+@test isapprox(gradlogpdf(Gumbel(3.5, 1.0), 4.0)  , -0.3934693402873666 , atol=1.0e-8)
 @test isapprox(gradlogpdf(Laplace(7.0), 34.0)     , -1.0                , atol=1.0e-8)
 @test isapprox(gradlogpdf(Logistic(-6.0), 1.0)    , -0.9981778976111987 , atol=1.0e-8)
 @test isapprox(gradlogpdf(LogNormal(5.5), 2.0)    ,  1.9034264097200273 , atol=1.0e-8)

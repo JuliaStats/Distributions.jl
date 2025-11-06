@@ -123,9 +123,9 @@ function suffstats(::Type{<:Poisson}, x::AbstractArray{T}, w::AbstractArray{Floa
     n == length(w) || throw(DimensionMismatch("Inconsistent array lengths."))
     sx = 0.
     tw = 0.
-    for i = 1 : n
-        @inbounds wi = w[i]
-        @inbounds sx += x[i] * wi
+    for i in eachindex(x, w)
+        wi = w[i]
+        sx += x[i] * wi
         tw += wi
     end
     PoissonStats(sx, tw)

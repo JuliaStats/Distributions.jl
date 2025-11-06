@@ -34,6 +34,7 @@ Semicircle(r::Integer; check_args::Bool=true) = Semicircle(float(r); check_args=
 @distr_support Semicircle -d.r +d.r
 
 params(d::Semicircle) = (d.r,)
+partype(::Semicircle{T}) where {T<:Real} = T
 
 mean(d::Semicircle) = zero(d.r)
 var(d::Semicircle) = d.r^2 / 4
@@ -74,7 +75,7 @@ end
 
 function rand(rng::AbstractRNG, d::Semicircle)
     # Idea:
-    # sample polar coodinates r,θ 
+    # sample polar coordinates r,θ
     # of point uniformly distributed on radius d.r half disk
     # project onto x axis
     θ = rand(rng) # multiple of π

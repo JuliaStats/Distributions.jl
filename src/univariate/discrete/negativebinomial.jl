@@ -25,8 +25,6 @@ failprob(d)     # Get the failure rate, i.e. 1 - p
 External links:
 
 * [Negative binomial distribution on Wolfram](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html)
-Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
-
 """
 struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     r::T
@@ -139,42 +137,3 @@ function cgf(d::NegativeBinomial, t)
     r * cgf(Geometric{typeof(p)}(p), t)
 end
 cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t*im)
-
-# ChainRules definitions
-
-## Callable struct to fix type inference issues caused by captured values
-struct LogPDFNegativeBinomialPullback{D,T<:Real}
-    ∂r::T
-    ∂p::T
-end
-
-function (f::LogPDFNegativeBinomialPullback{D})(Δ) where {D}
-    Δr = Δ * f.∂r
-    Δp = Δ * f.∂p
-    Δd = ChainRulesCore.Tangent{D}(; r=Δr, p=Δp)
-    return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.NoTangent()
-end
-
-function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
-    # Compute log probability (as in the definition of `logpdf(d, k)` above)
-    r, p = params(d)
-    z = xlogy(r, p) + xlog1py(k, -p)
-    if iszero(k)
-        Ω = z
-        ∂r = oftype(z, log(p))
-        ∂p = oftype(z, r/p)
-    elseif insupport(d, k)
-        Ω = z - log(k + r) - logbeta(r, k + 1)
-        ∂r = oftype(z, log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1))
-        ∂p = oftype(z, r/p - k / (1 - p))
-    else
-        Ω = oftype(z, -Inf)
-        ∂r = oftype(z, NaN)
-        ∂p = oftype(z, NaN)
-    end
-
-    # Define pullback
-    logpdf_NegativeBinomial_pullback = LogPDFNegativeBinomialPullback{typeof(d),typeof(z)}(∂r, ∂p)
-
-    return Ω, logpdf_NegativeBinomial_pullback
-end

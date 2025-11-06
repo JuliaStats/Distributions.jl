@@ -14,9 +14,10 @@ using LinearAlgebra, Printf
 import LinearAlgebra: dot, rank
 
 using Random
-import Random: GLOBAL_RNG, rand!, SamplerRangeInt
+import Random: default_rng, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
+import StatsAPI
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
@@ -24,10 +25,9 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
+using Base.MathConstants: eulergamma
 
-import ChainRulesCore
-
-import DensityInterface
+import AliasTables
 
 export
     # re-export Statistics
@@ -41,6 +41,7 @@ export
     Multivariate,
     Matrixvariate,
     CholeskyVariate,
+    NamedTupleVariate,
     Discrete,
     Continuous,
     Sampleable,
@@ -109,21 +110,25 @@ export
     InverseGaussian,
     IsoNormal,
     IsoNormalCanon,
+    JohnsonSU,
+    JointOrderStatistics,
     Kolmogorov,
     KSDist,
     KSOneSided,
+    Kumaraswamy,
     Laplace,
     Levy,
+    Lindley,
     LKJ,
     LKJCholesky,
     Logistic,
     LogNormal,
     LogUniform,
+    MvLogitNormal,
     LogitNormal,
     MatrixBeta,
     MatrixFDist,
     MatrixNormal,
-    MatrixReshaped,
     MatrixTDist,
     MixtureModel,
     Multinomial,
@@ -142,6 +147,7 @@ export
     Normal,
     NormalCanon,
     NormalInverseGaussian,
+    OrderStatistic,
     Pareto,
     PGeneralizedGaussian,
     SkewedExponentialPower,
@@ -290,6 +296,7 @@ include("univariates.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
+include("namedtuple/productnamedtuple.jl")
 include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
@@ -308,8 +315,8 @@ include("pdfnorm.jl")
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
 
-# Implementation of DensityInterface API
-include("density_interface.jl")
+# Interface for StatsAPI
+include("statsapi.jl")
 
 # Testing utilities for other packages which implement distributions.
 include("test_utils.jl")
@@ -344,7 +351,8 @@ Supported distributions:
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
-    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ, LKJCholesky,
+    IsoNormalCanon, JohnsonSU, Kolmogorov, KSDist, KSOneSided, Kumaraswamy,
+    Laplace, Levy, Lindley, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
@@ -352,7 +360,7 @@ Supported distributions:
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
     QQPair, Rayleigh, Rician, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
-    Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
+    Triweight, Truncated, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,

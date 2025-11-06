@@ -10,6 +10,10 @@ An N dimensional `MultivariateDistribution` constructed from a vector of N indep
 ```julia
 Product(Uniform.(rand(10), 1)) # A 10-dimensional Product from 10 independent `Uniform` distributions.
 ```
+
+!!! note
+    `Product` is deprecated and will be removed in the next breaking release.
+    Use [`product_distribution`](@ref) instead.
 """
 struct Product{
     S<:ValueSupport,
@@ -47,6 +51,7 @@ function _logpdf(d::Product, x::AbstractVector{<:Real})
 end
 
 mean(d::Product) = mean.(d.v)
+std(d::Product) = std.(d.v)
 var(d::Product) = var.(d.v)
 cov(d::Product) = Diagonal(var(d))
 entropy(d::Product) = sum(entropy, d.v)

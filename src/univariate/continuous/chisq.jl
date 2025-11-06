@@ -4,7 +4,7 @@ The *Chi squared distribution* (typically written χ²) with `ν` degrees of fre
 probability density function
 
 ```math
-f(x; \\nu) = \\frac{x^{\\nu/2 - 1} e^{-x/2}}{2^{\\nu/2} \\Gamma(k/2)}, \\quad x > 0.
+f(x; \\nu) = \\frac{x^{\\nu/2 - 1} e^{-x/2}}{2^{\\nu/2} \\Gamma(\\nu/2)}, \\quad x > 0.
 ```
 
 If `ν` is an integer, then it is the distribution of the sum of squares of `ν` independent standard [`Normal`](@ref) variates.
