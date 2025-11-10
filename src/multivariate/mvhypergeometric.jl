@@ -44,7 +44,6 @@ mean(d::MvHypergeometric) = d.n .* d.m ./ sum(d.m)
 
 function var(d::MvHypergeometric)
     m = d.m
-    k = length(m)
     n = ntrials(d)
     M = sum(m)
     f = n * (M - n) / (M - 1)
@@ -56,27 +55,14 @@ end
 
 function cov(d::MvHypergeometric)
     m = d.m
-    k = length(m)
     n = ntrials(d)
     M = sum(m)
     p = m / M
     f = n * (M - n) / (M - 1)
 
-    C = Matrix{Real}(undef, k, k)
-    for j = 1:k
-        pj = p[j]
-        for i = 1:j-1
-            @inbounds C[i, j] = -f * p[i] * pj
-        end
+    C = -f * (p * p')
+    C[diagind(C)] .= f .* p .* (1 .- p)
 
-        @inbounds C[j, j] = f * pj * (1 - pj)
-    end
-
-    for j = 1:k-1
-        for i = j+1:k
-            @inbounds C[i, j] = C[j, i]
-        end
-    end
     C
 end
 
