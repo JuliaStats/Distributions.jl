@@ -12,7 +12,7 @@ using Test
     d = MvHypergeometric(m, n)
     @test length(d) == 3
     @test d.n == n
-    @test nelements(d) == m
+    @test d.m == m
     @test ncategories(d) == length(m)
     @test params(d) == (m, n)
 
