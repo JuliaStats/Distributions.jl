@@ -47,13 +47,9 @@ function var(d::MvHypergeometric)
     k = length(m)
     n = ntrials(d)
     M = sum(m)
-    p = m / M
     f = n * (M - n) / (M - 1)
-
-    v = Vector{Real}(undef, k)
-    for i = 1:k
-        @inbounds p_i = p[i]
-        v[i] = f * p_i * (1 - p_i)
+    v = let f = f
+        map(mi -> f * (mi / M) * ((M - mi) / M), m)
     end
     v
 end
