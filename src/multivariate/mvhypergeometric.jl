@@ -16,9 +16,9 @@ MvHypergeometric(m, n)   # Multivariate hypergeometric distribution for a popula
 ```
 """
 struct MvHypergeometric <: DiscreteMultivariateDistribution
-    m::AbstractVector{Int}  # number of elements of each type
+    m::Vector{Int}  # number of elements of each type
     n::Int                  # number of draws
-    function MvHypergeometric(m::AbstractVector{Int}, n::Int; check_args::Bool=true)
+    function MvHypergeometric(m::Vector{Int}, n::Int; check_args::Bool=true)
         @check_args(
             MvHypergeometric,
             (m, all(m .>= zero.(n))),
@@ -117,7 +117,7 @@ end
 
 # Sampling is performed by sequentially sampling each entry from the
 # hypergeometric distribution
-_rand!(rng::AbstractRNG, d::MvHypergeometric, x::AbstractVector{Int}) =
+_rand!(rng::AbstractRNG, d::MvHypergeometric, x::Vector{Int}) =
     mvhypergeom_rand!(rng, d.m, ntrials(d), x)
 
 
