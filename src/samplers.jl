@@ -15,19 +15,18 @@ Samples from the sampler and returns the result.
 rand(::AbstractRNG, ::Sampleable)
 
 for fname in ["aliastable.jl",
-              "binomial.jl",
-              "poissonbinomial.jl",
-              "poisson.jl",
-              "exponential.jl",
-              "gamma.jl",
-              "multinomial.jl",
-              "mvhypergeometric.jl",
-              "vonmises.jl",
-              "vonmisesfisher.jl",
-              "discretenonparametric.jl",
-              "categorical.jl",
-              "productnamedtuple.jl",
-             ]
+    "binomial.jl",
+    "poissonbinomial.jl",
+    "poisson.jl",
+    "exponential.jl",
+    "gamma.jl",
+    "multinomial.jl",
+    "vonmises.jl",
+    "vonmisesfisher.jl",
+    "discretenonparametric.jl",
+    "categorical.jl",
+    "productnamedtuple.jl",
+]
 
     include(joinpath("samplers", fname))
 end
