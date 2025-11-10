@@ -21,7 +21,7 @@ struct MvHypergeometric <: DiscreteMultivariateDistribution
     function MvHypergeometric(m::Vector{Int}, n::Int; check_args::Bool=true)
         @check_args(
             MvHypergeometric,
-            (m, all(m .>= zero.(n))),
+            (m, all(x -> x >= 0, m)),
             zero(n) <= n <= sum(m),
         )
         new(m, n)
