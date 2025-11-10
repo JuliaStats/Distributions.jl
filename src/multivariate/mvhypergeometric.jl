@@ -42,7 +42,7 @@ params(d::MvHypergeometric) = (d.m, d.n)
 mean(d::MvHypergeometric) = d.n .* d.m ./ sum(d.m)
 
 function var(d::MvHypergeometric)
-    m = nelements(d)
+    m = d.m
     k = length(m)
     n = ntrials(d)
     M = sum(m)
@@ -58,7 +58,7 @@ function var(d::MvHypergeometric)
 end
 
 function cov(d::MvHypergeometric)
-    m = nelements(d)
+    m = d.m
     k = length(m)
     n = ntrials(d)
     M = sum(m)
@@ -87,7 +87,7 @@ end
 # Evaluation
 function insupport(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
     k = length(d)
-    m = nelements(d)
+    m = d.m
     length(x) == k || return false
     s = 0.0
     for i = 1:k
@@ -101,7 +101,7 @@ function insupport(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
 end
 
 function _logpdf(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
-    m = nelements(d)
+    m = d.m
     M = sum(m)
     n = ntrials(d)
     insupport(d, x) || return -Inf
@@ -117,7 +117,7 @@ end
 # Sampling is performed by sequentially sampling each entry from the
 # hypergeometric distribution
 _rand!(rng::AbstractRNG, d::MvHypergeometric, x::AbstractVector{Int}) =
-    mvhypergeom_rand!(rng, nelements(d), ntrials(d), x)
+    mvhypergeom_rand!(rng, d.m, ntrials(d), x)
 
 
 
