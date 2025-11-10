@@ -86,7 +86,7 @@ end
 
 
 # Evaluation
-function insupport(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
+function insupport(d::MvHypergeometric, x::AbstractVector{<:Real})
     k = length(d)
     m = d.m
     length(x) == k || return false
