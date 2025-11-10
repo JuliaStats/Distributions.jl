@@ -36,6 +36,7 @@ length(d::MvHypergeometric) = ncategories(d)
 ntrials(d::MvHypergeometric) = d.n
 
 params(d::MvHypergeometric) = (d.m, d.n)
+partype(::MvHypergeometric) = Int
 
 # Statistics
 
