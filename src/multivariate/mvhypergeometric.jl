@@ -69,18 +69,7 @@ end
 
 # Evaluation
 function insupport(d::MvHypergeometric, x::AbstractVector{<:Real})
-    k = length(d)
-    m = d.m
-    length(x) == k || return false
-    s = 0.0
-    for i = 1:k
-        @inbounds xi = x[i]
-        if !(isinteger(xi) && xi >= 0 && xi <= m[i])
-            return false
-        end
-        s += xi
-    end
-    return s == ntrials(d)  # integer computation would not yield truncation errors
+    return length(x) == length(d) && (eltype(x) <: Integer || all(isinteger, x)) && all(((xi, mi),) -> zero(xi) <= xi <= mi, zip(x, d.m)) && sum(x) == ntrials(d)
 end
 
 function _logpdf(d::MvHypergeometric, x::AbstractVector{<:Real})
