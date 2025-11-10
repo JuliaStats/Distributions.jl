@@ -15,6 +15,7 @@ using Test
     @test d.m == m
     @test ncategories(d) == length(m)
     @test params(d) == (m, n)
+    @test partype(d) == Int
 
     @test mean(d) ≈ [2.0, 1.2, 0.8]
     @test var(d) ≈ [2 / 3, 56 / 100, 32 / 75]
