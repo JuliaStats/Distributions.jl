@@ -76,13 +76,17 @@ function _logpdf(d::MvHypergeometric, x::AbstractVector{<:Real})
     m = d.m
     M = sum(m)
     n = ntrials(d)
-    insupport(d, x) || return -Float64(Inf)
+    (eltype(x) <: Integer || all(isinteger, x)) || return -Float64(Inf)
     s = -logabsbinomial(M, n)[1]
+    sumx = 0
     for i = 1:length(m)
         xi = x[i]
         mi = m[i]
+        (zero(xi) <= xi <= mi) || return -Float64(Inf)
         s += logabsbinomial(mi, xi)[1]
+        sumx += xi
     end
+    (sumx == n) || return -Float64(Inf)
     return s
 end
 

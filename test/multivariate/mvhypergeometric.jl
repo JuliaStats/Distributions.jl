@@ -70,6 +70,7 @@ using Test
     @test pdf(d, x) ≈ 2 / 7
     @test logpdf(d, x) ≈ log(2 / 7)
     @test logpdf(d, x) ≈ log(pdf(d, x))
+    @test logpdf(d, [2.5, 0.5, 1]) == -Inf
 
     x = rand(d, 100)
     pv = pdf(d, x)
