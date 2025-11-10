@@ -33,7 +33,6 @@ end
 
 ncategories(d::MvHypergeometric) = length(d.m)
 length(d::MvHypergeometric) = ncategories(d)
-nelements(d::MvHypergeometric) = d.m
 ntrials(d::MvHypergeometric) = d.n
 
 params(d::MvHypergeometric) = (d.m, d.n)
