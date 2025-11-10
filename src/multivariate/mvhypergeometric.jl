@@ -1,4 +1,6 @@
 """
+    MvHypergeometric(m, n)
+
 The [Multivariate hypergeometric distribution](https://en.wikipedia.org/wiki/Hypergeometric_distribution#Multivariate_hypergeometric_distribution)
 generalizes the *hypergeometric distribution*. Consider ``n`` draws from a finite population containing ``k`` types of elements. Suppose that the population has size ``M`` and there are ``m_i`` elements of type ``i`` for ``i = 1, .., k`` with ``m_1+...m_k = M``. Let ``X = (X_1, ..., X_k)`` where ``X_i`` represents the number of elements of type ``i`` drawn, then the distribution of ``X`` is a multivariate hypergeometric distribution. Each sample of a multivariate hypergeometric distribution is a ``k``-dimensional integer vector that sums to ``n`` and satisfies ``0 \\le X_i \\le m_i``. 
 
@@ -7,12 +9,12 @@ The probability mass function is given by
 
 ```math
 f(x; m, n) = {{{m_1 \\choose x_1}{m_2 \\choose x_2}\\cdots {m_k \\choose x_k}}\\over {N \\choose n}}, 
-\\quad x_1 + \\cdots + x_k = n, \\quad x_i \\le m_i
+\\quad x_1 + \\cdots + x_k = n, \\quad 0 \\le x_i \\le m_i
 ```
 
 ```julia
 MvHypergeometric(m, n)   # Multivariate hypergeometric distribution for a population with
-                         # m = (m_1, ..., m_k) elements of type 1 to k and n draws
+                         # m[i] elements of types i and n draws
 ```
 """
 struct MvHypergeometric <: DiscreteMultivariateDistribution
