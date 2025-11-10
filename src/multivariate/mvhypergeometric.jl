@@ -117,7 +117,7 @@ end
 
 # Sampling is performed by sequentially sampling each entry from the
 # hypergeometric distribution
-_rand!(rng::AbstractRNG, d::MvHypergeometric, x::Vector{Int}) =
+_rand!(rng::AbstractRNG, d::MvHypergeometric, x::AbstractVector{<:Real}) =
     mvhypergeom_rand!(rng, d.m, ntrials(d), x)
 
 
