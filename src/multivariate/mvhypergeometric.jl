@@ -101,7 +101,7 @@ function insupport(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
     return s == ntrials(d)  # integer computation would not yield truncation errors
 end
 
-function _logpdf(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
+function _logpdf(d::MvHypergeometric, x::AbstractVector{<:Real})
     m = d.m
     M = sum(m)
     n = ntrials(d)
