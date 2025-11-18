@@ -30,8 +30,8 @@ Pareto <- R6Class("Pareto",
                  } else { NaN },
                  entropy = (1 + 1 / a) + log(b / a))
         },
-        pdf = function(x, log=FALSE){ dpareto(x, self$alpha, self$beta, log=log) },
-        cdf = function(x){ ppareto(x, self$alpha, self$beta) },
-        quan = function(v){ qpareto(v, self$alpha, self$beta) }
+        pdf = function(x, log=FALSE){ extraDistr::dpareto(x, self$alpha, self$beta, log=log) },
+        cdf = function(x){ extraDistr::ppareto(x, self$alpha, self$beta) },
+        quan = function(v){ extraDistr::qpareto(v, self$alpha, self$beta) }
     )
 )

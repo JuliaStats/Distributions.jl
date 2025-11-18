@@ -19,8 +19,8 @@ Rayleigh <- R6Class("Rayleigh",
                  kurtosis = 0.245089300687638,
                  entropy = 0.94203424217079 + log(s))
         },
-        pdf = function(x, log=FALSE) { drayleigh(x, self$sigma, log=log) },
-        cdf = function(x){ prayleigh(x, self$sigma) },
-        quan = function(v){ qrayleigh(v, self$sigma) }
+        pdf = function(x, log=FALSE) { extraDistr::drayleigh(x, self$sigma, log=log) },
+        cdf = function(x){ extraDistr::prayleigh(x, self$sigma) },
+        quan = function(v){ extraDistr::qrayleigh(v, self$sigma) }
     )
 )

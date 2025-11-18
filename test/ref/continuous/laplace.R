@@ -23,8 +23,8 @@ Laplace <- R6Class("Laplace",
                  kurtosis = 3,
                  entropy = 1 + log(2 * b))
         },
-        pdf = function(x, log=FALSE){ dlaplace(x, self$mu, self$beta, log=log) },
-        cdf = function(x){ plaplace(x, self$mu, self$beta) },
-        quan = function(v){ qlaplace(v, self$mu, self$beta) }
+        pdf = function(x, log=FALSE){ extraDistr::dlaplace(x, self$mu, self$beta, log=log) },
+        cdf = function(x){ extraDistr::plaplace(x, self$mu, self$beta) },
+        quan = function(v){ extraDistr::qlaplace(v, self$mu, self$beta) }
     )
 )
