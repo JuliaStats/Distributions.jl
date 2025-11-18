@@ -322,6 +322,13 @@ function test_special(dist::Type{MatrixNormal})
             end
         end
     end
+    @testset "Non-allocating sampling" begin
+        # #2012: we can sample without allocations
+        M, U, V = _rand_params(MatrixNormal, Float64, 5, 5)
+        noallocD = MatrixNormal(M, cholesky!(Symmetric(U, :L)), cholesky!(Symmetric(V, :U)))
+        output = Matrix{Float64}(undef, size(noallocD))
+        @test iszero(@allocated(rand!(noallocD, output)))
+    end
     nothing
 end
 
