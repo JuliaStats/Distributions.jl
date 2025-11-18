@@ -24,7 +24,6 @@ function _reshape_check_dims(dist::Distribution{<:ArrayLikeVariate}, dims::Dims)
 end
 
 Base.size(d::ReshapedDistribution) = d.dims
-Base.eltype(::Type{ReshapedDistribution{<:Any,<:ValueSupport,D}}) where {D} = eltype(D)
 
 partype(d::ReshapedDistribution) = partype(d.dist)
 params(d::ReshapedDistribution) = (d.dist, d.dims)
@@ -86,11 +85,15 @@ end
 end
 
 # sampling
-function _rand!(
+function rand(rng::AbstractRNG, d::ReshapedDistribution)
+    return reshape(rand(rng, d.dist), size(d))
+end
+@inline function rand!(
     rng::AbstractRNG,
     d::ReshapedDistribution{N},
     x::AbstractArray{<:Real,N}
 ) where {N}
+    @boundscheck size(x) == size(d.dist)
     dist = d.dist
     rand!(rng, dist, reshape(x, size(dist)))
     return x

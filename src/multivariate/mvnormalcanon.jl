@@ -154,7 +154,6 @@ length(d::MvNormalCanon) = length(d.μ)
 mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
 params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
-Base.eltype(::Type{<:MvNormalCanon{T}}) where {T} = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = inv(d.J)
@@ -170,12 +169,25 @@ sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J,
 
 # Sampling (for GenericMvNormal)
 
-function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector)
+function rand(rng::AbstractRNG, d::MvNormalCanon)
+    x = invunwhiten!(d.J, randn(rng, float(partype(d)), length(d)))
+    x .+= d.μ
+    return x
+end
+function rand(rng::AbstractRNG, d::MvNormalCanon, n::Int)
+    x = invunwhiten!(d.J, randn(rng, float(partype(d)), length(d), n))
+    x .+= d.μ
+    return x
+end
+
+@inline function rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector{<:Real})
+    @boundscheck length(x) == length(d)
     invunwhiten!(d.J, randn!(rng, x))
     x .+= d.μ
     return x
 end
-function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix)
+@inline function rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix{<:Real})
+    @boundscheck size(x, 1) == length(d)
     invunwhiten!(d.J, randn!(rng, x))
     x .+= d.μ
     return x

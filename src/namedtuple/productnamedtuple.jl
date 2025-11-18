@@ -38,7 +38,7 @@ julia> var(d)  # var of marginals
 (x = 1.0, y = [0.031746031746031744, 0.031746031746031744])
 ```
 """
-struct ProductNamedTupleDistribution{Tnames,Tdists,S<:ValueSupport,eltypes} <:
+struct ProductNamedTupleDistribution{Tnames,Tdists,S<:ValueSupport} <:
        Distribution{NamedTupleVariate{Tnames},S}
     dists::NamedTuple{Tnames,Tdists}
 end
@@ -46,22 +46,8 @@ function ProductNamedTupleDistribution(
     dists::NamedTuple{K,V}
 ) where {K,V<:Tuple{Distribution,Vararg{Distribution}}}
     vs = _product_valuesupport(values(dists))
-    eltypes = _product_namedtuple_eltype(values(dists))
-    return ProductNamedTupleDistribution{K,V,vs,eltypes}(dists)
+    return ProductNamedTupleDistribution{K,V,vs}(dists)
 end
-
-_gentype(d::UnivariateDistribution) = eltype(d)
-_gentype(d::Distribution{<:ArrayLikeVariate{S}}) where {S} = Array{eltype(d),S}
-function _gentype(d::Distribution{CholeskyVariate})
-    T = eltype(d)
-    return LinearAlgebra.Cholesky{T,Matrix{T}}
-end
-function _gentype(d::ProductNamedTupleDistribution{K}) where {K}
-    return NamedTuple{K,Tuple{map(_gentype, values(d.dists))...}}
-end
-_gentype(::Distribution) = Any
-
-_product_namedtuple_eltype(dists) = typejoin(map(_gentype, dists)...)
 
 function Base.show(io::IO, d::ProductNamedTupleDistribution)
     return show_multline(io, d, collect(pairs(d.dists)))
@@ -87,8 +73,6 @@ function product_distribution(
 end
 
 # Properties
-
-Base.eltype(::Type{<:ProductNamedTupleDistribution{<:Any,<:Any,<:Any,T}}) where {T} = T
 
 Base.minimum(d::ProductNamedTupleDistribution) = map(minimum, d.dists)
 
@@ -166,9 +150,9 @@ end
 function Base.rand(
     rng::AbstractRNG, d::ProductNamedTupleDistribution{K}, dims::Dims
 ) where {K}
-    return convert(AbstractArray{<:NamedTuple{K}}, _rand(rng, sampler(d), dims))
+    return rand(rng, sampler(d), dims)
 end
 
-function _rand!(rng::AbstractRNG, d::ProductNamedTupleDistribution, xs::AbstractArray)
-    return _rand!(rng, sampler(d), xs)
+Base.@propagate_inbounds function Random.rand!(rng::AbstractRNG, d::ProductNamedTupleDistribution, xs::AbstractArray)
+    return rand!(rng, sampler(d), xs)
 end

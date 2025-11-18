@@ -26,38 +26,28 @@ rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
 
 # default fallback (redefined for univariate distributions)
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate})
+    Base.depwarn("Please implement `rand(rng::AbstractRNG, s::$(typeof(s)))`. The default fallback will be removed", :rand)
     return rand!(rng, s, Array{eltype(s)}(undef, size(s)))
 end
 
 # multiple samples
-function rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims)
-    out = Array{eltype(s)}(undef, dims)
-    return rand!(rng, sampler(s), out)
+# we use function barriers since for some distributions `sampler(s)` is not type-stable:
+# https://github.com/JuliaStats/Distributions.jl/pull/1281
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims)
+    return _rand(rng, sampler(s), dims)
 end
-function rand(
-    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims,
-)
-    sz = size(s)
-    ax = map(Base.OneTo, dims)
-    out = [Array{eltype(s)}(undef, sz) for _ in Iterators.product(ax...)]
-    return rand!(rng, sampler(s), out, false)
+function _rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims)
+    r = rand(rng, s)
+    out = Array{typeof(r)}(undef, dims)
+    out[1] = r
+    rand!(rng, s, @view(out[2:end]))
+    return out
 end
 
-# these are workarounds for sampleables that incorrectly base `eltype` on the parameters
+# this is a workaround for sampleables that incorrectly base `eltype` on the parameters
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
-    return rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
-end
-function rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims)
-    out = Array{float(eltype(s))}(undef, dims)
-    return rand!(rng, sampler(s), out)
-end
-function rand(
-    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims,
-)
-    sz = size(s)
-    ax = map(Base.OneTo, dims)
-    out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax...)]
-    return rand!(rng, sampler(s), out, false)
+    Base.depwarn("Please implement `rand(rng::AbstractRNG, s::$(typeof(s))`. The default fallback will be removed", :rand)
+    return rand!(rng, s, Array{float(eltype(s))}(undef, size(s)))
 end
 
 """
@@ -75,9 +65,6 @@ form as specified above. The rules are summarized as below:
 """
 function rand! end
 Base.@propagate_inbounds rand!(s::Sampleable, X::AbstractArray) = rand!(default_rng(), s, X)
-Base.@propagate_inbounds function rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray)
-    return _rand!(rng, s, X)
-end
 
 # default definitions for arraylike variates
 @inline function rand!(
@@ -85,6 +72,7 @@ end
     s::Sampleable{ArrayLikeVariate{N}},
     x::AbstractArray{<:Real,N},
 ) where {N}
+    Base.depwarn("Please implement `Random.rand!(rng::Random.AbstractRNG, s::$(typeof(s)), x::AbstractArray{<:Real,$N})`, the default fallback will be removed.", :rand!)
     @boundscheck begin
         size(x) == size(s) || throw(DimensionMismatch("inconsistent array dimensions"))
     end
@@ -105,7 +93,8 @@ end
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
     # the function barrier fixes performance issues if `sampler(s)` is type unstable
-    return _rand!(rng, sampler(s), x)
+    _rand!(rng, sampler(s), x)
+    return x
 end
 
 function _rand!(

@@ -119,7 +119,14 @@ end
 
 #  Mitra (1970 Sankhyā)
 
-function _rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix)
+function rand(rng::AbstractRNG, d::MatrixBeta)
+    A = Matrix{float(partype(d))}(undef, size(d))
+    @inbounds rand!(rng, d, A)
+    return A
+end
+
+@inline function rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix{<:Real})
+    @boundscheck size(A) == size(d)
     S1   = PDMat( rand(rng, d.W1) )
     S2   = PDMat( rand(rng, d.W2) )
     S    = S1 + S2
@@ -127,19 +134,3 @@ function _rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix)
     A .= X_A_Xt(S1, invL)
 end
 
-#  -----------------------------------------------------------------------------
-#  Test utils
-#  -----------------------------------------------------------------------------
-
-function _univariate(d::MatrixBeta)
-    check_univariate(d)
-    p, n1, n2 = params(d)
-    return Beta(n1 / 2, n2 / 2)
-end
-
-function _rand_params(::Type{MatrixBeta}, elty, n::Int, p::Int)
-    n == p || throw(ArgumentError("dims must be equal for MatrixBeta"))
-    n1 = elty( n + 1 + abs(10randn()) )
-    n2 = elty( n + 1 + abs(10randn()) )
-    return n, n1, n2
-end

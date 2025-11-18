@@ -1,3 +1,6 @@
+using LinearAlgebra
+using Random
+
 # Struct to test AbstractMvNormal methods
 struct CholeskyMvNormal{M,T} <: Distributions.AbstractMvNormal
     m::M
@@ -5,7 +8,7 @@ struct CholeskyMvNormal{M,T} <: Distributions.AbstractMvNormal
 end
 
 # Constructor for diagonal covariance matrices used in the tests below
-function CholeskyMvNormal(m::Vector, Σ::Diagonal)
+function CholeskyMvNormal(m::AbstractVector{<:Real}, Σ::Diagonal{<:Real})
     L = Diagonal(map(sqrt, Σ.diag))
     return CholeskyMvNormal{typeof(m),typeof(L)}(m, L)
 end
@@ -14,11 +17,27 @@ Distributions.length(p::CholeskyMvNormal) = length(p.m)
 Distributions.mean(p::CholeskyMvNormal) = p.m
 Distributions.cov(p::CholeskyMvNormal) = p.L * p.L'
 Distributions.logdetcov(p::CholeskyMvNormal) = 2 * logdet(p.L)
-function Distributions.sqmahal(p::CholeskyMvNormal, x::AbstractVector)
+function Distributions.sqmahal(p::CholeskyMvNormal, x::AbstractVector{<:Real})
     return sum(abs2, p.L \ (mean(p) - x))
 end
-function Distributions._rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::Vector)
-    return x .= p.m .+ p.L * randn!(rng, x)
+function Base.rand(rng::AbstractRNG, p::CholeskyMvNormal)
+    T = float(Base.promote_eltype(p.m, p.L))
+    x = Vector{T}(undef, length(p.m))
+    @inbounds rand!(rng, p, x)
+    return x
+end
+@inline function Random.rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::AbstractVector{<:Real})
+    @boundscheck length(x) == length(p)
+    randn!(rng, x)
+    # Older Julia versions that do not support `lmul!(::Diagonal, ::AbstractVector)`
+    # Ref https://github.com/JuliaLang/julia/pull/36012
+    if p.L isa Diagonal && VERSION < v"1.6.0-DEV.88"
+        x .*= p.L.diag
+    else
+        lmul!(p.L, x)
+    end
+    x .+= p.m
+    return x
 end
 
 @testset "Expectations" begin
@@ -99,7 +118,7 @@ end
             p = Geometric(0.3)
             q = Geometric(0.4)
             test_kl(p, q)
-            
+
             x1 = nextfloat(0.0)
             x2 = prevfloat(1.0)
             p1 = Geometric(x1)

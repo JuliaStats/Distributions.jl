@@ -8,6 +8,7 @@
 #   Each subtype should provide the following methods:
 #
 #   - length(d):        vector dimension
+#   - partype(d):       Element type of the parameters
 #   - mean(d):          the mean vector (in full form)
 #   - cov(d):           the covariance matrix (in full form)
 #   - invcov(d):        inverse of covariance
@@ -15,7 +16,8 @@
 #   - sqmahal(d, x):        Squared Mahalanobis distance to center
 #   - sqmahal!(r, d, x):    Squared Mahalanobis distances
 #   - gradlogpdf(d, x):     Gradient of logpdf w.r.t. x
-#   - _rand!(d, x):         Sample random vector(s)
+#   - rand(rng, d):         Sample random vector
+#   - rand!(rng, d, x):     Sample random vector(s) in x
 #
 #   Other generic functions will be implemented on top
 #   of these core functions.
@@ -80,8 +82,8 @@ abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
 insupport(d::AbstractMvNormal, x::AbstractVector) =
     length(d) == length(x) && all(isfinite, x)
 
-minimum(d::AbstractMvNormal) = fill(eltype(d)(-Inf), length(d))
-maximum(d::AbstractMvNormal) = fill(eltype(d)(Inf), length(d))
+minimum(d::AbstractMvNormal) = Fill(float(partype(d))(-Inf), length(d))
+maximum(d::AbstractMvNormal) = Fill(float(partype(d))(Inf), length(d))
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
@@ -134,7 +136,11 @@ When x is a vector, it returns a scalar value. When x is a matrix, it returns a 
 """
 sqmahal(d::AbstractMvNormal, x::AbstractArray)
 
-sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(undef, size(x, 2)), d, x)
+function sqmahal(d::AbstractMvNormal, x::AbstractMatrix{<:Real})
+    r = Vector{float(promote_type(partype(d), eltype(x)))}(undef, size(x, 2))
+    sqmahal!(r, d, x)
+    return r
+end
 
 _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
@@ -219,8 +225,6 @@ Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::Real) MvNormal(μ, σ^2
 Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(LinearAlgebra.Diagonal(map(abs2, σ)))
 Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(LinearAlgebra.Diagonal(FillArrays.Fill(σ^2, d)))
 
-Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
-
 ### Conversion
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
@@ -268,14 +272,25 @@ gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
-function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
+function rand(rng::AbstractRNG, d::MvNormal)
+    x = unwhiten!(d.Σ, randn(rng, float(partype(d)), length(d)))
+    x .+= d.μ
+    return x
+end
+function rand(rng::AbstractRNG, d::MvNormal, n::Int)
+    x = unwhiten!(d.Σ, randn(rng, float(partype(d)), length(d), n))
+    x .+= d.μ
+    return x
+end
+
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat{<:Real})
     unwhiten!(d.Σ, randn!(rng, x))
     x .+= d.μ
     return x
 end
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
-function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector{<:Real})
     for i in eachindex(x)
         x[i] = randn(rng, eltype(x))
     end
