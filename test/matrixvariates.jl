@@ -327,7 +327,7 @@ function test_special(dist::Type{MatrixNormal})
         M, U, V = _rand_params(MatrixNormal, Float64, 5, 5)
         noallocD = MatrixNormal(M, cholesky!(Symmetric(U, :L)), cholesky!(Symmetric(V, :U)))
         output = Matrix{Float64}(undef, size(noallocD))
-        @test iszero(((d, out) -> @allocated(rand!(d, out))(noallocD, output)))
+        @test iszero(((d, out) -> @allocated(rand!(d, out)))(noallocD, output))
     end
     nothing
 end
