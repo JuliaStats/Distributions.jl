@@ -11,23 +11,23 @@ We start by drawing 100 observations from a standard-normal random variable.
 
 The first step is to set up the environment:
 
-```julia-repl
+```jldoctest getting-started
 julia> using Random, Distributions
 
-julia> Random.seed!(123) # Setting the seed
+julia> Random.seed!(123); # Setting the seed
 ```
 
 Then, we create a standard-normal distribution `d` and obtain samples using `rand`:
 
-```julia-repl
+```jldoctest getting-started
 julia> d = Normal()
-Normal(μ=0.0, σ=1.0)
+Normal{Float64}(μ=0.0, σ=1.0)
 ```
 
 The object `d` represents a probability distribution, in our case the standard-normal distribution.
 One can query its properties such as the mean:
 
-```julia-repl
+```jldoctest getting-started
 julia> mean(d)
 0.0
 ```
@@ -43,11 +43,11 @@ julia> x = rand(d, 100)
 
 You can easily obtain the `pdf`, `cdf`, `quantile`, and many other functions for a distribution. For instance, the median (50th percentile) and the 95th percentile for the standard-normal distribution are given by:
 
-```julia-repl
+```jldoctest getting-started; filter = r"(\d*)\.(\d{3})\d+" => s"\1.\2***"
 julia> quantile.(Normal(), [0.5, 0.95])
 2-element Vector{Float64}:
  0.0
- 1.64485
+ 1.6448536269514717
 ```
 
 The normal distribution is parameterized by its mean and standard deviation. To draw random samples from a normal distribution with mean 1 and standard deviation 2, you write:
@@ -83,11 +83,9 @@ julia> truncated(Normal(mu, sigma), l, u)
 
 To find out which parameters are appropriate for a given distribution `D`, you can use `fieldnames(D)`:
 
-```julia-repl
+```jldoctest getting-started
 julia> fieldnames(Cauchy)
-2-element Vector{Symbol}:
- :μ
- :β
+(:μ, :σ)
 ```
 
 This tells you that a Cauchy distribution is initialized with location `μ` and scale `β`.
@@ -98,7 +96,7 @@ It is often useful to approximate an empirical distribution with a theoretical d
 
 ```julia-repl
 julia> fit(Normal, x)
-Normal(μ=0.036692077201688635, σ=1.1228280164716382)
+Normal{Float64}(μ=-0.04827714875398303, σ=0.9256810813636542)
 ```
 
 Since `x` is a random draw from `Normal`, it's easy to check that the fitted values are sensible. Indeed, the estimates [0.04, 1.12] are close to the true values of [0.0, 1.0] that we used to generate `x`.
