@@ -36,20 +36,9 @@ We can also draw samples from `d` with `rand`.
 ```julia-repl
 julia> x = rand(d, 100)
 100-element Vector{Float64}:
-  0.8082879284649668
- -1.1220725081141734
- -1.1046361023292959
- -0.4169926351649334
-  0.28758798062385577
-  0.2298186980518676
- -0.4217686643996927
-  ⋮
-  0.4350014776438522
-  0.8402951127287839
- -1.088218513936287
-  0.7037583257923017
-  0.14332589323751366
-  0.14837536667608195
+  0.376264
+ -0.405272
+ ...
 ```
 
 You can easily obtain the `pdf`, `cdf`, `quantile`, and many other functions for a distribution. For instance, the median (50th percentile) and the 95th percentile for the standard-normal distribution are given by:
@@ -63,8 +52,8 @@ julia> quantile.(Normal(), [0.5, 0.95])
 
 The normal distribution is parameterized by its mean and standard deviation. To draw random samples from a normal distribution with mean 1 and standard deviation 2, you write:
 
-```jldoctest getting-started
-julia> rand(Normal(1, 2), 100);
+```julia-repl
+julia> rand(Normal(1, 2), 100)
 ```
 
 ## Using Other Distributions
@@ -79,7 +68,7 @@ Each type splits further into `Discrete` and `Continuous`.
 
 For instance, you can define the following distributions (among many others):
 
-```julia
+```julia-repl
 julia> Binomial(n, p) # Discrete univariate
 julia> Cauchy(u, b)  # Continuous univariate
 julia> Multinomial(n, p) # Discrete multivariate
@@ -88,7 +77,7 @@ julia> Wishart(nu, S) # Continuous matrix-variate
 
 In addition, you can create truncated distributions from univariate distributions:
 
-```julia
+```julia-repl
 julia> truncated(Normal(mu, sigma), l, u)
 ```
 
