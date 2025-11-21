@@ -1,6 +1,3 @@
-```@meta
-DocTestFilters = r"(\d*)\.(\d{3})\d+" => s"\1.\2***"
-```
 # Getting Started
 
 ## Installation
@@ -46,7 +43,7 @@ julia> x = rand(d, 100)
 
 You can easily obtain the `pdf`, `cdf`, `quantile`, and many other functions for a distribution. For instance, the median (50th percentile) and the 95th percentile for the standard-normal distribution are given by:
 
-```jldoctest getting-started
+```jldoctest getting-started; filter = r"(\d*)\.(\d{3})\d+" => s"\1.\2***"
 julia> quantile.(Normal(), [0.5, 0.95])
 2-element Vector{Float64}:
  0.0
