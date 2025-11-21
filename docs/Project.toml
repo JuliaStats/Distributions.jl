@@ -4,6 +4,7 @@ Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 GR = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
 
 [compat]
+Distributions = "0.25"
 Documenter = "1"
 GR = "0.72.1, 0.73"
 
