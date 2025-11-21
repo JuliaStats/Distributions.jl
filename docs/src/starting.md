@@ -1,3 +1,6 @@
+```@meta
+DocTestFilters = r"(\d*)\.(\d{3})\d+" => s"\1.\2***"
+```
 # Getting Started
 
 ## Installation
