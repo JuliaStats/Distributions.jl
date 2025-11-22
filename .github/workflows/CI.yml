@@ -59,12 +59,12 @@ jobs:
           show-versioninfo: true
       - name: Install the current package into the `docs` environment
         run: 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-        shell: julia --project=docs {0}
+        shell: julia --color=yes --project=docs {0}
       - name: Run doctests
         run: 'using Documenter: doctest; using Distributions; doctest(Distributions)'
-        shell: julia --project=docs {0}
+        shell: julia --color=yes --project=docs {0}
       - name: Build and deploy docs
-        run: julia --project=docs docs/make.jl
+        run: julia --color=yes --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
