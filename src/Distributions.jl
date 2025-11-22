@@ -139,6 +139,7 @@ export
     MvNormalCanon,
     MvNormalKnownCov,
     MvTDist,
+    SymmetricMvLaplace,
     NegativeBinomial,
     NoncentralBeta,
     NoncentralChisq,
