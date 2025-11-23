@@ -327,7 +327,13 @@ function test_special(dist::Type{MatrixNormal})
         M, U, V = _rand_params(MatrixNormal, Float64, 5, 5)
         noallocD = MatrixNormal(M, cholesky!(Symmetric(U, :L)), cholesky!(Symmetric(V, :U)))
         output = Matrix{Float64}(undef, size(noallocD))
-        @test iszero(((d, out) -> @allocated(rand!(d, out)))(noallocD, output))
+        allocs = ((d, out) -> @allocated(rand!(d, out)))(noallocD, output)
+        # See https://github.com/JuliaStats/Distributions.jl/pull/2012#issuecomment-3566807876
+        if VERSION < v"1.10.5"
+            @test allocs <= 32
+        else
+            @test iszero(allocs)
+        end
     end
     nothing
 end
