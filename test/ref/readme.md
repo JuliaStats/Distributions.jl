@@ -15,7 +15,7 @@ in addition to the R language itself:
 | stringr     | For string parsing  |
 | R6          | OOP for implementing distributions |
 | extraDistr  | A number of distributions |
-| VGAM        | For ``Frechet`` and ``Levy`` |
+| VGAM        | For ``LogLogistic``, ``Frechet`` and ``Levy`` |
 | distr       | For ``Arcsine`` |
 | chi         | For ``Chi`` |
 | circular    | For ``VonMises`` |
