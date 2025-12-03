@@ -104,7 +104,6 @@ function cgf(d::Cosine{T}, t) where T<:Real
     μ, σ = params(d)
     t ≈ 0. && return one(complex(T))
     σ*abs(t) ≈ π && return cis(μ*t) / 2
-
     return π^2 * cis(μ*t) * sin(σ*t) / (σ*t*(π^2 - (σ*t)^2))
 end
 
