@@ -94,17 +94,17 @@ end
 
 quantile(d::Cosine, p::Real) = quantile_bisect(d, p)
 
-function mgf(d::Cosine, t::Real)
+function mgf(d::Cosine{T}, t::Real) where T<:Real
     μ, σ = params(d)
     t ≈ 0. && return exp(μ*t)
-    return π^2 * exp(μ*t) * sinh(σ*t) / (σ*t*(π^2 + (σ*t)^2))
+    return T(π^2) * exp(μ*t) * sinh(σ*t) / (σ*t*(T(π^2) + (σ*t)^2))
 end
 
-function cgf(d::Cosine{T}, t) where T<:Real
+function cf(d::Cosine{T}, t::Real) where T<:Real
     μ, σ = params(d)
     t ≈ 0. && return one(complex(T))
     σ*abs(t) ≈ π && return cis(μ*t) / 2
-    return π^2 * cis(μ*t) * sin(σ*t) / (σ*t*(π^2 - (σ*t)^2))
+    return T(π)^2 * cis(μ*t) * sin(σ*t) / (σ*t*(T(π)^2 - (σ*t)^2))
 end
 
 #### Affine transformations
