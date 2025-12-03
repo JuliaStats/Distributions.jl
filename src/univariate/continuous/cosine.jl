@@ -93,3 +93,21 @@ function ccdf(d::Cosine{T}, x::Real) where T<:Real
 end
 
 quantile(d::Cosine, p::Real) = quantile_bisect(d, p)
+
+function mgf(d::Cosine, t::Real)
+    μ, σ = params(d)
+    return π^2 * exp(μ*t) * sinh(σ*t) / (σ*t*(π^2 + (σ*t)^2))
+end
+
+function cgf(d::Cosine{T}, t) where T<:Real
+    μ, σ = params(d)
+    t ≈ 0. && return one(complex(T))
+    σ*abs(t) ≈ π && return cis(μ*t) / 2
+
+    return π^2 * cis(μ*t) * sin(σ*t) / (σ*t*(π^2 - (σ*t)^2))
+end
+
+#### Affine transformations
+
+Base.:+(d::Cosine, a::Real) = Cosine(d.μ + a, d.σ)
+Base.:*(c::Real, d::Cosine) = Cosine(c * d.μ, abs(c) * d.σ)
