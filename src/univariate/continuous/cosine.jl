@@ -101,10 +101,11 @@ function mgf(d::Cosine, t::Real)
     return exp(μ*t) * (z / (1 + (IrrationalConstants.invπ * σt)^2))
 end
 
-function cgf(d::Cosine{T}, t::Real) where T<:Real
-    μ, σ = params(d)
-    t ≈ 0. && return μ*t
-    return 2log(π) + μ*t + σ*abs(t) + log1p(-exp(-2σ*abs(t))) - log(2) - log(σ*abs(t)) - log(T(π^2) + (σ*t)^2)
+function cgf(d::Cosine, t::Real)
+    (; μ, σ) = d
+    σt = σ * t
+    z = iszero(σt) ? zero(float(σt)) : LogExpFunctions.logabssinh(σt) - log(σt)
+    return μ*t + z - LogExpFunctions.log1psq(invπ * σt)
 end
 
 function cf(d::Cosine{T}, t::Real) where T<:Real
