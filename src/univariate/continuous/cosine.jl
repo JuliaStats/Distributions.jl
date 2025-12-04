@@ -60,45 +60,44 @@ kurtosis(d::Cosine{T}) where {T<:Real} = 6*(90-T(π)^4) / (5*(T(π)^2-6)^2)
 #### Evaluation
 
 function pdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
-    W = promote_type(T, S)
     if insupport(d, x)
         z = (x - d.μ) / d.σ
         return (1 + cospi(z)) / (2d.σ)
     else
-        return zero(W)
+        return zero(promote_type(T, S))
     end
 end
 
-logpdf(d::Cosine, x::Real) = log(pdf(d, x))
+function logpdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+    if insupport(d, x)
+        z = (x - d.μ) / d.σ
+        return log1p(cospi(z)) - log(2d.σ)
+    else
+        return typemin(promote_type(T, S))
+    end
+end
 
 function cdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
     W = promote_type(T, S)
-    if x < d.μ - d.σ
-        return zero(W)
-    end
-    if x > d.μ + d.σ
-        return one(W)
-    end
+
+    x < d.μ - d.σ && return zero(W)
+    x > d.μ + d.σ && return one(W)
+
     z = (x - d.μ) / d.σ
     (1 + z + sinpi(z) * invπ) / 2
 end
 
-function cdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+function ccdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
     W = promote_type(T, S)
-    if x < d.μ - d.σ
-        return one(W)
-    end
-    if x > d.μ + d.σ
-        return zero(W)
-    end
+
+    x < d.μ - d.σ && return one(W)
+    x > d.μ + d.σ && return zero(W)
+
     nz = (d.μ - x) / d.σ
     (1 + nz + sinpi(nz) * invπ) / 2
 end
 
 quantile(d::Cosine, p::Real) = quantile_bisect(d, p)
-
-import IrrationalConstants: invπ
-import LogExpFunctions: logabssinh, log1psq
 
 function mgf(d::Cosine, t::Real)
     σt, μt = d.σ * t, d.μ*t
