@@ -100,6 +100,12 @@ function mgf(d::Cosine{T}, t::Real) where T<:Real
     return T(π^2) * exp(μ*t) * sinh(σ*t) / (σ*t*(T(π^2) + (σ*t)^2))
 end
 
+function cgf(d::Cosine{T}, t::Real) where T<:Real
+    μ, σ = params(d)
+    t ≈ 0. && return μ*t
+    return 2log(π) + μ*t + σ*abs(t) + log1p(-exp(-2σ*abs(t))) - log(2) - log(σ*abs(t)) - log(T(π^2) + (σ*t)^2)
+end
+
 function cf(d::Cosine{T}, t::Real) where T<:Real
     μ, σ = params(d)
     t ≈ 0. && return one(complex(T))
