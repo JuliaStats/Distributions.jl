@@ -95,7 +95,7 @@ end
 quantile(d::Cosine, p::Real) = quantile_bisect(d, p)
 
 function mgf(d::Cosine{T}, t::Real) where T<:Real
-    μ, σ = params(d)
+    (; μ, σ) = d
     t ≈ 0. && return exp(μ*t)
     return T(π^2) * exp(μ*t) * sinh(σ*t) / (σ*t*(T(π^2) + (σ*t)^2))
 end
