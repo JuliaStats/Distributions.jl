@@ -59,34 +59,37 @@ kurtosis(d::Cosine{T}) where {T<:Real} = 6*(90-T(π)^4) / (5*(T(π)^2-6)^2)
 
 #### Evaluation
 
-function pdf(d::Cosine{T}, x::Real) where T<:Real
+function pdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+    W = promote_type(T, S)
     if insupport(d, x)
         z = (x - d.μ) / d.σ
         return (1 + cospi(z)) / (2d.σ)
     else
-        return zero(T)
+        return zero(W)
     end
 end
 
 logpdf(d::Cosine, x::Real) = log(pdf(d, x))
 
-function cdf(d::Cosine{T}, x::Real) where T<:Real
+function cdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+    W = promote_type(T, S)
     if x < d.μ - d.σ
-        return zero(T)
+        return zero(W)
     end
     if x > d.μ + d.σ
-        return one(T)
+        return one(W)
     end
     z = (x - d.μ) / d.σ
     (1 + z + sinpi(z) * invπ) / 2
 end
 
-function ccdf(d::Cosine{T}, x::Real) where T<:Real
+function cdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+    W = promote_type(T, S)
     if x < d.μ - d.σ
-        return one(T)
+        return one(W)
     end
     if x > d.μ + d.σ
-        return zero(T)
+        return zero(W)
     end
     nz = (d.μ - x) / d.σ
     (1 + nz + sinpi(nz) * invπ) / 2
@@ -94,25 +97,26 @@ end
 
 quantile(d::Cosine, p::Real) = quantile_bisect(d, p)
 
+import IrrationalConstants: invπ
+import LogExpFunctions: logabssinh, log1psq
+
 function mgf(d::Cosine, t::Real)
-    (; μ, σ) = d
-    σt = σ * t
-    z = iszero(σt) ? one(float(σt)) : sinh(σ*t)/(σ*t)
-    return exp(μ*t) * (z / (1 + (IrrationalConstants.invπ * σt)^2))
+    σt, μt = d.σ * t, d.μ*t
+    z = iszero(σt) ? one(float(σt)) : sinh(σt)/σt
+    return exp(μt) * (z / (1 + (invπ * σt)^2))
 end
 
 function cgf(d::Cosine, t::Real)
-    (; μ, σ) = d
-    σt = σ * t
-    z = iszero(σt) ? zero(float(σt)) : LogExpFunctions.logabssinh(σt) - log(σt)
-    return μ*t + z - LogExpFunctions.log1psq(invπ * σt)
+    σt, μt = d.σ * t, d.μ*t
+    z = iszero(σt) ? zero(float(σt)) : logabssinh(σt) - log(σt)
+    return μt + z - log1psq(invπ * σt)
 end
 
-function cf(d::Cosine{T}, t::Real) where T<:Real
-    μ, σ = params(d)
-    t ≈ 0. && return one(complex(T))
-    σ*abs(t) ≈ π && return cis(μ*t) / 2
-    return T(π)^2 * cis(μ*t) * sin(σ*t) / (σ*t*(T(π)^2 - (σ*t)^2))
+function cf(d::Cosine, t::Real)
+    σt, μt = d.σ * t, d.μ*t
+    abs(σt) ≈ π && return cis(μt) / 2
+    z = iszero(σt) ? one(float(σt)) : sin(σt)/σt
+    return π^2 * cis(μt) * z / (π^2 - (σt)^2)
 end
 
 #### Affine transformations
