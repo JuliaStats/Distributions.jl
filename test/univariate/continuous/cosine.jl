@@ -5,7 +5,7 @@
         @test cgf(Cosine(-1, 2), 2) ≈ -2 + log(sinh(4)) - log(4) - log(1 + 16π^-2)
     end
 
-    @testset "affine transfomations" begin
+    @testset "affine transformations" begin
         @test -Cosine(1, 1) == Cosine(-1, 1)
         @test 3Cosine(1, 2) == Cosine(3, 6)
         @test Cosine(0, 2) + 42 == Cosine(42, 2)
