@@ -59,37 +59,66 @@ kurtosis(d::Cosine{T}) where {T<:Real} = 6*(90-T(π)^4) / (5*(T(π)^2-6)^2)
 
 #### Evaluation
 
-function pdf(d::Cosine{T}, x::Real) where T<:Real
+function pdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
     if insupport(d, x)
         z = (x - d.μ) / d.σ
         return (1 + cospi(z)) / (2d.σ)
     else
-        return zero(T)
+        return zero(promote_type(T, S))
     end
 end
 
-logpdf(d::Cosine, x::Real) = log(pdf(d, x))
+function logpdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+    if insupport(d, x)
+        z = (x - d.μ) / d.σ
+        return log1p(cospi(z)) - log(2d.σ)
+    else
+        return typemin(promote_type(T, S))
+    end
+end
 
-function cdf(d::Cosine{T}, x::Real) where T<:Real
-    if x < d.μ - d.σ
-        return zero(T)
-    end
-    if x > d.μ + d.σ
-        return one(T)
-    end
+function cdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+    W = promote_type(T, S)
+
+    x < d.μ - d.σ && return zero(W)
+    x > d.μ + d.σ && return one(W)
+
     z = (x - d.μ) / d.σ
     (1 + z + sinpi(z) * invπ) / 2
 end
 
-function ccdf(d::Cosine{T}, x::Real) where T<:Real
-    if x < d.μ - d.σ
-        return one(T)
-    end
-    if x > d.μ + d.σ
-        return zero(T)
-    end
+function ccdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+    W = promote_type(T, S)
+
+    x < d.μ - d.σ && return one(W)
+    x > d.μ + d.σ && return zero(W)
+
     nz = (d.μ - x) / d.σ
     (1 + nz + sinpi(nz) * invπ) / 2
 end
 
 quantile(d::Cosine, p::Real) = quantile_bisect(d, p)
+
+function mgf(d::Cosine, t::Real)
+    σt, μt = d.σ * t, d.μ * t
+    z = iszero(σt) ? one(float(σt)) : sinh(σt)/σt
+    return exp(μt) * (z / (1 + (invπ * σt)^2))
+end
+
+function cgf(d::Cosine, t::Real)
+    σt, μt = d.σ * t, d.μ * t
+    z = iszero(σt) ? zero(float(σt)) : logabssinh(σt) - log(σt)
+    return μt + z - log1psq(invπ * σt)
+end
+
+function cf(d::Cosine, t::Real)
+    σt, μt = d.σ * t, d.μ * t
+    abs(σt) ≈ π && return cis(μt) / 2
+    z = iszero(σt) ? one(float(σt)) : sin(σt)/σt
+    return cis(μt) * z / (1 - (invπ * σt)^2)
+end
+
+#### Affine transformations
+
+Base.:+(d::Cosine, a::Real) = Cosine(d.μ + a, d.σ)
+Base.:*(c::Real, d::Cosine) = Cosine(c * d.μ, abs(c) * d.σ)
