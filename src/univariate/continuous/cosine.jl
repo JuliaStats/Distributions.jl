@@ -100,22 +100,22 @@ end
 quantile(d::Cosine, p::Real) = quantile_bisect(d, p)
 
 function mgf(d::Cosine, t::Real)
-    σt, μt = d.σ * t, d.μ*t
+    σt, μt = d.σ * t, d.μ * t
     z = iszero(σt) ? one(float(σt)) : sinh(σt)/σt
     return exp(μt) * (z / (1 + (invπ * σt)^2))
 end
 
 function cgf(d::Cosine, t::Real)
-    σt, μt = d.σ * t, d.μ*t
+    σt, μt = d.σ * t, d.μ * t
     z = iszero(σt) ? zero(float(σt)) : logabssinh(σt) - log(σt)
     return μt + z - log1psq(invπ * σt)
 end
 
 function cf(d::Cosine, t::Real)
-    σt, μt = d.σ * t, d.μ*t
+    σt, μt = d.σ * t, d.μ * t
     abs(σt) ≈ π && return cis(μt) / 2
     z = iszero(σt) ? one(float(σt)) : sin(σt)/σt
-    return π^2 * cis(μt) * z / (π^2 - (σt)^2)
+    return cis(μt) * z / (1 - (invπ * σt)^2)
 end
 
 #### Affine transformations
