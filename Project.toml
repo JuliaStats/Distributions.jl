@@ -1,7 +1,7 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-authors = ["JuliaStats"]
 version = "0.25.122"
+authors = ["JuliaStats"]
 
 [deps]
 AliasTables = "66dad0bd-aa9a-41b7-9441-69ab47430ed8"
@@ -41,7 +41,7 @@ Distributed = "<0.0.1, 1"
 FillArrays = "0.9, 0.10, 0.11, 0.12, 0.13, 1"
 FiniteDifferences = "0.12"
 ForwardDiff = "0.10, 1"
-JSON = "0.21"
+JSON = "0.21, 1"
 LinearAlgebra = "<0.0.1, 1"
 OffsetArrays = "1"
 PDMats = "0.11.35"
