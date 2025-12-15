@@ -115,23 +115,6 @@ function cdf(d::EKDist, x::Real)
     return (1 - ( 1 - xs^α)^β)^γ
 end
 
-function ccdf(d::EKDist, x::Real)
-      xs = (x - d.l) / (d.u - d.l)
-      α = d.α
-      β = d.β
-      γ = d.γ
-
-    return 1 - (1 - ( 1 - xs^α)^β)^γ
-end
-
-function logcdf(d::EKDist, x::Real)
-    return log(cdf(d, x))
-end
-
-function logccdf(d::EKDist, x::Real)
-    return log(ccdf(d, x))
-end
-
 function quantile(d::EKDist, q::Real)
     α = d.α
     β = d.β
