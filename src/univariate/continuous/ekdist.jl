@@ -1,25 +1,21 @@
 """
-    kumaraswamy(α,β,γ,l,u)
-The exponentiated (scaled) kumaraswamy (EK) distribution is 5 paramter two of which are normalizing constants (l,u) to a range.
-```
-```julia
-kumaraswamy()          # distribution with zero log-mean and unit scale
-params(d)            # Get the parameters, 
-```
-External links
-* [Wikipedia](https://en.wikipedia.org/wiki/Kumaraswamy_distribution
-* The exponentiated Kumaraswamy Distribution and its log-transform: Lemonte et al https://www.jstor.org/stable/43601233
+    EKDist(α, β, γ)
 
+The *exponentiated Kumaraswamy (EK) distribution* with shape parameters `α > 0`, `β > 0`,
+and `γ > 0` has probability density function
+
+```math
+f(x; α, β, γ) = α β γ x^{α - 1} (x - x^α)^{β - 1} (1 - (1 - x^α)^β)^{γ - 1}, \\quad 0 < x < 1
+```
+
+When `γ == 1`, this reduces to the [Kumaraswamy distribution](@ref Kumaraswamy).
+
+References
+
+- Lemonte, A. J., Barreto-Souza, W., & Cordeiro, G. M. (2013). The exponentiated Kumaraswamy
+  distribution and its log-transform. Brazilian Journal of Probability and Statistics, 27(1),
+  31–53. http://www.jstor.org/stable/43601233
 """
-## NEED TO ACCOMONDATE LOG(1 -1) when x hits the upper bound of support
-## I get errors in trying to extend Distiributions functions in the script because I don't understand modules lol
-using Distributions
-import Distributions: @check_args, @distr_support, params, convert, partype, beta, gamma
-import Distributions: AbstractRNG,  maximum, minimum, convert
-import Distributions:   pdf, logpdf, gradlogpdf, cdf, ccdf, logcdf, logccdf, quantile, cquantile, median, mean, var, skewness, kurtosis, mode
-import Distributions: fit_mle
-
-
 struct EKDist{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
