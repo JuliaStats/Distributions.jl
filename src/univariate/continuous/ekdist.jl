@@ -33,10 +33,7 @@ EKDist(α::Real, β::Real, γ::Real; check_args::Bool=true) =
 
 EKDist() = EKDist{Float64}(1.0, 1.0, 1.0)
 
-# @distr_support macro would set constant bounds but we need to take bounds from input
-# so we will just define them ourselves
-maximum(d::EKDist) = d.u
-minimum(d::EKDist) = d.l
+@distr_support EKDist 0 1
 
 #### Conversions
 convert(::Type{EKDist{T}}, α::S, β::S, γ::S, l::S, u::S) where {T <: Real, S <: Real} = 
