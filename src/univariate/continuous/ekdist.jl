@@ -23,9 +23,9 @@ struct EKDist{T<:Real} <: ContinuousUnivariateDistribution
     EKDist{T}(α, β, γ) where {T} = new{T}(α, β, γ)
 end
 
-function EKDist(α::T, β::T, γ::T, l::T, u::T; check_args::Bool=true) where {T <: Real}
-    @check_args EKDist (α, α ≥ zero(α)) (β, β ≥ zero(β)) (γ, γ ≥ zero(γ)) (l < u)
-    return EKDist{T}(α, β, γ, l, u) 
+function EKDist(α::T, β::T, γ::T; check_args::Bool=true) where {T<:Real}
+    @check_args EKDist (α, α > zero(α)) (β, β > zero(β)) (γ, γ > zero(γ))
+    return EKDist{T}(α, β, γ) 
 end
 
 EKDist(α::Real, β::Real, γ::Real, l::Real, u::Real; check_args::Bool=true) = 
