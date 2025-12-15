@@ -132,10 +132,7 @@ cquantile(d::EKDist, q::Real) = quantile(d, 1 - q)
 
 ## Fitting
 
-function fit_mle(::Type{<:EKDist}, x::AbstractArray{T}) where T<:Real
-    #incomplete
-end
-
+# `fit_mle` not yet implemented
 
 #### Statistics
 
