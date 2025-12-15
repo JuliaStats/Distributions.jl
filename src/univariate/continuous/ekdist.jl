@@ -20,9 +20,7 @@ struct EKDist{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
     γ::T
-    l::T
-    u::T
-    EKDist{T}(α, β, γ, l, u) where {T} = new{T}(α, β, γ, l, u) 
+    EKDist{T}(α, β, γ) where {T} = new{T}(α, β, γ)
 end
 
 function EKDist(α::T, β::T, γ::T, l::T, u::T; check_args::Bool=true) where {T <: Real}
