@@ -108,11 +108,9 @@ end
 
 
 function cdf(d::EKDist, x::Real)
-      xs = (x - d.l) / (d.u - d.l)
-      α = d.α
-      β = d.β
-      γ = d.γ
-    return (1 - ( 1 - xs^α)^β)^γ
+    α, β, γ = params(d)
+    y = (1 - (1 - clamp(x, 0, 1)^α)^β)^γ
+    return x < 0 ? zero(y) : (x > 1 ? one(y) : y)
 end
 
 function quantile(d::EKDist, q::Real)
