@@ -28,14 +28,10 @@ function EKDist(α::T, β::T, γ::T; check_args::Bool=true) where {T<:Real}
     return EKDist{T}(α, β, γ) 
 end
 
-EKDist(α::Real, β::Real, γ::Real, l::Real, u::Real; check_args::Bool=true) = 
-    EKDist(promote(α, β, γ, l, u)...; check_args=check_args)
+EKDist(α::Real, β::Real, γ::Real; check_args::Bool=true) =
+    EKDist(float.(promote(α, β, γ))...; check_args=check_args)
 
-EKDist(α::Integer, β::Integer, γ::Integer, l::Integer, u::Integer ; check_args::Bool=true) = 
-    EKDist(float(α), float(β), float(γ), float(l), float(u); check_args=check_args)
-
-EKDist(α::Real, β::Real, γ::Real; check_args::Bool=true) = EKDist(promote(α, β, γ, 0.0, 1.0)...; check_args=check_args)
-EKDist(α::Real, β::Real; check_args::Bool=true) = EKDist(promote(α, β, 1.0, 0.0, 1.0)...; check_args=check_args)
+EKDist() = EKDist{Float64}(1.0, 1.0, 1.0)
 
 # @distr_support macro would set constant bounds but we need to take bounds from input
 # so we will just define them ourselves
