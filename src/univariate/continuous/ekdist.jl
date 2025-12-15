@@ -168,7 +168,6 @@ end
 
 
 #### Statistics
-median(d::EKDist) = quantile(d, .5) # right?
 
 function ekdmoment(d::EKDist, k::Real)
     α = d.α
