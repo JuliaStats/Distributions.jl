@@ -59,40 +59,42 @@ kurtosis(d::Cosine{T}) where {T<:Real} = 6*(90-T(π)^4) / (5*(T(π)^2-6)^2)
 
 #### Evaluation
 
-function pdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+function pdf(d::Cosine{T}, x::Real) where T<:Real
     if insupport(d, x)
         z = (x - d.μ) / d.σ
         return (1 + cospi(z)) / (2d.σ)
     else
-        return zero(promote_type(T, S))
+        return zero(T)
     end
 end
 
-function logpdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
+function logpdf(d::Cosine{T}, x::Real) where T<:Real
     if insupport(d, x)
         z = (x - d.μ) / d.σ
         return log1p(cospi(z)) - log(2d.σ)
     else
-        return typemin(promote_type(T, S))
+        return typemin(T)
     end
 end
 
-function cdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
-    W = promote_type(T, S)
-
-    x < d.μ - d.σ && return zero(W)
-    x > d.μ + d.σ && return one(W)
-
+function cdf(d::Cosine{T}, x::Real) where T<:Real
+    if x < d.μ - d.σ
+        return zero(T)
+    end
+    if x > d.μ + d.σ
+        return one(T)
+    end
     z = (x - d.μ) / d.σ
     (1 + z + sinpi(z) * invπ) / 2
 end
 
-function ccdf(d::Cosine{T}, x::S) where {T<:Real, S<:Real}
-    W = promote_type(T, S)
-
-    x < d.μ - d.σ && return one(W)
-    x > d.μ + d.σ && return zero(W)
-
+function ccdf(d::Cosine{T}, x::Real) where T<:Real
+    if x < d.μ - d.σ
+        return one(T)
+    end
+    if x > d.μ + d.σ
+        return zero(T)
+    end
     nz = (d.μ - x) / d.σ
     (1 + nz + sinpi(nz) * invπ) / 2
 end
