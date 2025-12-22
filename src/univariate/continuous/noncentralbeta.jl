@@ -39,7 +39,7 @@ partype(::NoncentralBeta{T}) where {T} = T
 
 @_delegate_statsfuns NoncentralBeta nbeta α β λ
 
-# TODO: remove RFunctions dependency once NoncentralChisq has its removed
+# TODO: remove Rmath dependency once NoncentralChisq has its removed
 @rand_rdist(NoncentralBeta)
 
 function rand(d::NoncentralBeta)
