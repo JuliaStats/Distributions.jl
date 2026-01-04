@@ -37,13 +37,14 @@ struct DirichletMultinomial{T <: Real,V <: AbstractVector{T}} <: DiscreteMultiva
     α::V
     α0::T
 
-    function DirichletMultinomial(n::Integer, α::V) where {T <: Real, V <: AbstractVector{T}}
+    function DirichletMultinomial{T}(n::Integer, α::V) where {T <: Real, V <: AbstractVector{T}}
         α0 = sum(abs, α)
         sum(α) == α0 || throw(ArgumentError("alpha must be a positive vector."))
         n > 0 || throw(ArgumentError("n must be a positive integer."))
         new{T,V}(Int(n), α, α0)
     end
 end
+DirichletMultinomial(n::Integer, α::Vector{T}) where {T <: Real} = DirichletMultinomial{T}(n, α)
 DirichletMultinomial(n::Integer, α::Vector{T}) where {T <: Integer} = DirichletMultinomial(n, float(α))
 DirichletMultinomial(n::Integer, k::Integer) = DirichletMultinomial(n, ones(k))
 
