@@ -45,7 +45,7 @@ struct DirichletMultinomial{T <: Real,V <: AbstractVector{T}} <: DiscreteMultiva
     end
 end
 DirichletMultinomial(n::Integer, α::AbstractVector{T}) where {T <: Real} = DirichletMultinomial{T}(n, α)
-DirichletMultinomial(n::Integer, α::Vector{T}) where {T <: Integer} = DirichletMultinomial(n, float(α))
+DirichletMultinomial(n::Integer, α::AbstractVector{T}) where {T <: Integer} = DirichletMultinomial(n, float(α))
 DirichletMultinomial(n::Integer, k::Integer) = DirichletMultinomial(n, ones(k))
 
 Base.show(io::IO, d::DirichletMultinomial) = show(io, d, (:n, :α,))
