@@ -79,6 +79,6 @@ end
 
 @_delegate_statsfuns NoncentralChisq nchisq ν λ
 
-# TODO: remove RFunctions dependency
+# TODO: remove Rmath dependency
 @rand_rdist(NoncentralChisq)
-rand(d::NoncentralChisq) = StatsFuns.RFunctions.nchisqrand(d.ν, d.λ)
+rand(d::NoncentralChisq) = Rmath.rnchisq(d.ν, d.λ)
