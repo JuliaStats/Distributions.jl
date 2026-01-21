@@ -60,8 +60,8 @@ GeneralizedExtremeValue <- R6Class("GeneralizedExtremeValue",
                      entropy = ent)
             }
         },
-        pdf = function(x, log=FALSE) { dgev(x, self$mu, self$sigma, self$xi, log=log) },
-        cdf = function(x) { pgev(x, self$mu, self$sigma, self$xi) },
-        quan = function(v) { qgev(v, self$mu, self$sigma, self$xi) }
+        pdf = function(x, log=FALSE) { extraDistr::dgev(x, self$mu, self$sigma, self$xi, log=log) },
+        cdf = function(x) { extraDistr::pgev(x, self$mu, self$sigma, self$xi) },
+        quan = function(v) { extraDistr::qgev(v, self$mu, self$sigma, self$xi) }
     )
 )
