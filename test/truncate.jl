@@ -62,17 +62,18 @@ _json_value(x::AbstractString) =
 
 function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify stats
-    @test minimum(d) ≈ max(_json_value(dct["minimum"]),d.lower)
-    @test maximum(d) ≈ min(_json_value(dct["maximum"]),d.upper)
+    @test minimum(d) ≈ max(_json_value(dct["minimum"]), something(d.lower, minimum(d.untruncated)))
+    @test maximum(d) ≈ min(_json_value(dct["maximum"]), something(d.upper, maximum(d.untruncated)))
     @test extrema(d) == (minimum(d), maximum(d))
     @test d == deepcopy(d)
 
     # verify logpdf and cdf at certain points
+    lower, upper = extrema(d)
     pts = dct["points"]
     for pt in pts
         x = _parse_x(d, pt["x"])
-        lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
-        cf = x < d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
+        lp = lower <= x <= upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
+        cf = x < lower ? 0.0 : x >= upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
         if !isa(d, Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous})
             @test logpdf(d, x) ≈ lp atol=sqrt(eps())
         end
@@ -146,7 +147,16 @@ for bound in (-2, 1)
     @test truncated(Normal(); lower=nothing, upper=bound) == d_nothing
     @test extrema(d_nothing) == promote(-Inf, bound)
 end
-@test truncated(Normal()) === Normal()
+@testset "no-op truncation" begin
+    @test truncated(Normal()) === Normal()
+    @test truncated(Normal(), -Inf, Inf) === Normal()
+    @test truncated(Poisson(), 0, Inf) === Poisson()
+    @test truncated(Kumaraswamy(), -1, 2) === Kumaraswamy()
+end
+@testset "equivalent truncations" begin
+    @test truncated(Beta(), -1, 0.5) === truncated(Beta(), 0, 0.5) === truncated(Beta(), nothing, 0.5)
+    @test truncated(Beta(), 0.5, 2) === truncated(Beta(), 0.5, 1) === truncated(Beta(), 0.5, nothing)
+end
 
 ## main
 
