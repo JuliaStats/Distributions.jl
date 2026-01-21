@@ -223,8 +223,10 @@ export
     logdiffcdf,         # log of difference between cdf at two values
     logdetcov,          # log-determinant of covariance
     loglikelihood,      # log probability of array of IID draws
+    logulikelihood,     # unnormalized log probability of array of IID draws
     logpdf,             # log probability density
     logpdf!,            # evaluate log pdf to provided storage
+    logupdf,            # unnormalized log probability density
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
@@ -268,10 +270,11 @@ export
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
     truncated,          # truncate a distribution with a lower and upper bound
+    updf,               # unnormalized probability density
     var,                # variance of distribution
     varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant
-    gradlogpdf,         # gradient (or derivative) of logpdf(d,x) wrt x
+    gradlogpdf,         # gradient (or derivative) of logpdf(d,x) and logupdf(d,x) wrt x
 
     # reexport from StatsBase
     sample, sample!,        # sample from a source array
