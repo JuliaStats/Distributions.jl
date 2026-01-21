@@ -1,12 +1,17 @@
 """
-    Erlang(α,θ)
+    Erlang(α=1,θ=1)
 
 The *Erlang distribution* is a special case of a [`Gamma`](@ref) distribution with integer shape parameter.
 
+```math
+f(x; α, θ) = \\frac{x^{α-1} e^{-x/ θ}}{(α-1)! θ^a},
+\\quad x > 0
+```
+
 ```julia
 Erlang()       # Erlang distribution with unit shape and unit scale, i.e. Erlang(1, 1)
-Erlang(a)      # Erlang distribution with shape parameter a and unit scale, i.e. Erlang(a, 1)
-Erlang(a, s)   # Erlang distribution with shape parameter a and scale s
+Erlang(α)      # Erlang distribution with shape parameter a and unit scale, i.e. Erlang(a, 1)
+Erlang(α, θ)   # Erlang distribution with shape parameter a and scale s
 ```
 
 External links
