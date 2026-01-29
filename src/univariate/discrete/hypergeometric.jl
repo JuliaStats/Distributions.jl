@@ -90,14 +90,14 @@ entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))
 #   Journal of Statistical Computation and Simulation, 22(2):127-145
 #   doi:10.1080/00949658508810839
 @rand_rdist(Hypergeometric)
-function rand(d::Hypergeometric)
+function rand(rng::AbstractRNG, d::Hypergeometric)
     # 0.0
     n1s, n2s, ks = d.ns, d.nf, d.n
     n1, n2, k = d.ns, d.nf, d.n
     n = n1+n2
     n1, n2 = minmax(n1, n2)
     k = min(k, n-k)
-    y = _hyper(n, n1, n2, k)
+    y = _hyper(rng, n, n1, n2, k)
     if 2ks < n
         if n1s <= n2s
             return y
@@ -111,7 +111,7 @@ function rand(d::Hypergeometric)
     end
 end
 
-function _hyper(n, n1, n2, k)
+function _hyper(rng, n, n1, n2, k)
     # 0.1 Use HIN algorithm if fast
     M = fld((k+1)*(n1+1), n+2)
     if M - max(0, k-n2) < 10
@@ -122,7 +122,7 @@ function _hyper(n, n1, n2, k)
             p = gamma(n1+1)*gamma(k+1)/(gamma(n1+n2+1)*gamma(k-n2+1))
             x = k-n2
         end
-        u = rand()
+        u = rand(rng)
         while u > p
             u -=p
             p *= (n1-x)*(k-x)/((x+1)*(n2-k+1+x))
@@ -146,7 +146,7 @@ function _hyper(n, n1, n2, k)
         # Generate u U(0, p,) for selecting the region, v .v U(0,l) for
         # the acceptlreject decision. If region 1 is selected, generate a
         # uniform variate between xL, and xR.
-        u, v = p3*rand(), rand()
+        u, v = p3*rand(rng), rand(rng)
         local y::Int
         if u <= p1
             y = floor(Int, xL + u)
