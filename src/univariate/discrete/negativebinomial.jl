@@ -107,7 +107,6 @@ function logpdf(d::NegativeBinomial, k::Real)
     return insupport(d, k) ? z - log(k + r) - logbeta(r, k + 1) : oftype(z, -Inf)
 end
 
-# cdf and quantile functions are more involved so we still rely on Rmath
 cdf(d::NegativeBinomial, x::Real) = nbinomcdf(d.r, d.p, x)
 ccdf(d::NegativeBinomial, x::Real) = nbinomccdf(d.r, d.p, x)
 logcdf(d::NegativeBinomial, x::Real) = nbinomlogcdf(d.r, d.p, x)
