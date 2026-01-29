@@ -327,6 +327,13 @@ plotdensity((-4, 8), Logistic, (2, 1)) # hide
 ```
 
 ```@docs
+LogLogistic
+```
+```@example plotdensity
+plotdensity((0, 2), LogLogistic, (2, 1)) # hide
+```
+
+```@docs
 LogitNormal
 ```
 ```@example plotdensity
