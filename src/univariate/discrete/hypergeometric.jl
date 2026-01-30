@@ -89,7 +89,6 @@ entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))
 #   "Computer generation of hypergeometric random variates"
 #   Journal of Statistical Computation and Simulation, 22(2):127-145
 #   doi:10.1080/00949658508810839
-@rand_rdist(Hypergeometric)
 function rand(rng::AbstractRNG, d::Hypergeometric)
     # 0.0
     n1s, n2s, ks = d.ns, d.nf, d.n

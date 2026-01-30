@@ -78,7 +78,8 @@ end
 ### Evaluation & Sampling
 
 @_delegate_statsfuns NoncentralChisq nchisq ν λ
-
-# TODO: remove Rmath dependency
-@rand_rdist(NoncentralChisq)
-rand(d::NoncentralChisq) = Rmath.rnchisq(d.ν, d.λ)
+function rand(rng::AbstractRNG, d::NoncentralChisq)
+    # use symmetry of distribution as suggested in
+    # https://mathstoshare.com/2022/05/26/sampling-from-the-non-central-chi-squared-distribution/
+    return (randn(rng) + sqrt(d.λ))^2 + rand(rng, Chisq(d.ν-1))
+end
