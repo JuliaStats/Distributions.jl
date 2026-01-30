@@ -1,7 +1,7 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-authors = ["JuliaStats"]
 version = "0.25.123"
+authors = ["JuliaStats"]
 
 [deps]
 AliasTables = "66dad0bd-aa9a-41b7-9441-69ab47430ed8"
@@ -44,8 +44,8 @@ FiniteDifferences = "0.12"
 ForwardDiff = "0.10, 1"
 JSON = "0.21"
 LinearAlgebra = "<0.0.1, 1"
-Optim = "1.13"
 OffsetArrays = "1"
+Optim = "1.13, 2"
 PDMats = "0.11.35"
 Printf = "<0.0.1, 1"
 QuadGK = "2"
@@ -72,8 +72,8 @@ Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
