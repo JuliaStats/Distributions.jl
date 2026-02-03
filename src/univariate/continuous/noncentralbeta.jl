@@ -39,15 +39,6 @@ partype(::NoncentralBeta{T}) where {T} = T
 
 @_delegate_statsfuns NoncentralBeta nbeta α β λ
 
-# TODO: remove Rmath dependency once NoncentralChisq has its removed
-@rand_rdist(NoncentralBeta)
-
-function rand(d::NoncentralBeta)
-    a = rand(NoncentralChisq(2d.α, d.λ))
-    b = rand(Chisq(2d.β))
-    a / (a + b)
-end
-
 function rand(rng::AbstractRNG, d::NoncentralBeta)
     a = rand(rng, NoncentralChisq(2d.α, d.λ))
     b = rand(rng, Chisq(2d.β))
