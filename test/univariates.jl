@@ -48,7 +48,7 @@ _json_value(x::AbstractString) =
     error("Invalid numerical value: $x")
 
 
-function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
+function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct::AbstractDict, n_tsamples::Int)
     # verify properties
     #
     # Note: properties include all applicable params and stats

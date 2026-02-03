@@ -60,7 +60,7 @@ _json_value(x::AbstractString) =
     x == "nan" ? NaN :
     error("Invalid numerical value: $x")
 
-function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
+function verify_and_test(d::UnivariateDistribution, dct::AbstractDict, n_tsamples::Int)
     # verify stats
     @test minimum(d) ≈ max(_json_value(dct["minimum"]),d.lower)
     @test maximum(d) ≈ min(_json_value(dct["maximum"]),d.upper)

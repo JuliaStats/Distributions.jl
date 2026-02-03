@@ -2,7 +2,7 @@
 
 
 using Distributions
-using Test, Random, SpecialFunctions
+using Test, Random, SpecialFunctions, StaticArrays
 
 Random.seed!(123)
 
@@ -44,18 +44,23 @@ d = fit(DirichletMultinomial, x)
 @test isapprox(cov(d) , cov(x, dims=2)      , atol=.5)
 
 # test Evaluation
-d = DirichletMultinomial(10, 5)
-@test typeof(d) == DirichletMultinomial{Float64}
-@test !insupport(d, func[1](5))
-@test insupport(d, [2, 2, 2, 2, 2])
-@test insupport(d, 2.0 * ones(5))
-@test !insupport(d, 3.0 * ones(5))
+@testset "Dirichlet evaluation and non-Vector arguments" begin
+    αS = SVector(0.1, 0.7, 9.2, 3.7, 0.4)
+    for (d, T) in (DirichletMultinomial(10, 5) => DirichletMultinomial{Float64,Vector{Float64}},
+                   DirichletMultinomial(10, αS) => DirichletMultinomial{Float64,typeof(αS)})
+        @test typeof(d) == T
+        @test !insupport(d, func[1](5))
+        @test insupport(d, [2, 2, 2, 2, 2])
+        @test insupport(d, 2.0 * ones(5))
+        @test !insupport(d, 3.0 * ones(5))
 
-for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 10])
-    @test pdf(d, x) ≈
-        factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α .+ x) ./ (gamma.(x .+ 1) .* gamma.(d.α)))
-    @test logpdf(d, x) ≈
-        logfactorial(d.n) + loggamma(d.α0) - loggamma(d.n + d.α0) + sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(loggamma.(x .+ 1))
+        for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 10])
+            @test pdf(d, x) ≈
+                factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α .+ x) ./ (gamma.(x .+ 1) .* gamma.(d.α)))
+            @test logpdf(d, x) ≈
+                logfactorial(d.n) + loggamma(d.α0) - loggamma(d.n + d.α0) + sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(loggamma.(x .+ 1))
+        end
+    end
 end
 
 # test Sampling
