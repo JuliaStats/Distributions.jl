@@ -43,15 +43,13 @@ partype(::NoncentralBeta{T}) where {T} = T
 @rand_rdist(NoncentralBeta)
 
 function rand(d::NoncentralBeta)
-    β = d.β
-    a = rand(NoncentralChisq(2d.α, β))
-    b = rand(Chisq(2β))
+    a = rand(NoncentralChisq(2d.α, d.λ))
+    b = rand(Chisq(2d.β))
     a / (a + b)
 end
 
 function rand(rng::AbstractRNG, d::NoncentralBeta)
-    β = d.β
-    a = rand(rng, NoncentralChisq(2d.α, β))
-    b = rand(rng, Chisq(2β))
+    a = rand(rng, NoncentralChisq(2d.α, d.λ))
+    b = rand(rng, Chisq(2d.β))
     a / (a + b)
 end
