@@ -25,8 +25,9 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
+using LogExpFunctions: logabssinh, log1psq
 using Base.MathConstants: eulergamma
-
+using IrrationalConstants: invπ
 import AliasTables
 import Rmath
 
