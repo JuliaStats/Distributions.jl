@@ -36,6 +36,7 @@ Hypergeometric(3, 2, 0)
 Hypergeometric(3, 2, 5)
 Hypergeometric(4, 5, 6)
 Hypergeometric(60, 80, 100)
+Hypergeometric(200, 200, 10)
 
 NegativeBinomial()
 NegativeBinomial(6)
