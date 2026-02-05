@@ -144,10 +144,6 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # generic testing
     if isa(d, Cosine)
         n_tsamples = floor(Int, n_tsamples / 10)
-    elseif isa(d, NoncentralChisq) ||
-           isa(d, NoncentralF) ||
-           isa(d, NoncentralT)
-        n_tsamples = min(n_tsamples, 100)
     end
 
     if !isa(d, Union{Skellam,
