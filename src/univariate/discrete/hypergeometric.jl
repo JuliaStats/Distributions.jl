@@ -94,7 +94,7 @@ function rand(rng::AbstractRNG, d::Hypergeometric)
     (;ns, nf, n) = d
     ntotal= ns+nf
     ns, nf = minmax(ns, nf)
-    n = min(n, ntotal-n)
+    n = min(n, ntotal - n)
     y = _hyper(rng, ntotal, ns, nf, n)
     if 2*d.n < ntotal
         if d.ns <= d.nf
@@ -112,7 +112,7 @@ end
 function _hyper(rng, ntotal, ns, nf, n)
     # step 0.1 Use HIN algorithm if fast
     M = fld((n + 1) * (ns + 1), ntotal + 2)
-    if M - max(0, n-nf) < 10
+    if M - max(0, n - nf) < 10
         if n < nf
             p = gamma(nf + 1) * gamma(ntotal - n + 1) / (gamma(ntotal + 1) * gamma(nf - n + 1))
             x = 0
@@ -132,7 +132,7 @@ function _hyper(rng, ntotal, ns, nf, n)
         loggamma(ns - M + 1) +
         loggamma(n - M + 1) +
         loggamma(nf - n + M + 1)
-    D = 1.5 * sqrt((ntotal - n) * n * ns * nf / ((ntotal-1) * ntotal^2)) + 0.5
+    D = 1.5 * sqrt((ntotal - n) * n * ns * nf / ((ntotal - 1) * ntotal^2)) + 0.5
     xL = M - D + 0.5
     xR = M + D + 0.5
     nL = exp(
@@ -161,7 +161,6 @@ function _hyper(rng, ntotal, ns, nf, n)
         # v = U(0,1) for the accept reject decision. 
         u = p3 * rand(rng)
         v = rand(rng)
-        logv = log(v)
         local y::Int
         if u <= p1
             # Region 1: is selected, generate a
@@ -169,12 +168,12 @@ function _hyper(rng, ntotal, ns, nf, n)
             y = floor(Int, xL + u)
         elseif u <= p2
             # Region 2: left exponential tail
-            y = floor(Int, xL + logv / λL)
+            y = floor(Int, xL + log(v) / λL)
             y < max(0, n - nf) && continue
             v *= (u - p1) * λL
         else
             # Region 3. Right exponential tail
-            y = floor(Int, xR - logv / λR)
+            y = floor(Int, xR - log(v) / λR)
             y > min(ns, n) && continue
             v *= (u - p2) * λR
         end
@@ -184,10 +183,11 @@ function _hyper(rng, ntotal, ns, nf, n)
         # f(y+1) = f(y)(ns-y)(n-y)/((y+1)(nf-y+1))
         
         # 4.2 Squeezing: Check the value of ln(v) against upper and lower bound of ln(f(y))
+        logv = log(v)
         yn = ns - y + 1
         yk = n - y + 1
         nk = nf - n + y + 1
-        RSTE = (y - M) ./ (-y - 1, yn, yk, -nk)
+        RSTE = (y - M) ./ (- y - 1, yn, yk, -nk)
         G = yn * yk / muladd(y, nk, nk) - 1
 
         coefs = (0.0, 1.0, -1/2, 1/3)
@@ -199,7 +199,7 @@ function _hyper(rng, ntotal, ns, nf, n)
         Ub = sum(XMSTE .* evalpoly.(RSTE, Ref(coefs))) + y * GU - M * GL + 0.0034
         logv > Ub && continue
         
-        DRSTE = @. XMSTE*(RSTE^2)^2 / (1 + min(RSTE, 0.0))
+        DRSTE = XMSTE .* (RSTE.^2).^2 ./ (1 .+ min.(RSTE, 0.0))
         if logv < Ub - 0.25 * sum(DRSTE) + (y + M) * (GL - GU) - 0.0078
             return y
         end
