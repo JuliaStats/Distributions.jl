@@ -135,6 +135,8 @@ import Distributions:
             MvNormal(zeros(3), I),
             Normal(1.5, 2.0),
             Poisson(0.5),
+            Hypergeometric(2, 2, 2)
+            Hypergeometric(100, 200, 40)
         )
             @test Random.Sampler(rng, dist, Val(1)) == dist
             @test Random.Sampler(rng, dist) == sampler(dist)
