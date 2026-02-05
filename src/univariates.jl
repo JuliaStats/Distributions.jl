@@ -693,8 +693,10 @@ const continuous_distributions = [
     "frechet",
     "gamma", "erlang",
     "pgeneralizedgaussian", # GeneralizedGaussian depends on Gamma
+    "generalizedhyperbolic",
     "generalizedpareto",
     "generalizedextremevalue",
+    "generalizedinversegaussian",
     "gumbel",
     "inversegamma",
     "inversegaussian",
