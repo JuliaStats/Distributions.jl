@@ -151,6 +151,7 @@ canonform(d::MvNormal{T,C,Zeros{T}}) where {C, T<:Real} = MvNormalCanon(inv(d.Σ
 ### Basic statistics
 
 length(d::MvNormalCanon) = length(d.μ)
+Base.axes(d::MvNormalCanon) = axes(d.h)
 mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
 params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T

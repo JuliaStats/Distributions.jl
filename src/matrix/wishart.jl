@@ -102,6 +102,8 @@ end
 
 size(d::Wishart) = size(d.S)
 
+Base.axes(d::Wishart) = axes(d.S)
+
 rank(d::Wishart) = d.rank
 params(d::Wishart) = (d.df, d.S)
 @inline partype(d::Wishart{T}) where {T<:Real} = T

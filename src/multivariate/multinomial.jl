@@ -43,6 +43,7 @@ end
 
 ncategories(d::Multinomial) = length(d.p)
 length(d::Multinomial) = ncategories(d)
+Base.axes(d::Multinomial) = axes(d.p)
 probs(d::Multinomial) = d.p
 ntrials(d::Multinomial) = d.n
 
@@ -63,37 +64,20 @@ mean(d::Multinomial) = d.n .* d.p
 
 function var(d::Multinomial{T}) where T<:Real
     p = probs(d)
-    k = length(p)
     n = ntrials(d)
 
-    v = Vector{T}(undef, k)
-    for i = 1:k
-        p_i = p[i]
-        v[i] = n * p_i * (1 - p_i)
-    end
+    v = @. n * p * (1 - p)
     v
 end
 
 function cov(d::Multinomial{T}) where T<:Real
     p = probs(d)
-    k = length(p)
+    ax = axes(p, 1)
     n = ntrials(d)
 
-    C = Matrix{T}(undef, k, k)
-    for j = 1:k
-        pj = p[j]
-        for i = 1:j-1
-            C[i,j] = - n * p[i] * pj
-        end
-
-        C[j,j] = n * pj * (1-pj)
-    end
-
-    for j = 1:k-1
-        for i = j+1:k
-            C[i,j] = C[j,i]
-        end
-    end
+    C = similar(p, T, (ax, ax))
+    @. C = -n * p * p'
+    C[diagind(C)] .+= n .* p
     C
 end
 
@@ -168,7 +152,7 @@ end
 _rand!(rng::AbstractRNG, d::Multinomial, x::AbstractVector{<:Real}) =
     multinom_rand!(rng, ntrials(d), probs(d), x)
 
-sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))
+sampler(d::Multinomial) = MultinomialSampler(ntrials(d), convert(Vector, probs(d)))
 
 
 ## Fit model
