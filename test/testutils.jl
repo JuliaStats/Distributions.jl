@@ -445,6 +445,7 @@ end
 
 
 function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
+    T = eltype(vs)
     nv  = length(vs)
     p   = Vector{Float64}(undef, nv)
     c   = Vector{Float64}(undef, nv)
@@ -475,11 +476,10 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, 
         if testquan
             ep = 1.0e-8
             if p[i] > 2 * ep   # ensure p[i] is large enough to guarantee a reliable result
-                @test quantile(d, c[i] - ep) == v
-                @test cquantile(d, cc[i] + ep) == v
-                @test invlogcdf(d, lc[i] - ep) == v
-                if 0.0 < c[i] < 1.0
-                    @test invlogccdf(d, lcc[i] + ep) == v
+                for (f, z) in ((quantile, c[i] - ep), (cquantile, cc[i] + ep), (invlogcdf, lc[i] - ep), (invlogccdf, lcc[i] + ep))
+                    fz = @inferred(f(d, z))
+                    @test fz isa T
+                    @test fz == v
                 end
             end
         end
@@ -497,6 +497,7 @@ end
 
 
 function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
+    T = eltype(vs)
     nv  = length(vs)
     p   = Vector{Float64}(undef, nv)
     c   = Vector{Float64}(undef, nv)
@@ -532,10 +533,11 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
             qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
             qtol = isa(d, StudentizedRange) ? 1.0e-5 : qtol
             if p[i] > 1.0e-6
-                @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
-                @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
-                @test isapprox(invlogcdf(d, lc[i])  , v, atol=qtol * (abs(v) + 1.0))
-                @test isapprox(invlogccdf(d, lcc[i]), v, atol=qtol * (abs(v) + 1.0))
+                for (f, z) in ((quantile, c[i]), (cquantile, cc[i]), (invlogcdf, lc[i]), (invlogccdf, lcc[i]))
+                    fz = @inferred(f(d, z))
+                    @test fz isa T
+                    @test fz ≈ v atol = qtol * (abs(v) + 1.0)
+                end
             end
         end
     end
