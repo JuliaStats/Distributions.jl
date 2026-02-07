@@ -27,6 +27,16 @@ in addition to the R language itself:
 | LindleyR    | For ``Lindley`` |
 | ExtDist     | For ``JohnsonSU`` |
 
+They can be installed using:
+
+```R
+install.packages(c("stringr", "R6", "extraDistr", "VGAM", "distr", "chi", "circular",
+                   "statmod", "skellam", "BiasedUrn", "fBasics", "gnorm", "ExtDist"))
+# LindleyR has been archived by CRAN
+install.packages("lamW")
+install.packages("https://cran.r-project.org/src/contrib/Archive/LindleyR/LindleyR_1.1.0.tar.gz")
+```
+
 ## Usage
 
 All reference classes are in ``test/ref/continuous`` and ``test/ref/discrete``. One R file for each distribution class.

@@ -14,6 +14,7 @@ StudentizedRange <- R6Class("StudentizedRange",
             d1 <- self$nu
             k <- self$k
         },
+        pdf = function(x, log=FALSE) rep(NaN, length(x)),
         cdf = function(x) { ptukey(x, self$k, self$nu) },
         quan = function(v) { qtukey(v, self$k, self$nu) }
     )

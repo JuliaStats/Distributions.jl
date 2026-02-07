@@ -4,6 +4,8 @@ using Distributions
 import JSON
 using  Test
 
+# R needs a simple type name
+TruncatedNormal(μ, σ, a, b) = truncated(Normal(μ, σ), lower=a, upper=b)
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
@@ -23,7 +25,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         println("    testing $(ex)")
         dtype = eval(dsym)
         d = eval(ex)
-        if dsym == :truncated
+        if dsym == :TruncatedNormal
             @test isa(d, Truncated{Normal{Float64}})
         else
             @test dtype isa Type && dtype <: UnivariateDistribution
