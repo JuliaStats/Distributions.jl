@@ -76,7 +76,7 @@ function logpdf(d::Skellam, x::Real)
     μ1, μ2 = params(d)
     if insupport(d, x)
         besselarg =  2*sqrt(μ1*μ2)
-        return - (μ1 + μ2) + xlogy(x/2, μ1/μ2) - besselarg + log(besselix(x, besselarg))
+        return - (μ1 + μ2) + xlogy(x/2, μ1/μ2) + besselarg + log(besselix(x, besselarg))
     else
         return one(x) / 2 * log(zero(μ1/μ2))
     end
