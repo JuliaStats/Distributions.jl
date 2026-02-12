@@ -81,13 +81,4 @@ entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))
 ### Evaluation & Sampling
 
 @_delegate_statsfuns Hypergeometric hyper ns nf n
-
-## sampling
-
-# TODO: remove Rmath dependency. Implement:
-#   V. Kachitvichyanukul & B. Schmeiser
-#   "Computer generation of hypergeometric random variates"
-#   Journal of Statistical Computation and Simulation, 22(2):127-145
-#   doi:10.1080/00949658508810839
-@rand_rdist(Hypergeometric)
-rand(d::Hypergeometric) = convert(Int, Rmath.rhyper(d.ns, d.nf, d.n))
+sampler(dist::Hypergeometric) = HypergeometricSampler(dist)
