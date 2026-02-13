@@ -5,8 +5,11 @@ using Random, Test
 using StatsFuns
 
 ####### Core testing procedure
-function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
-                          rng::Union{AbstractRNG, Missing} = missing)
+function test_logitnormal(
+    g::LogitNormal,
+    n_tsamples::Int = 10^6,
+    rng::Union{AbstractRNG,Missing} = missing,
+)
     d = length(g)
     #mn = mean(g)
     md = median(g)
@@ -20,16 +23,16 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
     #@test isa(s, Float64)
     @test md ≈ logistic(g.μ)
     #@test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
-     @test insupport(g,1e-8)
-     # corner cases of 0 and 1 handled as in support
-     @test insupport(g,1.0)
-     @test pdf(g,0.0) == 0.0
-     @test insupport(g,0.0)
-     @test pdf(g,1.0) == 0.0
-     @test !insupport(g,-1e-8)
-     @test pdf(g,-1e-8) == 0.0
-     @test !insupport(g,1+1e-8)
-     @test pdf(g,1+1e-8) == 0.0
+    @test insupport(g, 1e-8)
+    # corner cases of 0 and 1 handled as in support
+    @test insupport(g, 1.0)
+    @test pdf(g, 0.0) == 0.0
+    @test insupport(g, 0.0)
+    @test pdf(g, 1.0) == 0.0
+    @test !insupport(g, -1e-8)
+    @test pdf(g, -1e-8) == 0.0
+    @test !insupport(g, 1 + 1e-8)
+    @test pdf(g, 1 + 1e-8) == 0.0
 
     # sampling
     if ismissing(rng)
@@ -44,9 +47,9 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
         @test logpdf(g, X[i]) ≈ log(pdf(g, X[i]))
     end
     @test Base.Fix1(logpdf, g).(X) ≈ log.(Base.Fix1(pdf, g).(X))
-    @test isequal(logpdf(g, 0),-Inf)
-    @test isequal(logpdf(g, 1),-Inf)
-    @test isequal(logpdf(g, -eps()),-Inf)
+    @test isequal(logpdf(g, 0), -Inf)
+    @test isequal(logpdf(g, 1), -Inf)
+    @test isequal(logpdf(g, -eps()), -Inf)
 
     # test the location and scale functions
     @test location(g) == g.μ
@@ -57,12 +60,12 @@ end
 
 ###### General Testing
 @testset "Logitnormal tests" begin
-    test_logitnormal( LogitNormal() )
-    test_logitnormal( LogitNormal(2,0.5) )
+    test_logitnormal(LogitNormal())
+    test_logitnormal(LogitNormal(2, 0.5))
     d = LogitNormal(Float32(2))
     typeof(rand(d, 5)) # still Float64
     @test convert(LogitNormal{Float32}, d) === d
-    @test typeof(convert(LogitNormal{Float64}, d)) == typeof(LogitNormal(2,1))
+    @test typeof(convert(LogitNormal{Float64}, d)) == typeof(LogitNormal(2, 1))
 end
 
 @testset "LogitNormal: Degenerate case" begin
@@ -100,12 +103,12 @@ end
 
     @test @inferred(pdf(LogitNormal(0.0, 0.0), BigInt(-1))) == big(0.0)
     @test @inferred(pdf(LogitNormal(0.0, 0.0), BigInt(0))) == big(0.0)
-    @test @inferred(pdf(LogitNormal(0.0, 0.0), BigInt(1)//BigInt(2))) == big(Inf)
+    @test @inferred(pdf(LogitNormal(0.0, 0.0), BigInt(1) // BigInt(2))) == big(Inf)
     @test @inferred(pdf(LogitNormal(0.0, 0.0), BigInt(1))) == big(0.0)
     @test @inferred(pdf(LogitNormal(0.0, 0.0), BigInt(2))) == big(0.0)
     @test @inferred(pdf(LogitNormal(0.0, 0.0), BigFloat(-1))) == big(0.0)
     @test @inferred(pdf(LogitNormal(0.0, 0.0), BigFloat(0))) == big(0.0)
-    @test @inferred(pdf(LogitNormal(0.0, 0.0), BigFloat(1//2))) == big(Inf)
+    @test @inferred(pdf(LogitNormal(0.0, 0.0), BigFloat(1 // 2))) == big(Inf)
     @test @inferred(pdf(LogitNormal(0.0, 0.0), BigFloat(1))) == big(0.0)
     @test @inferred(pdf(LogitNormal(0.0, 0.0), BigFloat(2))) == big(0.0)
     @test isnan(@inferred(pdf(LogitNormal(0.0, 0.0), BigFloat(NaN)))::BigFloat)
@@ -143,12 +146,12 @@ end
 
     @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigInt(-1))) == big(-Inf)
     @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigInt(0))) == big(-Inf)
-    @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigInt(1)//BigInt(2))) == big(Inf)
+    @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigInt(1) // BigInt(2))) == big(Inf)
     @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigInt(1))) == big(-Inf)
     @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigInt(2))) == big(-Inf)
     @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigFloat(-1))) == big(-Inf)
     @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigFloat(0))) == big(-Inf)
-    @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigFloat(1//2))) == big(Inf)
+    @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigFloat(1 // 2))) == big(Inf)
     @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigFloat(1))) == big(-Inf)
     @test @inferred(logpdf(LogitNormal(0.0, 0.0), BigFloat(2))) == big(-Inf)
     @test isnan(@inferred(logpdf(LogitNormal(0.0, 0.0), BigFloat(NaN)))::BigFloat)
@@ -186,12 +189,12 @@ end
 
     @test @inferred(cdf(LogitNormal(0.0, 0.0), BigInt(-1))) == big(0.0)
     @test @inferred(cdf(LogitNormal(0.0, 0.0), BigInt(0))) == big(0.0)
-    @test @inferred(cdf(LogitNormal(0.0, 0.0), BigInt(1)//BigInt(2))) == big(1.0)
+    @test @inferred(cdf(LogitNormal(0.0, 0.0), BigInt(1) // BigInt(2))) == big(1.0)
     @test @inferred(cdf(LogitNormal(0.0, 0.0), BigInt(1))) == big(1.0)
     @test @inferred(cdf(LogitNormal(0.0, 0.0), BigInt(2))) == big(1.0)
     @test @inferred(cdf(LogitNormal(0.0, 0.0), BigFloat(-1))) == big(0.0)
     @test @inferred(cdf(LogitNormal(0.0, 0.0), BigFloat(0))) == big(0.0)
-    @test @inferred(cdf(LogitNormal(0.0, 0.0), BigFloat(1//2))) == big(1.0)
+    @test @inferred(cdf(LogitNormal(0.0, 0.0), BigFloat(1 // 2))) == big(1.0)
     @test @inferred(cdf(LogitNormal(0.0, 0.0), BigFloat(1))) == big(1.0)
     @test @inferred(cdf(LogitNormal(0.0, 0.0), BigFloat(2))) == big(1.0)
     @test isnan(@inferred(cdf(LogitNormal(0.0, 0.0), big(NaN)))::BigFloat)
@@ -229,12 +232,12 @@ end
 
     @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigInt(-1))) == big(-Inf)
     @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigInt(0))) == big(-Inf)
-    @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigInt(1)//BigInt(2))) == big(0.0)
+    @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigInt(1) // BigInt(2))) == big(0.0)
     @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigInt(1))) == big(0.0)
     @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigInt(2))) == big(0.0)
     @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigFloat(-1))) == big(-Inf)
     @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigFloat(0))) == big(-Inf)
-    @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigFloat(1//2))) == big(0.0)
+    @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigFloat(1 // 2))) == big(0.0)
     @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigFloat(1))) == big(0.0)
     @test @inferred(logcdf(LogitNormal(0.0, 0.0), BigFloat(2))) == big(0.0)
     @test isnan(@inferred(logcdf(LogitNormal(0.0, 0.0), big(NaN)))::BigFloat)
@@ -272,12 +275,12 @@ end
 
     @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigInt(-1))) == big(1.0)
     @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigInt(0))) == big(1.0)
-    @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigInt(1)//BigInt(2))) == big(0.0)
+    @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigInt(1) // BigInt(2))) == big(0.0)
     @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigInt(1))) == big(0.0)
     @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigInt(2))) == big(0.0)
     @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigFloat(-1))) == big(1.0)
     @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigFloat(0))) == big(1.0)
-    @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigFloat(1//2))) == big(0.0)
+    @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigFloat(1 // 2))) == big(0.0)
     @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigFloat(1))) == big(0.0)
     @test @inferred(ccdf(LogitNormal(0.0, 0.0), BigFloat(2))) == big(0.0)
     @test isnan(@inferred(ccdf(LogitNormal(0.0, 0.0), big(NaN)))::BigFloat)
@@ -315,12 +318,12 @@ end
 
     @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigInt(-1))) == big(0.0)
     @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigInt(0))) == big(0.0)
-    @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigInt(1)//BigInt(2))) == big(-Inf)
+    @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigInt(1) // BigInt(2))) == big(-Inf)
     @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigInt(1))) == big(-Inf)
     @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigInt(2))) == big(-Inf)
     @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigFloat(-1))) == big(0.0)
     @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigFloat(0))) == big(0.0)
-    @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigFloat(1//2))) == big(-Inf)
+    @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigFloat(1 // 2))) == big(-Inf)
     @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigFloat(1))) == big(-Inf)
     @test @inferred(logccdf(LogitNormal(0.0, 0.0), BigFloat(2))) == big(-Inf)
     @test isnan(@inferred(logccdf(LogitNormal(0.0, 0.0), big(NaN)))::BigFloat)
@@ -334,7 +337,7 @@ end
     @test @inferred(quantile(LogitNormal(1.0f0, 0.0f0), 1.0f0)) === 1.0f0
     @test @inferred(quantile(LogitNormal(1.0f0, 0.0f0), 0.5f0)) === logistic(1.0f0)
     @test isnan(@inferred(quantile(LogitNormal(1.0f0, 0.0f0), NaN32))::Float32)
-    @test @inferred(quantile(LogitNormal(1//1, 0//1), 1//2)) === logistic(1.0)
+    @test @inferred(quantile(LogitNormal(1 // 1, 0 // 1), 1 // 2)) === logistic(1.0)
 
     # invlogcdf
     @test @inferred(invlogcdf(LogitNormal(1.0, 0.0), -Inf32)) === 0.0
@@ -343,9 +346,9 @@ end
     @test isnan(@inferred(invlogcdf(LogitNormal(1.0f0, 0.0), NaN))::Float64)
     @test @inferred(invlogcdf(LogitNormal(1.0f0, 0.0f0), -Inf32)) === 0.0f0
     @test @inferred(invlogcdf(LogitNormal(1.0f0, 0.0f0), 0.0f0)) === 1.0f0
-    @test @inferred(invlogcdf(LogitNormal(1.0f0, 0.0f0), -log(2f0))) === logistic(1.0f0)
+    @test @inferred(invlogcdf(LogitNormal(1.0f0, 0.0f0), -log(2.0f0))) === logistic(1.0f0)
     @test isnan(@inferred(invlogcdf(LogitNormal(1.0f0, 0.0f0), NaN32))::Float32)
-    @test @inferred(invlogcdf(LogitNormal(1//1, 0//1), -log(2.0))) === logistic(1.0)
+    @test @inferred(invlogcdf(LogitNormal(1 // 1, 0 // 1), -log(2.0))) === logistic(1.0)
 
     # cquantile
     @test @inferred(cquantile(LogitNormal(1.0, 0.0), 0.0f0)) === 1.0
@@ -356,7 +359,7 @@ end
     @test @inferred(cquantile(LogitNormal(1.0f0, 0.0f0), 1.0f0)) === 0.0f0
     @test @inferred(cquantile(LogitNormal(1.0f0, 0.0f0), 0.5f0)) === logistic(1.0f0)
     @test isnan(@inferred(cquantile(LogitNormal(1.0f0, 0.0f0), NaN32))::Float32)
-    @test @inferred(cquantile(LogitNormal(1//1, 0//1), 1//2)) === logistic(1.0)
+    @test @inferred(cquantile(LogitNormal(1 // 1, 0 // 1), 1 // 2)) === logistic(1.0)
 
     # invlogccdf
     @test @inferred(invlogccdf(LogitNormal(1.0, 0.0), -Inf32)) === 1.0
@@ -367,13 +370,14 @@ end
     @test @inferred(invlogccdf(LogitNormal(1.0f0, 0.0f0), 0.0f0)) === 0.0f0
     @test @inferred(invlogccdf(LogitNormal(1.0f0, 0.0f0), -log(2.0f0))) === logistic(1.0f0)
     @test isnan(@inferred(invlogccdf(LogitNormal(1.0f0, 0.0f0), NaN32))::Float32)
-    @test @inferred(invlogccdf(LogitNormal(1//1, 0//1), -log(2.0))) === logistic(1.0)
+    @test @inferred(invlogccdf(LogitNormal(1 // 1, 0 // 1), -log(2.0))) === logistic(1.0)
 end
 
 @testset "LogitNormal: gradlogpdf" begin
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), -1.0)) === 0.0
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), 0.0)) === 0.0
-    @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), logistic(-1)))::Float64 ≈ 2 * (exp(-1) + 1)
+    @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), logistic(-1)))::Float64 ≈
+          2 * (exp(-1) + 1)
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), 0.5)) === 0.0
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), 1.0)) === 0.0
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), 2.0)) === 0.0
@@ -391,23 +395,21 @@ end
 
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigInt(-1))) == big(0.0)
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigInt(0))) == big(0.0)
-    @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigInt(1)//BigInt(2))) == big(0.0)
+    @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigInt(1) // BigInt(2))) == big(0.0)
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigInt(1))) == big(0.0)
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigInt(2))) == big(0.0)
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigFloat(-1))) == big(0.0)
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigFloat(0))) == big(0.0)
-    @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), logistic(BigFloat(-1)))) ≈ 2 * (exp(big(-1)) + 1)
-    @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigFloat(1//2))) == big(0.0)
+    @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), logistic(BigFloat(-1)))) ≈
+          2 * (exp(big(-1)) + 1)
+    @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigFloat(1 // 2))) == big(0.0)
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigFloat(1))) == big(0.0)
     @test @inferred(gradlogpdf(LogitNormal(0.0, 1.0), BigFloat(2))) == big(0.0)
     @test isnan(@inferred(gradlogpdf(LogitNormal(0.0, 1.0), big(NaN)))::BigFloat)
 end
 
 @testset "Logitnormal Sampling Tests" begin
-    for d in [
-        LogitNormal(-2, 3),
-        LogitNormal(0, 0.2)
-    ]
+    for d in [LogitNormal(-2, 3), LogitNormal(0, 0.2)]
         test_distr(d, 10^6)
     end
 end

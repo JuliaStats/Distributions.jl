@@ -8,19 +8,26 @@ It is recommended to not use `reshape` instead of the constructor of `ReshapedDi
 directly since `reshape` can return more optimized distributions for specific types of `d`
 and number of dimensions `N`.
 """
-struct ReshapedDistribution{N,S<:ValueSupport,D<:Distribution{<:ArrayLikeVariate,S}} <: Distribution{ArrayLikeVariate{N},S}
+struct ReshapedDistribution{N,S<:ValueSupport,D<:Distribution{<:ArrayLikeVariate,S}} <:
+       Distribution{ArrayLikeVariate{N},S}
     dist::D
     dims::Dims{N}
 
-    function ReshapedDistribution(dist::Distribution{<:ArrayLikeVariate,S}, dims::Dims{N}) where {N,S<:ValueSupport}
+    function ReshapedDistribution(
+        dist::Distribution{<:ArrayLikeVariate,S},
+        dims::Dims{N},
+    ) where {N,S<:ValueSupport}
         _reshape_check_dims(dist, dims)
         return new{N,S,typeof(dist)}(dist, dims)
     end
 end
 
 function _reshape_check_dims(dist::Distribution{<:ArrayLikeVariate}, dims::Dims)
-    (all(d > 0 for d in dims) && length(dist) == prod(dims)) ||
-        throw(ArgumentError("dimensions $(dims) do not match size of source distribution $(size(dist))"))
+    (all(d > 0 for d in dims) && length(dist) == prod(dims)) || throw(
+        ArgumentError(
+            "dimensions $(dims) do not match size of source distribution $(size(dist))",
+        ),
+    )
 end
 
 Base.size(d::ReshapedDistribution) = d.dims
@@ -62,8 +69,7 @@ end
     x::AbstractArray{<:Real,N},
 ) where {N}
     @boundscheck begin
-        size(x) == size(d) ||
-            throw(DimensionMismatch("inconsistent array dimensions"))
+        size(x) == size(d) || throw(DimensionMismatch("inconsistent array dimensions"))
     end
     dist = d.dist
     return loglikelihood(dist, reshape(x, size(dist)))
@@ -73,10 +79,11 @@ end
     x::AbstractArray{<:Real,M},
 ) where {N,M}
     @boundscheck begin
-        M > N ||
-            throw(DimensionMismatch(
-                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)"
-            ))
+        M > N || throw(
+            DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)",
+            ),
+        )
         ntuple(i -> size(x, i), Val(N)) == size(d) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
@@ -89,7 +96,7 @@ end
 function _rand!(
     rng::AbstractRNG,
     d::ReshapedDistribution{N},
-    x::AbstractArray{<:Real,N}
+    x::AbstractArray{<:Real,N},
 ) where {N}
     dist = d.dist
     rand!(rng, dist, reshape(x, size(dist)))

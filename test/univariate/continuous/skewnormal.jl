@@ -12,7 +12,7 @@ import Distributions: normpdf, normcdf, normlogpdf, normlogcdf
     # Azzalini sn: sprintf("%.17f",dsn(3.3, xi=1, omega=2, alpha=3))
     @test pdf(d1, 3.3) ≈ 0.20587854616839998
     @test minimum(d1) ≈ -Inf
-    @test maximum(d1) ≈  Inf
+    @test maximum(d1) ≈ Inf
     @test logpdf(d1, 3.3) ≈ log(pdf(d1, 3.3))
     ## cdf and quantile: when we get Owen's T
     #@test cdf(d, 4.5) ≈ 1.0 #when we get Owen's T

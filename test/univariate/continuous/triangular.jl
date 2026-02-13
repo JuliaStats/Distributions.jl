@@ -56,9 +56,10 @@ using Test
             @test params(d) == (a, b, c)
             @test mode(d) == c
             @test mean(d) == (a + b + c) / 3
-            @test median(d) == (c >= middle(a, b) ?
-                                a + sqrt((b - a) * (c - a) / 2) :
-                                b - sqrt((b - a) * (b - c) / 2))
+            @test median(d) == (
+                c >= middle(a, b) ? a + sqrt((b - a) * (c - a) / 2) :
+                b - sqrt((b - a) * (b - c) / 2)
+            )
             @test var(d) == (a^2 + b^2 + c^2 - a * b - a * c - b * c) / 18
 
             @test kurtosis(d) == -3 / 5
@@ -109,10 +110,10 @@ using Test
 
             @test mgf(d, 0) == 1
             @test fdm(Base.Fix1(mgf, d), 0.0) ≈ mean(d)
-            @test fdm2(Base.Fix1(mgf, d), 0.0) ≈ mean(d)^2 + var(d) rtol=1e-6
+            @test fdm2(Base.Fix1(mgf, d), 0.0) ≈ mean(d)^2 + var(d) rtol = 1e-6
             @test cf(d, 0) == 1
             @test fdm(Base.Fix1(cf, d), 0.0) ≈ mean(d) * im
-            @test fdm2(Base.Fix1(cf, d), 0.0) ≈ -(mean(d)^2 + var(d)) rtol=1e-6
+            @test fdm2(Base.Fix1(cf, d), 0.0) ≈ -(mean(d)^2 + var(d)) rtol = 1e-6
         end
     end
 end

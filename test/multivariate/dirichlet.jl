@@ -1,6 +1,6 @@
 # Tests for Dirichlet distribution
 
-using  Distributions
+using Distributions
 using Test, Random, LinearAlgebra
 using ChainRulesCore
 using ChainRulesTestUtils
@@ -10,9 +10,10 @@ Random.seed!(34567)
 
 rng = MersenneTwister(123)
 
-@testset "Testing Dirichlet with $key" for (key, func) in
-    Dict("rand(...)" => [rand, rand],
-         "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)])
+@testset "Testing Dirichlet with $key" for (key, func) in Dict(
+    "rand(...)" => [rand, rand],
+    "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
+)
 
     for T in (Int, Float64)
         d = Dirichlet(3, T(2))
@@ -22,19 +23,19 @@ rng = MersenneTwister(123)
         @test d.alpha == [2, 2, 2]
         @test d.alpha0 == 6
 
-        @test mean(d) ≈ fill(1/3, 3)
-        @test mode(d) ≈ fill(1/3, 3)
-        @test cov(d)  ≈ [8 -4 -4; -4 8 -4; -4 -4 8] / (36 * 7)
-        @test var(d)  ≈ diag(cov(d))
-        @test std(d)  ≈ sqrt.(var(d))
+        @test mean(d) ≈ fill(1 / 3, 3)
+        @test mode(d) ≈ fill(1 / 3, 3)
+        @test cov(d) ≈ [8 -4 -4; -4 8 -4; -4 -4 8] / (36 * 7)
+        @test var(d) ≈ diag(cov(d))
+        @test std(d) ≈ sqrt.(var(d))
 
         r = Vector{Float64}(undef, 3)
         Distributions.dirichlet_mode!(r, d.alpha, d.alpha0)
-        @test r ≈ fill(1/3, 3)
+        @test r ≈ fill(1 / 3, 3)
 
         @test pdf(Dirichlet([1, 1]), [0, 1]) ≈ 1
-        @test pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0]) ≈ 1
-        @test typeof(pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0])) === Float32
+        @test pdf(Dirichlet([1.0f0, 1.0f0]), [0.0f0, 1.0f0]) ≈ 1
+        @test typeof(pdf(Dirichlet([1.0f0, 1.0f0]), [0.0f0, 1.0f0])) === Float32
 
         @test iszero(pdf(d, [-1, 1, 0]))
         @test iszero(pdf(d, [0, 0, 1]))
@@ -46,9 +47,9 @@ rng = MersenneTwister(123)
         x = func[2](d, 100)
         p = pdf(d, x)
         lp = logpdf(d, x)
-        for i in 1 : size(x, 2)
-            @test lp[i] ≈ logpdf(d, x[:,i])
-            @test p[i]  ≈ pdf(d, x[:,i])
+        for i = 1:size(x, 2)
+            @test lp[i] ≈ logpdf(d, x[:, i])
+            @test p[i] ≈ pdf(d, x[:, i])
         end
 
         v = [2, 1, 3]
@@ -64,9 +65,9 @@ rng = MersenneTwister(123)
         @test d == deepcopy(d)
 
         @test mean(d) ≈ v / sum(v)
-        @test cov(d)  ≈ [8 -2 -6; -2 5 -3; -6 -3 9] / (36 * 7)
-        @test var(d)  ≈ diag(cov(d))
-        @test std(d)  ≈ sqrt.(var(d))
+        @test cov(d) ≈ [8 -2 -6; -2 5 -3; -6 -3 9] / (36 * 7)
+        @test var(d) ≈ diag(cov(d))
+        @test std(d) ≈ sqrt.(var(d))
 
         @test pdf(d, [0.2, 0.3, 0.5]) ≈ 3
         @test pdf(d, [0.4, 0.5, 0.1]) ≈ 0.24
@@ -76,9 +77,9 @@ rng = MersenneTwister(123)
         x = func[2](d, 100)
         p = pdf(d, x)
         lp = logpdf(d, x)
-        for i in 1 : size(x, 2)
-            @test p[i]  ≈ pdf(d, x[:,i])
-            @test lp[i] ≈ logpdf(d, x[:,i])
+        for i = 1:size(x, 2)
+            @test p[i] ≈ pdf(d, x[:, i])
+            @test lp[i] ≈ logpdf(d, x[:, i])
         end
 
         # Sampling
@@ -111,12 +112,12 @@ rng = MersenneTwister(123)
 
         n = 10000
         x = func[2](d, n)
-        x = x ./ sum(x, dims=1)
+        x = x ./ sum(x, dims = 1)
 
         r = fit_mle(Dirichlet, x)
-        @test r.alpha ≈ d.alpha atol=0.25
+        @test r.alpha ≈ d.alpha atol = 0.25
         r = fit(Dirichlet{Float32}, x)
-        @test r.alpha ≈ d.alpha atol=0.25
+        @test r.alpha ≈ d.alpha atol = 0.25
 
         # r = fit_mle(Dirichlet, x, fill(2.0, n))
         # @test r.alpha ≈ d.alpha atol=0.25
@@ -139,8 +140,8 @@ end
     @testset "constructor $T" for T in (Dirichlet, Dirichlet{Float64})
         # Avoid issues with finite differencing if values in `alpha` become negative or zero
         # by using forward differencing
-        test_frule(T, alpha; fdm=forward_fdm(5, 1))
-        test_rrule(T, alpha; fdm=forward_fdm(5, 1))
+        test_frule(T, alpha; fdm = forward_fdm(5, 1))
+        test_rrule(T, alpha; fdm = forward_fdm(5, 1))
     end
 
     @testset "_logpdf" begin
@@ -151,12 +152,12 @@ end
 
         # Use special finite differencing method that tries to avoid moving outside of the
         # support by limiting the range of the points around the input that are evaluated
-        fdm = central_fdm(5, 1; max_range=1e-9)
+        fdm = central_fdm(5, 1; max_range = 1e-9)
 
         for x in (x1, x2)
             # We have to adjust the tolerance since the finite differencing method is rough
-            test_frule(Distributions._logpdf, d, x; fdm=fdm, rtol=1e-5, nans=true)
-            test_rrule(Distributions._logpdf, d, x; fdm=fdm, rtol=1e-5, nans=true)
+            test_frule(Distributions._logpdf, d, x; fdm = fdm, rtol = 1e-5, nans = true)
+            test_rrule(Distributions._logpdf, d, x; fdm = fdm, rtol = 1e-5, nans = true)
         end
     end
 end

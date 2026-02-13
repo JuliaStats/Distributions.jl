@@ -19,7 +19,7 @@ using ForwardDiff
     @test isinf(logpdf(d, 5.0))
 
     # derivative
-    for v in 3.01:0.1:4.99
+    for v = 3.01:0.1:4.99
         fgrad = ForwardDiff.derivative(x -> logpdf(d, x), v)
         glog = gradlogpdf(d, v)
         @test fgrad ≈ glog

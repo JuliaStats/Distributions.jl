@@ -33,20 +33,22 @@ struct Rician{T<:Real} <: ContinuousUnivariateDistribution
     Rician{T}(ν, σ) where {T} = new{T}(ν, σ)
 end
 
-function Rician(ν::T, σ::T; check_args::Bool=true) where {T<:Real}
+function Rician(ν::T, σ::T; check_args::Bool = true) where {T<:Real}
     @check_args Rician (ν, ν ≥ zero(ν)) (σ, σ ≥ zero(σ))
     return Rician{T}(ν, σ)
 end
 
 Rician() = Rician{Float64}(0.0, 1.0)
-Rician(ν::Real, σ::Real; check_args::Bool=true) = Rician(promote(ν, σ)...; check_args=check_args)
-Rician(ν::Integer, σ::Integer; check_args::Bool=true) = Rician(float(ν), float(σ); check_args=check_args)
+Rician(ν::Real, σ::Real; check_args::Bool = true) =
+    Rician(promote(ν, σ)...; check_args = check_args)
+Rician(ν::Integer, σ::Integer; check_args::Bool = true) =
+    Rician(float(ν), float(σ); check_args = check_args)
 
 @distr_support Rician 0.0 Inf
 
 #### Conversions
 
-function convert(::Type{Rician{T}}, ν::Real, σ::Real) where T<:Real
+function convert(::Type{Rician{T}}, ν::Real, σ::Real) where {T<:Real}
     Rician(T(ν), T(σ))
 end
 
@@ -64,10 +66,11 @@ partype(d::Rician{T}) where {T<:Real} = T
 #### Statistics
 
 # helper
-_Lhalf(x) = exp(x/2) * ((1-x) * besseli(zero(x), -x/2) - x * besseli(oneunit(x), -x/2))
+_Lhalf(x) =
+    exp(x / 2) * ((1 - x) * besseli(zero(x), -x / 2) - x * besseli(oneunit(x), -x / 2))
 
-mean(d::Rician) = d.σ * sqrthalfπ * _Lhalf(-d.ν^2/(2 * d.σ^2))
-var(d::Rician) = 2 * d.σ^2 + d.ν^2 - halfπ * d.σ^2 * _Lhalf(-d.ν^2/(2 * d.σ^2))^2
+mean(d::Rician) = d.σ * sqrthalfπ * _Lhalf(-d.ν^2 / (2 * d.σ^2))
+var(d::Rician) = 2 * d.σ^2 + d.ν^2 - halfπ * d.σ^2 * _Lhalf(-d.ν^2 / (2 * d.σ^2))^2
 
 function mode(d::Rician)
     m = mean(d)
@@ -75,7 +78,7 @@ function mode(d::Rician)
 end
 
 # helper: 1D minimization using Golden-section search
-function _minimize_gss(f, a, b; tol=1e-12)
+function _minimize_gss(f, a, b; tol = 1e-12)
     ϕ = (√5 + 1) / 2
     c = b - (b - a) / ϕ
     d = a + (b - a) / ϕ
@@ -138,18 +141,22 @@ end
 #### Fitting
 
 # implementation based on the Koay inversion technique
-function fit(::Type{<:Rician}, x::AbstractArray{T}; tol=1e-12, maxiters=500) where T
+function fit(::Type{<:Rician}, x::AbstractArray{T}; tol = 1e-12, maxiters = 500) where {T}
     μ₁ = mean(x)
     μ₂ = var(x)
     r = μ₁ / √μ₂
-    if r < sqrt(π/(4-π))
+    if r < sqrt(π / (4 - π))
         ν = zero(float(T))
         σ = scale(fit(Rayleigh, x))
     else
-        ξ(θ) = 2 + θ^2 - π/8 * exp(-θ^2 / 2) * ((2 + θ^2) * besseli(0, θ^2 / 4) + θ^2 * besseli(1, θ^2 / 4))^2
-        g(θ) = sqrt(ξ(θ) * (1+r^2) - 2)
+        ξ(θ) =
+            2 + θ^2 -
+            π / 8 *
+            exp(-θ^2 / 2) *
+            ((2 + θ^2) * besseli(0, θ^2 / 4) + θ^2 * besseli(1, θ^2 / 4))^2
+        g(θ) = sqrt(ξ(θ) * (1 + r^2) - 2)
         θ = g(1)
-        for j in 1:maxiters
+        for j = 1:maxiters
             θ⁻ = θ
             θ = g(θ)
             abs(θ - θ⁻) < tol && break

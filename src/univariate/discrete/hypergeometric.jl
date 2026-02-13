@@ -24,7 +24,7 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
     nf::Int     # number of failures in population
     n::Int      # sample size
 
-    function Hypergeometric(ns::Real, nf::Real, n::Real; check_args::Bool=true)
+    function Hypergeometric(ns::Real, nf::Real, n::Real; check_args::Bool = true)
         @check_args(
             Hypergeometric,
             (ns, ns >= zero(ns)),
@@ -58,22 +58,26 @@ mode(d::Hypergeometric) = floor(Int, (d.n + 1) * (d.ns + 1) / (d.ns + d.nf + 2))
 
 function modes(d::Hypergeometric)
     if (d.ns == d.nf) && mod(d.n, 2) == 1
-        [(d.n-1)/2, (d.n+1)/2]
+        [(d.n - 1) / 2, (d.n + 1) / 2]
     else
         [mode(d)]
     end
 end
 
-skewness(d::Hypergeometric) = (d.nf-d.ns)*sqrt(d.ns+d.nf-1)*(d.ns+d.nf-2*d.n)/sqrt(d.n*d.ns*d.nf*(d.ns+d.nf-d.n))/(d.ns+d.nf-2)
+skewness(d::Hypergeometric) =
+    (d.nf - d.ns) * sqrt(d.ns + d.nf - 1) * (d.ns + d.nf - 2 * d.n) /
+    sqrt(d.n * d.ns * d.nf * (d.ns + d.nf - d.n)) / (d.ns + d.nf - 2)
 
 function kurtosis(d::Hypergeometric)
     ns = float(d.ns)
     nf = float(d.nf)
     n = float(d.n)
     N = ns + nf
-    a = (N-1) * N^2 * (N * (N+1) - 6*ns * (N-ns) - 6*n*(N-n)) + 6*n*ns*(nf)*(N-n)*(5*N-6)
-    b = (n*ns*(N-ns) * (N-n)*(N-2)*(N-3))
-    a/b
+    a =
+        (N - 1) * N^2 * (N * (N + 1) - 6 * ns * (N - ns) - 6 * n * (N - n)) +
+        6 * n * ns * (nf) * (N - n) * (5 * N - 6)
+    b = (n * ns * (N - ns) * (N - n) * (N - 2) * (N - 3))
+    a / b
 end
 
 entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))

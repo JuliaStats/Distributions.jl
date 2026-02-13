@@ -13,12 +13,13 @@ end
 
 import Distributions: AliasTable, CategoricalDirectSampler
 
-make_sampler(::Type{<:CategoricalDirectSampler}, k::Integer) = CategoricalDirectSampler(fill(1/k, k))
-make_sampler(::Type{<:AliasTable}, k::Integer) = AliasTable(fill(1/k, k))
+make_sampler(::Type{<:CategoricalDirectSampler}, k::Integer) =
+    CategoricalDirectSampler(fill(1 / k, k))
+make_sampler(::Type{<:AliasTable}, k::Integer) = AliasTable(fill(1 / k, k))
 
 if haskey(ENV, "categorical") && ENV["categorical"] != "skip"
     @info "Categorical"
-            
+
     for ST in [CategoricalDirectSampler, AliasTable]
         mt = Random.MersenneTwister(33)
         @info string(ST)
@@ -34,13 +35,12 @@ end
 
 if haskey(ENV, "binomial") && ENV["binomial"] != "skip"
     @info "Binomial"
-    
-    import Distributions: BinomialAliasSampler, BinomialGeomSampler, BinomialTPESampler, BinomialPolySampler
-    
-    for ST in [BinomialAliasSampler,
-                   BinomialGeomSampler, 
-                   BinomialTPESampler, 
-                   BinomialPolySampler]
+
+    import Distributions:
+        BinomialAliasSampler, BinomialGeomSampler, BinomialTPESampler, BinomialPolySampler
+
+    for ST in
+        [BinomialAliasSampler, BinomialGeomSampler, BinomialTPESampler, BinomialPolySampler]
         mt = Random.MersenneTwister(33)
         @info string(ST)
         nvals = haskey(ENV, "CI") ? [2] : 2 .^ (1:12)
@@ -59,9 +59,9 @@ end
 
 if haskey(ENV, "poisson") && ENV["poisson"] != "skip"
     @info "Poisson samplers"
-    
+
     import Distributions: PoissonCountSampler, PoissonADSampler
-    
+
     for ST in [PoissonCountSampler, PoissonADSampler]
         @info string(ST)
         mt = Random.MersenneTwister(33)
@@ -76,9 +76,9 @@ end
 
 if haskey(ENV, "exponential") && ENV["exponential"] != "skip"
     @info "Exponential"
-    
+
     import Distributions: ExponentialSampler, ExponentialLogUSampler
-    
+
     for ST in (ExponentialSampler, ExponentialLogUSampler)
         @info string(ST)
         mt = Random.MersenneTwister(33)
@@ -86,14 +86,14 @@ if haskey(ENV, "exponential") && ENV["exponential"] != "skip"
         for scale in scale_values
             s = ST(scale)
             b = @benchmark rand($mt, $s)
-            @info "scale: $scale, result: $b"        
+            @info "scale: $scale, result: $b"
         end
     end
 end
 
 if haskey(ENV, "gamma") && ENV["gamma"] != "skip"
     @info "Gamma"
-    
+
     import Distributions: GammaGDSampler, GammaGSSampler, GammaMTSampler, GammaIPSampler
     @info "Low"
     for ST in [GammaGSSampler, GammaIPSampler]
@@ -107,7 +107,7 @@ if haskey(ENV, "gamma") && ENV["gamma"] != "skip"
             @info "α: $α, result: $b"
         end
     end
-    @info "High"    
+    @info "High"
     for ST in [GammaMTSampler, GammaGDSampler]
         @info string(ST)
         mt = Random.MersenneTwister(33)

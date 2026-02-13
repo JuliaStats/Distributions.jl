@@ -70,17 +70,17 @@ end
     @test d === d0
 
     # bound keyword constructors
-    d = censored(d0; lower=-2, upper=1.5)
+    d = censored(d0; lower = -2, upper = 1.5)
     @test d isa Censored
     @test d.lower === -2.0
     @test d.upper === 1.5
 
-    d = censored(d0; upper=true)
+    d = censored(d0; upper = true)
     @test d isa Censored
     @test d.lower === nothing
     @test d.upper === true
 
-    d = censored(d0; lower=-3)
+    d = censored(d0; lower = -3)
     @test d isa Censored
     @test d.upper === nothing
     @test d.lower === -3
@@ -93,10 +93,10 @@ end
     @testset "basic" begin
         # check_args
         @test_throws ArgumentError Censored(Normal(0, 1), 2, 1)
-        @test_throws ArgumentError Censored(Normal(0, 1), 2, 1; check_args=true)
-        Censored(Normal(0, 1), 2, 1; check_args=false)
-        Censored(Normal(0, 1), nothing, 1; check_args=true)
-        Censored(Normal(0, 1), 2, nothing; check_args=true)
+        @test_throws ArgumentError Censored(Normal(0, 1), 2, 1; check_args = true)
+        Censored(Normal(0, 1), 2, 1; check_args = false)
+        Censored(Normal(0, 1), nothing, 1; check_args = true)
+        Censored(Normal(0, 1), 2, nothing; check_args = true)
 
         d = Censored(Normal(0.0, 1.0), -1, 2)
         @test d isa Censored
@@ -111,7 +111,8 @@ end
         @test insupport(d, 2)
         @test !insupport(d, -1.1)
         @test !insupport(d, 2.1)
-        @test sprint(show, "text/plain", d) == "Censored($(Normal(0.0, 1.0)); lower=-1, upper=2)"
+        @test sprint(show, "text/plain", d) ==
+              "Censored($(Normal(0.0, 1.0)); lower=-1, upper=2)"
 
         d = Censored(Cauchy(0, 1), nothing, 2)
         @test d isa Censored
@@ -149,22 +150,32 @@ end
         @test insupport(d, 9.5)
         @test !insupport(d, 10)
 
-        @test censored(Censored(Normal(), 1, nothing), nothing, 2) == Censored(Normal(), 1, 2)
-        @test censored(Censored(Normal(), nothing, 1), -1, nothing) == Censored(Normal(), -1, 1)
+        @test censored(Censored(Normal(), 1, nothing), nothing, 2) ==
+              Censored(Normal(), 1, 2)
+        @test censored(Censored(Normal(), nothing, 1), -1, nothing) ==
+              Censored(Normal(), -1, 1)
         @test censored(Censored(Normal(), 1, 2), 1.5, 2.5) == Censored(Normal(), 1.5, 2.0)
         @test censored(Censored(Normal(), 1, 3), 1.5, 2.5) == Censored(Normal(), 1.5, 2.5)
         @test censored(Censored(Normal(), 1, 2), 0.5, 2.5) == Censored(Normal(), 1.0, 2.0)
         @test censored(Censored(Normal(), 1, 2), 0.5, 1.5) == Censored(Normal(), 1.0, 1.5)
 
-        @test censored(Censored(Normal(), nothing, 1), nothing, 1) == Censored(Normal(), nothing, 1)
-        @test censored(Censored(Normal(), nothing, 1), nothing, 2) == Censored(Normal(), nothing, 1)
-        @test censored(Censored(Normal(), nothing, 1), nothing, 1.5) == Censored(Normal(), nothing, 1)
-        @test censored(Censored(Normal(), nothing, 1.5), nothing, 1) == Censored(Normal(), nothing, 1)
+        @test censored(Censored(Normal(), nothing, 1), nothing, 1) ==
+              Censored(Normal(), nothing, 1)
+        @test censored(Censored(Normal(), nothing, 1), nothing, 2) ==
+              Censored(Normal(), nothing, 1)
+        @test censored(Censored(Normal(), nothing, 1), nothing, 1.5) ==
+              Censored(Normal(), nothing, 1)
+        @test censored(Censored(Normal(), nothing, 1.5), nothing, 1) ==
+              Censored(Normal(), nothing, 1)
 
-        @test censored(Censored(Normal(), 1, nothing), 1, nothing) == Censored(Normal(), 1, nothing)
-        @test censored(Censored(Normal(), 1, nothing), 2, nothing) == Censored(Normal(), 2, nothing)
-        @test censored(Censored(Normal(), 1, nothing), 1.5, nothing) == Censored(Normal(), 1.5, nothing)
-        @test censored(Censored(Normal(), 1.5, nothing), 1, nothing) == Censored(Normal(), 1.5, nothing)
+        @test censored(Censored(Normal(), 1, nothing), 1, nothing) ==
+              Censored(Normal(), 1, nothing)
+        @test censored(Censored(Normal(), 1, nothing), 2, nothing) ==
+              Censored(Normal(), 2, nothing)
+        @test censored(Censored(Normal(), 1, nothing), 1.5, nothing) ==
+              Censored(Normal(), 1.5, nothing)
+        @test censored(Censored(Normal(), 1.5, nothing), 1, nothing) ==
+              Censored(Normal(), 1.5, nothing)
     end
 
     @testset "Uniform" begin
@@ -181,7 +192,10 @@ end
             (3.5, Inf),
             (-Inf, Inf),
         ]
-        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (
+            lower,
+            upper,
+        ) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
@@ -196,10 +210,10 @@ end
                 @test u == upper
             end
             @testset for f in [cdf, logcdf, ccdf, logccdf]
-                @test @inferred(f(d, l)) ≈ f(dmix, l) atol=1e-8
-                @test @inferred(f(d, l - 0.1)) ≈ f(dmix, l - 0.1) atol=1e-8
-                @test @inferred(f(d, u)) ≈ f(dmix, u) atol=1e-8
-                @test @inferred(f(d, u + 0.1)) ≈ f(dmix, u + 0.1) atol=1e-8
+                @test @inferred(f(d, l)) ≈ f(dmix, l) atol = 1e-8
+                @test @inferred(f(d, l - 0.1)) ≈ f(dmix, l - 0.1) atol = 1e-8
+                @test @inferred(f(d, u)) ≈ f(dmix, u) atol = 1e-8
+                @test @inferred(f(d, u + 0.1)) ≈ f(dmix, u + 0.1) atol = 1e-8
                 @test @inferred(f(d, 5)) ≈ f(dmix, 5)
             end
             @testset for f in [mean, var]
@@ -207,7 +221,8 @@ end
             end
             @test @inferred(median(d)) ≈ clamp(median(d0), l, u)
             @inferred quantile(d, 0.5)
-            @test Base.Fix1(quantile, d).(0:0.01:1) ≈ clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
+            @test Base.Fix1(quantile, d).(0:0.01:1) ≈
+                  clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
             # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
             # Normal(μ, 0), they are infinite
             if lower === nothing || !isfinite(lower)
@@ -238,22 +253,26 @@ end
     @testset "Normal" begin
         d0 = Normal()
         bounds = [(nothing, 0.2), (-0.1, nothing), (-0.1, 0.2)]
-        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (
+            lower,
+            upper,
+        ) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
             @testset for f in [cdf, logcdf, ccdf, logccdf]
-                @test f(d, l) ≈ f(dmix, l) atol=1e-8
-                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol=1e-8
-                @test f(d, u) ≈ f(dmix, u) atol=1e-8
-                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol=1e-8
+                @test f(d, l) ≈ f(dmix, l) atol = 1e-8
+                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol = 1e-8
+                @test f(d, u) ≈ f(dmix, u) atol = 1e-8
+                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol = 1e-8
                 @test f(d, 5) ≈ f(dmix, 5)
             end
             @testset for f in [mean, var]
                 @test f(d) ≈ f(dmix)
             end
             @test median(d) ≈ clamp(median(d0), l, u)
-            @test Base.Fix1(quantile, d).(0:0.01:1) ≈ clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
+            @test Base.Fix1(quantile, d).(0:0.01:1) ≈
+                  clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
             # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
             # Normal(μ, 0), they are infinite
             if lower === nothing
@@ -294,16 +313,19 @@ end
             (3.5, Inf),
             (-Inf, Inf),
         ]
-        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (
+            lower,
+            upper,
+        ) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             @test extrema(d) == extrema(dmix)
             l, u = extrema(d)
             @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
-                @test @inferred(f(d, l)) ≈ f(dmix, l) atol=1e-8
-                @test @inferred(f(d, l - 0.1)) ≈ f(dmix, l - 0.1) atol=1e-8
-                @test @inferred(f(d, u)) ≈ f(dmix, u) atol=1e-8
-                @test @inferred(f(d, u + 0.1)) ≈ f(dmix, u + 0.1) atol=1e-8
+                @test @inferred(f(d, l)) ≈ f(dmix, l) atol = 1e-8
+                @test @inferred(f(d, l - 0.1)) ≈ f(dmix, l - 0.1) atol = 1e-8
+                @test @inferred(f(d, u)) ≈ f(dmix, u) atol = 1e-8
+                @test @inferred(f(d, u + 0.1)) ≈ f(dmix, u + 0.1) atol = 1e-8
                 @test @inferred(f(d, 5)) ≈ f(dmix, 5)
             end
             @testset for f in [mean, var]
@@ -311,7 +333,8 @@ end
             end
             @test @inferred(median(d)) ≈ clamp(median(d0), l, u)
             @inferred quantile(d, 0.5)
-            @test Base.Fix1(quantile, d).(0:0.01:1) ≈ clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
+            @test Base.Fix1(quantile, d).(0:0.01:1) ≈
+                  clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
             # rand
             x = rand(d, 10_000)
             @test all(x -> insupport(d, x), x)
@@ -333,20 +356,24 @@ end
     @testset "Poisson" begin
         d0 = Poisson(20)
         bounds = [(nothing, 12), (2, nothing), (2, 12), (8, nothing)]
-        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (
+            lower,
+            upper,
+        ) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             @test extrema(d) == extrema(dmix)
             l, u = extrema(d)
             @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
-                @test f(d, l) ≈ f(dmix, l) atol=1e-8
-                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol=1e-8
-                @test f(d, u) ≈ f(dmix, u) atol=1e-8
-                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol=1e-8
+                @test f(d, l) ≈ f(dmix, l) atol = 1e-8
+                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol = 1e-8
+                @test f(d, u) ≈ f(dmix, u) atol = 1e-8
+                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol = 1e-8
                 @test f(d, 5) ≈ f(dmix, 5)
             end
             @test median(d) ≈ clamp(median(d0), l, u)
-            @test Base.Fix1(quantile, d).(0:0.01:0.99) ≈ clamp.(Base.Fix1(quantile, d0).(0:0.01:0.99), l, u)
+            @test Base.Fix1(quantile, d).(0:0.01:0.99) ≈
+                  clamp.(Base.Fix1(quantile, d0).(0:0.01:0.99), l, u)
             x = rand(d, 100)
             @test loglikelihood(d, x) ≈ loglikelihood(dmix, x)
             # rand
@@ -354,20 +381,29 @@ end
             @test all(x -> insupport(d, x), x)
             # mean, std
             @test mean(x) ≈ mean(x) atol = 1e-1
-            @test std(x) ≈ std(x) atol = 1e-1            
+            @test std(x) ≈ std(x) atol = 1e-1
         end
     end
 
     @testset "mixed types are still type-inferrible" begin
         bounds = [(nothing, 8), (2, nothing), (2, 8)]
-        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper), uncensored partype=$T0, partype=$T" for (lower, upper) in bounds,
-                T in (Int, Float32, Float64), T0 in (Int, Float32, Float64)
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper), uncensored partype=$T0, partype=$T" for (
+                lower,
+                upper,
+            ) in bounds,
+            T in (Int, Float32, Float64),
+            T0 in (Int, Float32, Float64)
+
             d0 = Uniform(T0(0), T0(10))
-            d = censored(d0, lower === nothing ? nothing : T(lower), upper === nothing ? nothing : T(upper))
+            d = censored(
+                d0,
+                lower === nothing ? nothing : T(lower),
+                upper === nothing ? nothing : T(upper),
+            )
             l, u = extrema(d)
             @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
                 @inferred f(d, 3)
-                @inferred f(d, 4f0)
+                @inferred f(d, 4.0f0)
                 @inferred f(d, 5.0)
             end
             @testset for f in [median, mean, var, entropy]

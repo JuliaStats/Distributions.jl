@@ -21,5 +21,9 @@ using Test, Distributions, StatsBase
 
     fnecdf = ecdf(z)
     y = [-1.96, -1.644854, -1.281552, -0.6744898, 0, 0.6744898, 1.281552, 1.644854, 1.96]
-    @test isapprox(fnecdf(y), [0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975], atol=1e-3)
+    @test isapprox(
+        fnecdf(y),
+        [0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975],
+        atol = 1e-3,
+    )
 end

@@ -29,10 +29,10 @@ end
 MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
-function Base.show(io::IO, d::MvLogitNormal; indent::String="  ")
+function Base.show(io::IO, d::MvLogitNormal; indent::String = "  ")
     print(io, distrname(d))
     println(io, "(")
-    normstr = strip(sprint(show, d.normal; context=IOContext(io)))
+    normstr = strip(sprint(show, d.normal; context = IOContext(io)))
     normstr = replace(normstr, "\n" => "\n$indent")
     print(io, indent)
     println(io, normstr)
@@ -121,8 +121,8 @@ function _softmax1!(x::AbstractMatrix, y::AbstractMatrix)
     return x
 end
 
-_drop1(x::AbstractVector) = @views x[firstindex(x, 1):(end - 1)]
-_drop1(x::AbstractMatrix) = @views x[firstindex(x, 1):(end - 1), :]
+_drop1(x::AbstractVector) = @views x[firstindex(x, 1):(end-1)]
+_drop1(x::AbstractMatrix) = @views x[firstindex(x, 1):(end-1), :]
 
 _last1(x::AbstractVector) = x[end]
 _last1(x::AbstractMatrix) = @views x[end, :]

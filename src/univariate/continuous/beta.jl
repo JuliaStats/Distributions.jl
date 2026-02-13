@@ -32,23 +32,25 @@ struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     Beta{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function Beta(α::T, β::T; check_args::Bool=true) where {T<:Real}
+function Beta(α::T, β::T; check_args::Bool = true) where {T<:Real}
     @check_args Beta (α, α > zero(α)) (β, β > zero(β))
     return Beta{T}(α, β)
 end
 
-Beta(α::Real, β::Real; check_args::Bool=true) = Beta(promote(α, β)...; check_args=check_args)
-Beta(α::Integer, β::Integer; check_args::Bool=true) = Beta(float(α), float(β); check_args=check_args)
-function Beta(α::Real; check_args::Bool=true)
+Beta(α::Real, β::Real; check_args::Bool = true) =
+    Beta(promote(α, β)...; check_args = check_args)
+Beta(α::Integer, β::Integer; check_args::Bool = true) =
+    Beta(float(α), float(β); check_args = check_args)
+function Beta(α::Real; check_args::Bool = true)
     @check_args Beta (α, α > zero(α))
-    Beta(α, α; check_args=false)
+    Beta(α, α; check_args = false)
 end
 Beta() = Beta{Float64}(1.0, 1.0)
 
 @distr_support Beta 0.0 1.0
 
 #### Conversions
-function convert(::Type{Beta{T}}, α::Real, β::Real) where T<:Real
+function convert(::Type{Beta{T}}, α::Real, β::Real) where {T<:Real}
     Beta(T(α), T(β))
 end
 Base.convert(::Type{Beta{T}}, d::Beta) where {T<:Real} = Beta{T}(T(d.α), T(d.β))
@@ -62,9 +64,10 @@ params(d::Beta) = (d.α, d.β)
 
 #### Statistics
 
-mean(d::Beta) = ((α, β) = params(d); α / (α + β))
+mean(d::Beta) = ((α, β) = params(d);
+α / (α + β))
 
-function mode(d::Beta; check_args::Bool=true)
+function mode(d::Beta; check_args::Bool = true)
     α, β = params(d)
     @check_args(
         Beta,
@@ -82,9 +85,11 @@ function var(d::Beta)
     return (α * β) / (abs2(s) * (s + 1))
 end
 
-meanlogx(d::Beta) = ((α, β) = params(d); digamma(α) - digamma(α + β))
+meanlogx(d::Beta) = ((α, β) = params(d);
+digamma(α) - digamma(α + β))
 
-varlogx(d::Beta) = ((α, β) = params(d); trigamma(α) - trigamma(α + β))
+varlogx(d::Beta) = ((α, β) = params(d);
+trigamma(α) - trigamma(α + β))
 stdlogx(d::Beta) = sqrt(varlogx(d))
 
 function skewness(d::Beta)
@@ -107,30 +112,33 @@ end
 function entropy(d::Beta)
     α, β = params(d)
     s = α + β
-    logbeta(α, β) - (α - 1) * digamma(α) - (β - 1) * digamma(β) +
-        (s - 2) * digamma(s)
+    logbeta(α, β) - (α - 1) * digamma(α) - (β - 1) * digamma(β) + (s - 2) * digamma(s)
 end
 
 function kldivergence(p::Beta, q::Beta)
     αp, βp = params(p)
     αq, βq = params(q)
-    return logbeta(αq, βq) - logbeta(αp, βp) + (αp - αq) * digamma(αp) +
-        (βp - βq) * digamma(βp) + (αq - αp + βq - βp) * digamma(αp + βp)
+    return logbeta(αq, βq) - logbeta(αp, βp) +
+           (αp - αq) * digamma(αp) +
+           (βp - βq) * digamma(βp) +
+           (αq - αp + βq - βp) * digamma(αp + βp)
 end
 
 #### Evaluation
 
 @_delegate_statsfuns Beta beta α β
 
-gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
-    ((α, β) = params(d); 0 <= x <= 1 ? (α - 1) / x - (β - 1) / (1 - x) : zero(T))
+gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} = ((α, β) = params(d);
+0 <= x <= 1 ? (α - 1) / x - (β - 1) / (1 - x) : zero(T))
 
 
 #### Sampling
 
-struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,Continuous},
-                   S2 <: Sampleable{Univariate,Continuous}} <:
-    Sampleable{Univariate,Continuous}
+struct BetaSampler{
+    T<:Real,
+    S1<:Sampleable{Univariate,Continuous},
+    S2<:Sampleable{Univariate,Continuous},
+} <: Sampleable{Univariate,Continuous}
     γ::Bool
     iα::T
     iβ::T
@@ -138,15 +146,18 @@ struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,Continuous},
     s2::S2
 end
 
-function sampler(d::Beta{T}) where T
+function sampler(d::Beta{T}) where {T}
     (α, β) = params(d)
     if (α ≤ 1.0) && (β ≤ 1.0)
-        return BetaSampler(false, inv(α), inv(β),
-                           sampler(Uniform()), sampler(Uniform()))
+        return BetaSampler(false, inv(α), inv(β), sampler(Uniform()), sampler(Uniform()))
     else
-        return BetaSampler(true, inv(α), inv(β),
-                           sampler(Gamma(α, one(T))),
-                           sampler(Gamma(β, one(T))))
+        return BetaSampler(
+            true,
+            inv(α),
+            inv(β),
+            sampler(Gamma(α, one(T))),
+            sampler(Gamma(β, one(T))),
+        )
     end
 end
 
@@ -180,7 +191,7 @@ function rand(rng::AbstractRNG, s::BetaSampler)
     end
 end
 
-function rand(rng::AbstractRNG, d::Beta{T}) where T
+function rand(rng::AbstractRNG, d::Beta{T}) where {T}
     (α, β) = params(d)
     if (α ≤ 1.0) && (β ≤ 1.0)
         while true
@@ -210,27 +221,35 @@ end
 
 
 
-function fit_mle(::Type{<:Beta}, x::AbstractArray{T};
-    maxiter::Int=1000, tol::Float64=1e-14) where T<:Real
+function fit_mle(
+    ::Type{<:Beta},
+    x::AbstractArray{T};
+    maxiter::Int = 1000,
+    tol::Float64 = 1e-14,
+) where {T<:Real}
 
-    α₀,β₀ = params(fit(Beta,x)) #initial guess of parameters
+    α₀, β₀ = params(fit(Beta, x)) #initial guess of parameters
     g₁ = mean(log.(x))
     g₂ = mean(log.(one(T) .- x))
-    θ= [α₀ ; β₀ ]
+    θ = [α₀; β₀]
 
     converged = false
-    t=0
+    t = 0
     while !converged && t < maxiter #newton method
-        t+=1
-        temp1 = digamma(θ[1]+θ[2])
-        temp2 = trigamma(θ[1]+θ[2])
-        grad = [g₁+temp1-digamma(θ[1])
-               temp1+g₂-digamma(θ[2])]
-        hess = [temp2-trigamma(θ[1]) temp2
-                temp2 temp2-trigamma(θ[2])]
-        Δθ = hess\grad #newton step
+        t += 1
+        temp1 = digamma(θ[1] + θ[2])
+        temp2 = trigamma(θ[1] + θ[2])
+        grad = [
+            g₁ + temp1 - digamma(θ[1])
+            temp1 + g₂ - digamma(θ[2])
+        ]
+        hess = [
+            temp2-trigamma(θ[1]) temp2
+            temp2 temp2-trigamma(θ[2])
+        ]
+        Δθ = hess \ grad #newton step
         θ .-= Δθ
-        converged = dot(Δθ,Δθ) < 2*tol #stopping criterion
+        converged = dot(Δθ, Δθ) < 2 * tol #stopping criterion
     end
 
     return Beta(θ[1], θ[2])
@@ -238,7 +257,7 @@ end
 
 
 
-function fit(::Type{<:Beta}, x::AbstractArray{T}) where T<:Real
+function fit(::Type{<:Beta}, x::AbstractArray{T}) where {T<:Real}
     x_bar = mean(x)
     v_bar = varm(x, x_bar)
     temp = ((x_bar * (one(T) - x_bar)) / v_bar) - one(T)

@@ -25,11 +25,11 @@ function ccdf(d::KSOneSided, x::Float64)
     end
     n = d.n
     s = 0.0
-    for j = 0:floor(Int,n-n*x)
-        p = x+j/n
-        s += pdf(Binomial(n,p),j) / p
+    for j = 0:floor(Int, n - n * x)
+        p = x + j / n
+        s += pdf(Binomial(n, p), j) / p
     end
-    s*x
+    s * x
 end
 
-cdf(d::KSOneSided, x::Float64) = 1 - ccdf(d,x)
+cdf(d::KSOneSided, x::Float64) = 1 - ccdf(d, x)

@@ -34,9 +34,7 @@ function rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims)
     out = Array{eltype(s)}(undef, dims)
     return rand!(rng, sampler(s), out)
 end
-function rand(
-    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims,
-)
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims)
     sz = size(s)
     ax = map(Base.OneTo, dims)
     out = [Array{eltype(s)}(undef, sz) for _ in Iterators.product(ax...)]
@@ -51,9 +49,7 @@ function rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims
     out = Array{float(eltype(s))}(undef, dims)
     return rand!(rng, sampler(s), out)
 end
-function rand(
-    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims,
-)
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims)
     sz = size(s)
     ax = map(Base.OneTo, dims)
     out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax...)]
@@ -97,10 +93,11 @@ end
     x::AbstractArray{<:Real,M},
 ) where {N,M}
     @boundscheck begin
-        M > N ||
-            throw(DimensionMismatch(
-                "number of dimensions of `x` ($M) must be greater than number of dimensions of `s` ($N)"
-            ))
+        M > N || throw(
+            DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `s` ($N)",
+            ),
+        )
         ntuple(i -> size(x, i), Val(N)) == size(s) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
     end

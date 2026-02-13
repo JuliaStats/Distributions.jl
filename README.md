@@ -55,6 +55,17 @@ clone it and make modifications on a new branch,
 Once your changes are made, push them on your fork and create the
 Pull Request on the main repository.
 
+To format the code, run the following command:
+```bash
+julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_all.jl")'
+```
+
+Code formatting is automatically checked in CI.
+To run the check locally:
+```bash
+julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_check.jl")'
+```
+
 ### Requirements
 
 Distributions is a central package which many rely on,

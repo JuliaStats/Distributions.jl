@@ -14,7 +14,9 @@ function _rand(rng::AbstractRNG, spl::ProductNamedTupleSampler, dims::Dims)
 end
 
 function _rand!(
-    rng::AbstractRNG, spl::ProductNamedTupleSampler, xs::AbstractArray{<:NamedTuple{K}}
+    rng::AbstractRNG,
+    spl::ProductNamedTupleSampler,
+    xs::AbstractArray{<:NamedTuple{K}},
 ) where {K}
     for i in eachindex(xs)
         xs[i] = NamedTuple{K}(rand(rng, spl))

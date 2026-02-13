@@ -45,7 +45,7 @@ function convolve(d1::Geometric, d2::Geometric)
     return NegativeBinomial(2, d1.p)
 end
 
-convolve(d1::Poisson, d2::Poisson) =  Poisson(d1.λ + d2.λ)
+convolve(d1::Poisson, d2::Poisson) = Poisson(d1.λ + d2.λ)
 
 
 function convolve(d1::DiscreteNonParametric, d2::DiscreteNonParametric)
@@ -53,12 +53,12 @@ function convolve(d1::DiscreteNonParametric, d2::DiscreteNonParametric)
     sort!(support_conv) #for fast index finding below
     probs1 = probs(d1)
     probs2 = probs(d2)
-    p_conv = zeros(Base.promote_eltype(probs1, probs2), length(support_conv)) 
+    p_conv = zeros(Base.promote_eltype(probs1, probs2), length(support_conv))
     for (s1, p1) in zip(support(d1), probs(d1)), (s2, p2) in zip(support(d2), probs(d2))
-            idx = searchsortedfirst(support_conv, s1+s2)
-            p_conv[idx] += p1*p2
+        idx = searchsortedfirst(support_conv, s1 + s2)
+        p_conv[idx] += p1 * p2
     end
-    DiscreteNonParametric(support_conv, p_conv,check_args=false) 
+    DiscreteNonParametric(support_conv, p_conv, check_args = false)
 end
 
 # continuous univariate
@@ -83,9 +83,11 @@ function convolve(d1::MvNormal, d2::MvNormal)
 end
 
 function _check_convolution_args(p1, p2)
-    p1 ≈ p2 || throw(ArgumentError(
-    "$(p1) !≈ $(p2): distribution parameters must be approximately equal",
-    ))
+    p1 ≈ p2 || throw(
+        ArgumentError(
+            "$(p1) !≈ $(p2): distribution parameters must be approximately equal",
+        ),
+    )
 end
 
 function _check_convolution_shape(d1, d2)

@@ -30,19 +30,21 @@ struct Logistic{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 
-function Logistic(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
+function Logistic(μ::T, θ::T; check_args::Bool = true) where {T<:Real}
     @check_args Logistic (θ, θ > zero(θ))
     return Logistic{T}(μ, θ)
 end
 
-Logistic(μ::Real, θ::Real; check_args::Bool=true) = Logistic(promote(μ, θ)...; check_args=check_args)
-Logistic(μ::Integer, θ::Integer; check_args::Bool=true) = Logistic(float(μ), float(θ); check_args=check_args)
-Logistic(μ::Real=0.0) = Logistic(μ, one(μ); check_args=false)
+Logistic(μ::Real, θ::Real; check_args::Bool = true) =
+    Logistic(promote(μ, θ)...; check_args = check_args)
+Logistic(μ::Integer, θ::Integer; check_args::Bool = true) =
+    Logistic(float(μ), float(θ); check_args = check_args)
+Logistic(μ::Real = 0.0) = Logistic(μ, one(μ); check_args = false)
 
 @distr_support Logistic -Inf Inf
 
 #### Conversions
-function convert(::Type{Logistic{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
+function convert(::Type{Logistic{T}}, μ::S, θ::S) where {T<:Real,S<:Real}
     Logistic(T(μ), T(θ))
 end
 function Base.convert(::Type{Logistic{T}}, d::Logistic) where {T<:Real}
@@ -68,7 +70,7 @@ mode(d::Logistic) = d.μ
 std(d::Logistic) = π * d.θ / sqrt3
 var(d::Logistic) = (π * d.θ)^2 / 3
 skewness(d::Logistic{T}) where {T<:Real} = zero(T)
-kurtosis(d::Logistic{T}) where {T<:Real} = T(6)/5
+kurtosis(d::Logistic{T}) where {T<:Real} = T(6) / 5
 
 entropy(d::Logistic) = log(d.θ) + 2
 
@@ -78,8 +80,8 @@ entropy(d::Logistic) = log(d.θ) + 2
 zval(d::Logistic, x::Real) = (x - d.μ) / d.θ
 xval(d::Logistic, z::Real) = d.μ + z * d.θ
 
-pdf(d::Logistic, x::Real) = (lz = logistic(-abs(zval(d, x))); lz*(1-lz)/d.θ)
-logpdf(d::Logistic, x::Real) = (u = -abs(zval(d, x)); u - 2*log1pexp(u) - log(d.θ))
+pdf(d::Logistic, x::Real) = (lz = logistic(-abs(zval(d, x))); lz * (1 - lz) / d.θ)
+logpdf(d::Logistic, x::Real) = (u = -abs(zval(d, x)); u - 2 * log1pexp(u) - log(d.θ))
 
 cdf(d::Logistic, x::Real) = logistic(zval(d, x))
 ccdf(d::Logistic, x::Real) = logistic(-zval(d, x))
@@ -99,7 +101,7 @@ end
 mgf(d::Logistic, t::Real) = exp(t * d.μ) / sinc(d.θ * t)
 function cgf(d::Logistic, t)
     μ, θ = params(d)
-    t*μ - log(sinc(θ*t))
+    t * μ - log(sinc(θ * t))
 end
 function cf(d::Logistic, t::Real)
     a = (π * t) * d.θ

@@ -26,16 +26,18 @@ External links
 struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-    Uniform{T}(a::Real, b::Real) where {T <: Real} = new{T}(a, b)
+    Uniform{T}(a::Real, b::Real) where {T<:Real} = new{T}(a, b)
 end
 
-function Uniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
+function Uniform(a::T, b::T; check_args::Bool = true) where {T<:Real}
     @check_args Uniform (a < b)
     return Uniform{T}(a, b)
 end
 
-Uniform(a::Real, b::Real; check_args::Bool=true) = Uniform(promote(a, b)...; check_args=check_args)
-Uniform(a::Integer, b::Integer; check_args::Bool=true) = Uniform(float(a), float(b); check_args=check_args)
+Uniform(a::Real, b::Real; check_args::Bool = true) =
+    Uniform(promote(a, b)...; check_args = check_args)
+Uniform(a::Integer, b::Integer; check_args::Bool = true) =
+    Uniform(float(a), float(b); check_args = check_args)
 Uniform() = Uniform{Float64}(0.0, 1.0)
 
 @distr_support Uniform d.a d.b
@@ -64,7 +66,7 @@ modes(d::Uniform) = Float64[]
 var(d::Uniform) = (w = d.b - d.a; w^2 / 12)
 
 skewness(d::Uniform{T}) where {T<:Real} = zero(T)
-kurtosis(d::Uniform{T}) where {T<:Real} = -6/5*one(T)
+kurtosis(d::Uniform{T}) where {T<:Real} = -6 / 5 * one(T)
 
 entropy(d::Uniform) = log(d.b - d.a)
 
@@ -80,7 +82,7 @@ end
 function logpdf(d::Uniform, x::Real)
     # include dependency on `x` for return type to be consistent with `logcdf`
     a, b, _ = promote(d.a, d.b, x)
-    val = - log(b - a)
+    val = -log(b - a)
     return insupport(d, x) ? val : oftype(val, -Inf)
 end
 gradlogpdf(d::Uniform, x::Real) = zero(partype(d)) / oneunit(x)
@@ -112,13 +114,13 @@ function cgf_uniform_around_zero_kernel(x)
     a1 = inv(T(6))
     a2 = inv(T(24))
     a3 = inv(T(120))
-    x*@evalpoly(x, a0, a1, a2, a3)
+    x * @evalpoly(x, a0, a1, a2, a3)
 end
 
 function cgf(d::Uniform, t)
     # log((exp(t*b) - exp(t*a))/ (t*(b-a)))
-    a,b = params(d)
-    x = t*(b-a)
+    a, b = params(d)
+    x = t * (b - a)
     if abs(x) <= sqrt(eps(float(one(x))))
         cgf_around_zero(d, t)
     else
@@ -126,14 +128,14 @@ function cgf(d::Uniform, t)
     end
 end
 function cgf_around_zero(d::Uniform, t)
-    a,b = params(d)
-    x = t*(b-a)
-    t*a + log1p(cgf_uniform_around_zero_kernel(x))
+    a, b = params(d)
+    x = t * (b - a)
+    t * a + log1p(cgf_uniform_around_zero_kernel(x))
 end
 function cgf_away_from_zero(d::Uniform, t)
-    a,b = params(d)
-    x = t*(b-a)
-    logsubexp(t*b, t*a) - log(abs(x))
+    a, b = params(d)
+    x = t * (b - a)
+    logsubexp(t * b, t * a) - log(abs(x))
 end
 
 function cf(d::Uniform, t::Real)

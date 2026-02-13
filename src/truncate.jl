@@ -35,8 +35,8 @@ function truncated(d::UnivariateDistribution, l::Real, u::Real)
 end
 function truncated(
     d::UnivariateDistribution;
-    lower::Union{Real,Nothing}=nothing,
-    upper::Union{Real,Nothing}=nothing,
+    lower::Union{Real,Nothing} = nothing,
+    upper::Union{Real,Nothing} = nothing,
 )
     return truncated(d, lower, upper)
 end
@@ -60,7 +60,7 @@ function truncated(d::UnivariateDistribution, l::Real, ::Nothing)
     Truncated(d, l, nothing, loglcdf, lcdf, ucdf, tp, logtp)
 end
 truncated(d::UnivariateDistribution, ::Nothing, ::Nothing) = d
-function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
+function truncated(d::UnivariateDistribution, l::T, u::T) where {T<:Real}
     l <= u || error("the lower bound must be less or equal than the upper bound")
 
     # (log)lcdf = (log) P(X < l) where X ~ d
@@ -86,7 +86,13 @@ Generic wrapper for a truncated distribution.
 The *truncated normal distribution* is a particularly important one in the family of truncated distributions.
 Unlike the general case, truncated normal distributions support `mean`, `mode`, `modes`, `var`, `std`, and `entropy`.
 """
-struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T<: Real, TL<:Union{T,Nothing}, TU<:Union{T,Nothing}} <: UnivariateDistribution{S}
+struct Truncated{
+    D<:UnivariateDistribution,
+    S<:ValueSupport,
+    T<:Real,
+    TL<:Union{T,Nothing},
+    TU<:Union{T,Nothing},
+} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::TL     # lower bound
     upper::TU     # upper bound
@@ -97,17 +103,45 @@ struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T<: Real, TL<:Union
     tp::T         # the probability of the truncated part, i.e. ucdf - lcdf
     logtp::T      # log(tp), i.e. log(ucdf - lcdf)
 
-    function Truncated(d::UnivariateDistribution, l::TL, u::TU, loglcdf::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real, TL <: Union{T,Nothing}, TU <: Union{T,Nothing}}
-        new{typeof(d), value_support(typeof(d)), T, TL, TU}(d, l, u, loglcdf, lcdf, ucdf, tp, logtp)
+    function Truncated(
+        d::UnivariateDistribution,
+        l::TL,
+        u::TU,
+        loglcdf::T,
+        lcdf::T,
+        ucdf::T,
+        tp::T,
+        logtp::T,
+    ) where {T<:Real,TL<:Union{T,Nothing},TU<:Union{T,Nothing}}
+        new{typeof(d),value_support(typeof(d)),T,TL,TU}(
+            d,
+            l,
+            u,
+            loglcdf,
+            lcdf,
+            ucdf,
+            tp,
+            logtp,
+        )
     end
 end
 
-const LeftTruncated{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Truncated{D,S,T,T,Nothing}
-const RightTruncated{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Truncated{D,S,T,Nothing,T}
+const LeftTruncated{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} =
+    Truncated{D,S,T,T,Nothing}
+const RightTruncated{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} =
+    Truncated{D,S,T,Nothing,T}
 
 ### Constructors of `Truncated` are deprecated - users should call `truncated`
 @deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncated(d, l, u)
-@deprecate Truncated(d::UnivariateDistribution, l::T, u::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real} Truncated(d, l, u, log(lcdf), lcdf, ucdf, tp, logtp)
+@deprecate Truncated(
+    d::UnivariateDistribution,
+    l::T,
+    u::T,
+    lcdf::T,
+    ucdf::T,
+    tp::T,
+    logtp::T,
+) where {T<:Real} Truncated(d, l, u, log(lcdf), lcdf, ucdf, tp, logtp)
 
 function truncated(d::Truncated, l::T, u::T) where {T<:Real}
     return truncated(
@@ -124,7 +158,8 @@ function truncated(d::Truncated, l::Real, ::Nothing)
 end
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
-partype(d::Truncated{<:UnivariateDistribution,<:ValueSupport,T}) where {T<:Real} = promote_type(partype(d.untruncated), T)
+partype(d::Truncated{<:UnivariateDistribution,<:ValueSupport,T}) where {T<:Real} =
+    promote_type(partype(d.untruncated), T)
 
 Base.eltype(::Type{<:Truncated{D}}) where {D<:UnivariateDistribution} = eltype(D)
 Base.eltype(d::Truncated) = eltype(d.untruncated)
@@ -143,7 +178,10 @@ minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::LeftTruncated) = maximum(d.untruncated)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-function insupport(d::Truncated{<:UnivariateDistribution,<:Union{Discrete,Continuous}}, x::Real)
+function insupport(
+    d::Truncated{<:UnivariateDistribution,<:Union{Discrete,Continuous}},
+    x::Real,
+)
     return _in_closed_interval(x, d.lower, d.upper) && insupport(d.untruncated, x)
 end
 
@@ -239,8 +277,7 @@ function show(io::IO, d::Truncated)
     print(io, "Truncated(")
     d0 = d.untruncated
     uml, namevals = _use_multline_show(d0)
-    uml ? show_multline(io, d0, namevals) :
-          show_oneline(io, d0, namevals)
+    uml ? show_multline(io, d0, namevals) : show_oneline(io, d0, namevals)
     if d.lower === nothing
         print(io, "; upper=$(d.upper))")
     elseif d.upper === nothing

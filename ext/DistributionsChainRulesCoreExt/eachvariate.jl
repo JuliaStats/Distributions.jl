@@ -1,4 +1,7 @@
-function ChainRulesCore.rrule(::Type{Distributions.EachVariate{V}}, x::AbstractArray{<:Real}) where {V}
+function ChainRulesCore.rrule(
+    ::Type{Distributions.EachVariate{V}},
+    x::AbstractArray{<:Real},
+) where {V}
     y = Distributions.EachVariate{V}(x)
     size_x = size(x)
     function EachVariate_pullback(Δ)

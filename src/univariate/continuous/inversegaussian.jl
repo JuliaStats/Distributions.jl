@@ -29,21 +29,24 @@ struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     InverseGaussian{T}(μ::T, λ::T) where {T<:Real} = new{T}(μ, λ)
 end
 
-function InverseGaussian(μ::T, λ::T; check_args::Bool=true) where {T<:Real}
+function InverseGaussian(μ::T, λ::T; check_args::Bool = true) where {T<:Real}
     @check_args InverseGaussian (μ, μ > zero(μ)) (λ, λ > zero(λ))
     return InverseGaussian{T}(μ, λ)
 end
 
-InverseGaussian(μ::Real, λ::Real; check_args::Bool=true) = InverseGaussian(promote(μ, λ)...; check_args=check_args)
-InverseGaussian(μ::Integer, λ::Integer; check_args::Bool=true) = InverseGaussian(float(μ), float(λ); check_args=check_args)
-InverseGaussian(μ::Real; check_args::Bool=true) = InverseGaussian(μ, one(μ); check_args=check_args)
+InverseGaussian(μ::Real, λ::Real; check_args::Bool = true) =
+    InverseGaussian(promote(μ, λ)...; check_args = check_args)
+InverseGaussian(μ::Integer, λ::Integer; check_args::Bool = true) =
+    InverseGaussian(float(μ), float(λ); check_args = check_args)
+InverseGaussian(μ::Real; check_args::Bool = true) =
+    InverseGaussian(μ, one(μ); check_args = check_args)
 InverseGaussian() = InverseGaussian{Float64}(1.0, 1.0)
 
 @distr_support InverseGaussian 0.0 Inf
 
 #### Conversions
 
-function convert(::Type{InverseGaussian{T}}, μ::S, λ::S) where {T <: Real, S <: Real}
+function convert(::Type{InverseGaussian{T}}, μ::S, λ::S) where {T<:Real,S<:Real}
     InverseGaussian(T(μ), T(λ))
 end
 function Base.convert(::Type{InverseGaussian{T}}, d::InverseGaussian) where {T<:Real}
@@ -70,13 +73,13 @@ kurtosis(d::InverseGaussian) = 15d.μ / d.λ
 function mode(d::InverseGaussian)
     μ, λ = params(d)
     r = μ / λ
-    μ * (sqrt(1 + (3r/2)^2) - (3r/2))
+    μ * (sqrt(1 + (3r / 2)^2) - (3r / 2))
 end
 
 
 #### Evaluation
 
-function pdf(d::InverseGaussian{T}, x::Real) where T<:Real
+function pdf(d::InverseGaussian{T}, x::Real) where {T<:Real}
     if x > 0
         μ, λ = params(d)
         return sqrt(λ / (twoπ * x^3)) * exp(-λ * (x - μ)^2 / (2μ^2 * x))
@@ -85,10 +88,10 @@ function pdf(d::InverseGaussian{T}, x::Real) where T<:Real
     end
 end
 
-function logpdf(d::InverseGaussian{T}, x::Real) where T<:Real
+function logpdf(d::InverseGaussian{T}, x::Real) where {T<:Real}
     if x > 0
         μ, λ = params(d)
-        return (log(λ) - (log2π + 3log(x)) - λ * (x - μ)^2 / (μ^2 * x))/2
+        return (log(λ) - (log2π + 3log(x)) - λ * (x - μ)^2 / (μ^2 * x)) / 2
     else
         return -T(Inf)
     end
@@ -187,7 +190,11 @@ function suffstats(::Type{<:InverseGaussian}, x::AbstractVector{<:Real})
     InverseGaussianStats(sx, sinvx, length(x))
 end
 
-function suffstats(::Type{<:InverseGaussian}, x::AbstractVector{<:Real}, w::AbstractVector{<:Real})
+function suffstats(
+    ::Type{<:InverseGaussian},
+    x::AbstractVector{<:Real},
+    w::AbstractVector{<:Real},
+)
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -197,8 +204,8 @@ function suffstats(::Type{<:InverseGaussian}, x::AbstractVector{<:Real}, w::Abst
     sinvx = zero(T)
     sw = zero(T)
     @simd for i in eachindex(x)
-        sx += w[i]*x[i]
-        sinvx += w[i]/x[i]
+        sx += w[i] * x[i]
+        sinvx += w[i] / x[i]
         sw += w[i]
     end
     InverseGaussianStats(sx, sinvx, sw)
@@ -206,6 +213,6 @@ end
 
 function fit_mle(::Type{<:InverseGaussian}, ss::InverseGaussianStats)
     mu = ss.sx / ss.sw
-    invlambda = ss.sinvx / ss.sw  -  inv(mu)
+    invlambda = ss.sinvx / ss.sw - inv(mu)
     InverseGaussian(mu, inv(invlambda))
 end

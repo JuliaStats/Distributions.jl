@@ -30,20 +30,22 @@ struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
     Gamma{T}(α, θ) where {T} = new{T}(α, θ)
 end
 
-function Gamma(α::T, θ::T; check_args::Bool=true) where {T <: Real}
+function Gamma(α::T, θ::T; check_args::Bool = true) where {T<:Real}
     @check_args Gamma (α, α > zero(α)) (θ, θ > zero(θ))
     return Gamma{T}(α, θ)
 end
 
-Gamma(α::Real, θ::Real; check_args::Bool=true) = Gamma(promote(α, θ)...; check_args=check_args)
-Gamma(α::Integer, θ::Integer; check_args::Bool=true) = Gamma(float(α), float(θ); check_args=check_args)
-Gamma(α::Real; check_args::Bool=true) = Gamma(α, one(α); check_args=check_args)
+Gamma(α::Real, θ::Real; check_args::Bool = true) =
+    Gamma(promote(α, θ)...; check_args = check_args)
+Gamma(α::Integer, θ::Integer; check_args::Bool = true) =
+    Gamma(float(α), float(θ); check_args = check_args)
+Gamma(α::Real; check_args::Bool = true) = Gamma(α, one(α); check_args = check_args)
 Gamma() = Gamma{Float64}(1.0, 1.0)
 
 @distr_support Gamma 0.0 Inf
 
 #### Conversions
-convert(::Type{Gamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = Gamma(T(α), T(θ))
+convert(::Type{Gamma{T}}, α::S, θ::S) where {T<:Real,S<:Real} = Gamma(T(α), T(θ))
 Base.convert(::Type{Gamma{T}}, d::Gamma) where {T<:Real} = Gamma{T}(T(d.α), T(d.θ))
 Base.convert(::Type{Gamma{T}}, d::Gamma{T}) where {T<:Real} = d
 
@@ -89,8 +91,8 @@ function kldivergence(p::Gamma, q::Gamma)
     αp, θp = params(p)
     αq, θq = params(q)
     θp_over_θq = θp / θq
-    return (αp - αq) * digamma(αp) - loggamma(αp) + loggamma(αq) -
-        αq * log(θp_over_θq) + αp * (θp_over_θq - 1)
+    return (αp - αq) * digamma(αp) - loggamma(αp) + loggamma(αq) - αq * log(θp_over_θq) +
+           αp * (θp_over_θq - 1)
 end
 
 #### Evaluation & Sampling
@@ -132,17 +134,21 @@ struct GammaStats <: SufficientStats
     GammaStats(sx::Real, slogx::Real, tw::Real) = new(sx, slogx, tw)
 end
 
-function suffstats(::Type{<:Gamma}, x::AbstractArray{T}) where T<:Real
+function suffstats(::Type{<:Gamma}, x::AbstractArray{T}) where {T<:Real}
     sx = zero(T)
     slogx = zero(T)
-    for xi = x
+    for xi in x
         sx += xi
         slogx += log(xi)
     end
     GammaStats(sx, slogx, length(x))
 end
 
-function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
+function suffstats(
+    ::Type{<:Gamma},
+    x::AbstractArray{T},
+    w::AbstractArray{Float64},
+) where {T<:Real}
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -167,14 +173,19 @@ function gamma_mle_update(logmx::Float64, mlogx::Float64, a::Float64)
     1 / z
 end
 
-function fit_mle(::Type{<:Gamma}, ss::GammaStats;
-    alpha0::Float64=NaN, maxiter::Int=1000, tol::Float64=1e-16)
+function fit_mle(
+    ::Type{<:Gamma},
+    ss::GammaStats;
+    alpha0::Float64 = NaN,
+    maxiter::Int = 1000,
+    tol::Float64 = 1e-16,
+)
 
     mx = ss.sx / ss.tw
     logmx = log(mx)
     mlogx = ss.slogx / ss.tw
 
-    a::Float64 = isnan(alpha0) ? (logmx - mlogx)/2 : alpha0
+    a::Float64 = isnan(alpha0) ? (logmx - mlogx) / 2 : alpha0
     converged = false
 
     t = 0

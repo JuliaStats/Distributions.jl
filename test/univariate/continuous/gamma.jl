@@ -27,7 +27,7 @@ using Test, Distributions, OffsetArrays
 
     for T in (Float32, Float64)
         @test @inferred(rand(Gamma(T(1), T(1)))) isa T
-        @test @inferred(rand(Gamma(1/T(2), T(1)))) isa T
+        @test @inferred(rand(Gamma(1 / T(2), T(1)))) isa T
         @test @inferred(rand(Gamma(T(2), T(1)))) isa T
     end
 end

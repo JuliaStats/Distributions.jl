@@ -29,7 +29,7 @@ External links
   Journal of Multivariate Analysis (2009), 100(9): 1989-2001
   doi: [10.1016/j.jmva.2009.04.008](https://doi.org/10.1016/j.jmva.2009.04.008)
 """
-struct LKJCholesky{T <: Real} <: Distribution{CholeskyVariate,Continuous}
+struct LKJCholesky{T<:Real} <: Distribution{CholeskyVariate,Continuous}
     d::Int
     η::T
     uplo::Char
@@ -40,7 +40,12 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args::Bool=true)
+function LKJCholesky(
+    d::Int,
+    η::Real,
+    _uplo::Union{Char,Symbol} = 'L';
+    check_args::Bool = true,
+)
     @check_args(
         LKJCholesky,
         (d, d > 0, "matrix dimension must be positive"),
@@ -69,12 +74,18 @@ Base.show(io::IO, d::LKJCholesky) = show(io, d, (:d, :η, :uplo))
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where T <: Real
+function Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where {T<:Real}
     return LKJCholesky{T}(d.d, T(d.η), d.uplo, T(d.logc0))
 end
-Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky{T}) where T <: Real = d
+Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky{T}) where {T<:Real} = d
 
-function convert(::Type{LKJCholesky{T}}, d::Integer, η::Real, uplo::Char, logc0::Real) where T <: Real
+function convert(
+    ::Type{LKJCholesky{T}},
+    d::Integer,
+    η::Real,
+    uplo::Char,
+    logc0::Real,
+) where {T<:Real}
     return LKJCholesky{T}(Int(d), T(η), uplo, T(logc0))
 end
 
@@ -109,7 +120,7 @@ function insupport(d::LKJCholesky, R::LinearAlgebra.Cholesky)
     return true
 end
 
-function mode(d::LKJCholesky; check_args::Bool=true)
+function mode(d::LKJCholesky; check_args::Bool = true)
     @check_args(
         LKJCholesky,
         @setup(η = d.η),
@@ -121,7 +132,7 @@ end
 
 StatsBase.params(d::LKJCholesky) = (d.d, d.η, d.uplo)
 
-@inline partype(::LKJCholesky{T}) where {T <: Real} = T
+@inline partype(::LKJCholesky{T}) where {T<:Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation
@@ -134,7 +145,7 @@ function logkernel(d::LKJCholesky, R::LinearAlgebra.Cholesky)
     p == 1 && return c * log(first(factors))
     # assuming D = diag(factors) with length(D) = p,
     # logp = sum(i -> (c - i) * log(D[i]), 2:p)
-    logp = sum(Iterators.drop(enumerate(diagind(factors)), 1)) do (i, di) 
+    logp = sum(Iterators.drop(enumerate(diagind(factors)), 1)) do (i, di)
         return (c - i) * log(factors[di])
     end
     return logp
@@ -210,7 +221,8 @@ function Random.rand!(
     d::LKJCholesky,
     Rs::AbstractArray{<:LinearAlgebra.Cholesky{<:Real}},
 )
-    allocate = any(!isassigned(Rs, i) for i in eachindex(Rs)) || any(R -> size(R, 1) != d.d, Rs)
+    allocate =
+        any(!isassigned(Rs, i) for i in eachindex(Rs)) || any(R -> size(R, 1) != d.d, Rs)
     return Random.rand!(rng, d, Rs, allocate)
 end
 
@@ -244,7 +256,7 @@ function _lkj_cholesky_onion_tri!(
     @assert size(A) == (d, d)
     A[1, 1] = 1
     d > 1 || return A
-    β = η + (d - 2)//2
+    β = η + (d - 2) // 2
     #  1. Initialization
     w0 = 2 * rand(rng, Beta(β, β)) - 1
     if uplo === :L
@@ -254,18 +266,18 @@ function _lkj_cholesky_onion_tri!(
     end
     A[2, 2] = sqrt(1 - w0^2)
     #  2. Loop, each iteration k adds row/column k+1
-    for k in 2:(d - 1)
+    for k = 2:(d-1)
         #  (a)
-        β -= 1//2
+        β -= 1 // 2
         #  (b)
-        y = rand(rng, Beta(k//2, β))
+        y = rand(rng, Beta(k // 2, β))
         #  (c)-(e)
         # w is directionally uniform vector of length √y
-        w = @views uplo === :L ? A[k + 1, 1:k] : A[1:k, k + 1]
+        w = @views uplo === :L ? A[k+1, 1:k] : A[1:k, k+1]
         Random.randn!(rng, w)
         rmul!(w, sqrt(y) / norm(w))
         # normalize so new row/column has unit norm
-        A[k + 1, k + 1] = sqrt(1 - y)
+        A[k+1, k+1] = sqrt(1 - y)
     end
     #  3.
     return A

@@ -29,19 +29,21 @@ struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
     Frechet{T}(α::T, θ::T) where {T<:Real} = new{T}(α, θ)
 end
 
-function Frechet(α::T, θ::T; check_args::Bool=true) where {T <: Real}
+function Frechet(α::T, θ::T; check_args::Bool = true) where {T<:Real}
     @check_args Frechet (α, α > zero(α)) (θ, θ > zero(θ))
     return Frechet{T}(α, θ)
 end
 
-Frechet(α::Real, θ::Real; check_args::Bool=true) = Frechet(promote(α, θ)...; check_args=check_args)
-Frechet(α::Integer, θ::Integer; check_args::Bool=true) = Frechet(float(α), float(θ); check_args=check_args)
-Frechet(α::Real=1.0) = Frechet(α, one(α); check_args=false)
+Frechet(α::Real, θ::Real; check_args::Bool = true) =
+    Frechet(promote(α, θ)...; check_args = check_args)
+Frechet(α::Integer, θ::Integer; check_args::Bool = true) =
+    Frechet(float(α), float(θ); check_args = check_args)
+Frechet(α::Real = 1.0) = Frechet(α, one(α); check_args = false)
 
 @distr_support Frechet 0.0 Inf
 
 #### Conversions
-function convert(::Type{Frechet{T}}, α::S, θ::S) where {T <: Real, S <: Real}
+function convert(::Type{Frechet{T}}, α::S, θ::S) where {T<:Real,S<:Real}
     Frechet(T(α), T(θ))
 end
 Base.convert(::Type{Frechet{T}}, d::Frechet) where {T<:Real} = Frechet{T}(T(d.α), T(d.θ))
@@ -64,7 +66,8 @@ end
 
 median(d::Frechet) = d.θ * logtwo^(-1 / d.α)
 
-mode(d::Frechet) = (iα = -1/d.α; d.θ * (1 - iα) ^ iα)
+mode(d::Frechet) = (iα = -1 / d.α;
+d.θ * (1 - iα)^iα)
 
 function var(d::Frechet{T}) where {T<:Real}
     if d.α > 2
@@ -75,7 +78,7 @@ function var(d::Frechet{T}) where {T<:Real}
     end
 end
 
-function skewness(d::Frechet{T}) where T<:Real
+function skewness(d::Frechet{T}) where {T<:Real}
     if d.α > 3
         iα = 1 / d.α
         g1 = gamma(1 - iα)
@@ -87,7 +90,7 @@ function skewness(d::Frechet{T}) where T<:Real
     end
 end
 
-function kurtosis(d::Frechet{T}) where T<:Real
+function kurtosis(d::Frechet{T}) where {T<:Real}
     if d.α > 3
         iα = 1 / d.α
         g1 = gamma(1 - iα)
@@ -107,7 +110,7 @@ end
 
 #### Evaluation
 
-function logpdf(d::Frechet{T}, x::Real) where T<:Real
+function logpdf(d::Frechet{T}, x::Real) where {T<:Real}
     (α, θ) = params(d)
     if x > 0
         z = θ / x
@@ -118,23 +121,23 @@ function logpdf(d::Frechet{T}, x::Real) where T<:Real
 end
 
 zval(d::Frechet, x::Real) = (d.θ / max(x, 0))^d.α
-xval(d::Frechet, z::Real) = d.θ * z^(- 1 / d.α)
+xval(d::Frechet, z::Real) = d.θ * z^(-1 / d.α)
 
-cdf(d::Frechet, x::Real) = exp(- zval(d, x))
-ccdf(d::Frechet, x::Real) = -expm1(- zval(d, x))
-logcdf(d::Frechet, x::Real) = - zval(d, x)
-logccdf(d::Frechet, x::Real) = log1mexp(- zval(d, x))
+cdf(d::Frechet, x::Real) = exp(-zval(d, x))
+ccdf(d::Frechet, x::Real) = -expm1(-zval(d, x))
+logcdf(d::Frechet, x::Real) = -zval(d, x)
+logccdf(d::Frechet, x::Real) = log1mexp(-zval(d, x))
 
 quantile(d::Frechet, p::Real) = xval(d, -log(p))
 cquantile(d::Frechet, p::Real) = xval(d, -log1p(-p))
 invlogcdf(d::Frechet, lp::Real) = xval(d, -lp)
 invlogccdf(d::Frechet, lp::Real) = xval(d, -log1mexp(lp))
 
-function gradlogpdf(d::Frechet{T}, x::Real) where T<:Real
+function gradlogpdf(d::Frechet{T}, x::Real) where {T<:Real}
     (α, θ) = params(d)
-    insupport(Frechet, x) ? -(α + 1) / x + α * (θ^α) * x^(-α-1)  : zero(T)
+    insupport(Frechet, x) ? -(α + 1) / x + α * (θ^α) * x^(-α - 1) : zero(T)
 end
 
 ## Sampling
 
-rand(rng::AbstractRNG, d::Frechet) = d.θ * randexp(rng) ^ (-1 / d.α)
+rand(rng::AbstractRNG, d::Frechet) = d.θ * randexp(rng)^(-1 / d.α)

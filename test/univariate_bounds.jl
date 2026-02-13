@@ -3,7 +3,12 @@ using Test
 
 # to make sure that subtypes provides the required behavior without having to add
 # a dependency to InteractiveUtils
-function _subtypes(m::Module, x::Type, sts=Base.IdSet{Any}(), visited=Base.IdSet{Module}())
+function _subtypes(
+    m::Module,
+    x::Type,
+    sts = Base.IdSet{Any}(),
+    visited = Base.IdSet{Module}(),
+)
     push!(visited, m)
     xt = Base.unwrap_unionall(x)
     if !isa(xt, DataType)
@@ -47,7 +52,7 @@ function _subtypes_in(mods::Array, x::Type)
     for m in mods
         _subtypes(m, x, sts, visited)
     end
-    return sort!(collect(sts), by=string)
+    return sort!(collect(sts), by = string)
 end
 
 get_subtypes(m::Module, x::Type) = _subtypes_in([m], x)
@@ -61,7 +66,7 @@ filter!(x -> isbounded(x()), dists)
 
 @testset "bound checking $dist" for dist in dists
     d = dist()
-    lb,ub = float.(extrema(support(d)))
+    lb, ub = float.(extrema(support(d)))
     lb = prevfloat(lb)
     ub = nextfloat(ub)
     @test iszero(cdf(d, lb))
@@ -70,7 +75,7 @@ filter!(x -> isbounded(x()), dists)
     @test isone(cdf(d, Inf))
     @test isnan(cdf(d, NaN))
 
-    lb_lcdf = logcdf(d,lb)
+    lb_lcdf = logcdf(d, lb)
     @test isinf(lb_lcdf) & (lb_lcdf < 0)
     @test iszero(logcdf(d, ub))
     @test logcdf(d, -Inf) == -Inf
@@ -83,7 +88,7 @@ filter!(x -> isbounded(x()), dists)
     @test iszero(ccdf(d, Inf))
     @test isnan(ccdf(d, NaN))
 
-    ub_lccdf = logccdf(d,ub)
+    ub_lccdf = logccdf(d, ub)
     @test isinf(ub_lccdf) & (ub_lccdf < 0)
     @test iszero(logccdf(d, lb))
     @test iszero(logccdf(d, -Inf))

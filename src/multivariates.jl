@@ -31,20 +31,23 @@ rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =
 If ``x`` is a vector, it returns whether x is within the support of ``d``.
 If ``x`` is a matrix, it returns whether every column in ``x`` is within the support of ``d``.
 """
-insupport{D<:MultivariateDistribution}(d::Union{D, Type{D}}, x::AbstractArray)
+insupport{D<:MultivariateDistribution}(d::Union{D,Type{D}}, x::AbstractArray)
 
-function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix) where D<:MultivariateDistribution
+function insupport!(
+    r::AbstractArray,
+    d::Union{D,Type{D}},
+    X::AbstractMatrix,
+) where {D<:MultivariateDistribution}
     n = length(r)
-    size(X) == (length(d),n) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    for i in 1:n
+    size(X) == (length(d), n) || throw(DimensionMismatch("Inconsistent array dimensions."))
+    for i = 1:n
         r[i] = insupport(d, view(X, :, i))
     end
     return r
 end
 
 insupport(d::Union{D,Type{D}}, X::AbstractMatrix) where {D<:MultivariateDistribution} =
-    insupport!(BitArray(undef, size(X,2)), d, X)
+    insupport!(BitArray(undef, size(X, 2)), d, X)
 
 ## statistics
 
@@ -116,16 +119,18 @@ end
 
 ##### Specific distributions #####
 
-for fname in ["dirichlet.jl",
-              "multinomial.jl",
-              "dirichletmultinomial.jl",
-              "jointorderstatistics.jl",
-              "mvnormal.jl",
-              "mvnormalcanon.jl",
-              "mvlogitnormal.jl",
-              "mvlognormal.jl",
-              "mvtdist.jl",
-              "product.jl", # deprecated
-              "vonmisesfisher.jl"]
+for fname in [
+    "dirichlet.jl",
+    "multinomial.jl",
+    "dirichletmultinomial.jl",
+    "jointorderstatistics.jl",
+    "mvnormal.jl",
+    "mvnormalcanon.jl",
+    "mvlogitnormal.jl",
+    "mvlognormal.jl",
+    "mvtdist.jl",
+    "product.jl", # deprecated
+    "vonmisesfisher.jl",
+]
     include(joinpath("multivariate", fname))
 end

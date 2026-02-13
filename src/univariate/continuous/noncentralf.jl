@@ -10,19 +10,21 @@ struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     NoncentralF{T}(ν1::T, ν2::T, λ::T) where {T} = new{T}(ν1, ν2, λ)
 end
 
-function NoncentralF(ν1::T, ν2::T, λ::T; check_args::Bool=true) where {T <: Real}
+function NoncentralF(ν1::T, ν2::T, λ::T; check_args::Bool = true) where {T<:Real}
     @check_args NoncentralF (ν1, ν1 > zero(ν1)) (ν2, ν2 > zero(ν2)) (λ, λ >= zero(λ))
     return NoncentralF{T}(ν1, ν2, λ)
 end
 
-NoncentralF(ν1::Real, ν2::Real, λ::Real; check_args::Bool=true) = NoncentralF(promote(ν1, ν2, λ)...; check_args=check_args)
-NoncentralF(ν1::Integer, ν2::Integer, λ::Integer; check_args::Bool=true) = NoncentralF(float(ν1), float(ν2), float(λ); check_args=check_args)
+NoncentralF(ν1::Real, ν2::Real, λ::Real; check_args::Bool = true) =
+    NoncentralF(promote(ν1, ν2, λ)...; check_args = check_args)
+NoncentralF(ν1::Integer, ν2::Integer, λ::Integer; check_args::Bool = true) =
+    NoncentralF(float(ν1), float(ν2), float(λ); check_args = check_args)
 
 @distr_support NoncentralF 0.0 Inf
 
 #### Conversions
 
-function convert(::Type{NoncentralF{T}}, ν1::S, ν2::S, λ::S) where {T <: Real, S <: Real}
+function convert(::Type{NoncentralF{T}}, ν1::S, ν2::S, λ::S) where {T<:Real,S<:Real}
     NoncentralF(T(ν1), T(ν2), T(λ))
 end
 function Base.convert(::Type{NoncentralF{T}}, d::NoncentralF) where {T<:Real}
@@ -41,9 +43,10 @@ function mean(d::NoncentralF{T}) where {T<:Real}
     d.ν2 > 2 ? d.ν2 / (d.ν2 - 2) * (d.ν1 + d.λ) / d.ν1 : T(NaN)
 end
 
-var(d::NoncentralF{T}) where {T<:Real} = d.ν2 > 4 ? 2d.ν2^2 *
-               ((d.ν1 + d.λ)^2 + (d.ν2 - 2)*(d.ν1 + 2d.λ)) /
-               (d.ν1 * (d.ν2 - 2)^2 * (d.ν2 - 4)) : T(NaN)
+var(d::NoncentralF{T}) where {T<:Real} =
+    d.ν2 > 4 ?
+    2d.ν2^2 * ((d.ν1 + d.λ)^2 + (d.ν2 - 2) * (d.ν1 + 2d.λ)) /
+    (d.ν1 * (d.ν2 - 2)^2 * (d.ν2 - 4)) : T(NaN)
 
 
 ### Evaluation & Sampling
@@ -51,7 +54,7 @@ var(d::NoncentralF{T}) where {T<:Real} = d.ν2 > 4 ? 2d.ν2^2 *
 @_delegate_statsfuns NoncentralF nfdist ν1 ν2 λ
 
 function rand(rng::AbstractRNG, d::NoncentralF)
-    r1 = rand(rng, NoncentralChisq(d.ν1,d.λ)) / d.ν1
+    r1 = rand(rng, NoncentralChisq(d.ν1, d.λ)) / d.ν1
     r2 = rand(rng, Chisq(d.ν2)) / d.ν2
     r1 / r2
 end

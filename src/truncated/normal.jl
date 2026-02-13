@@ -115,7 +115,7 @@ function entropy(d::Truncated{<:Normal{<:Real},Continuous})
     b = (upper - μ) / σ
     aφa = isinf(a) ? 0.0 : a * normpdf(a)
     bφb = isinf(b) ? 0.0 : b * normpdf(b)
-    0.5 * (log2π + 1.) + log(σ * z) + (aφa - bφb) / (2.0 * z)
+    0.5 * (log2π + 1.0) + log(σ * z) + (aφa - bφb) / (2.0 * z)
 end
 
 
@@ -154,8 +154,9 @@ function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
 
     else
         span = ub - lb
-        if lb > 0 && span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
-            a = (lb + sqrt(lb^2 + 4.0))/2.0
+        if lb > 0 &&
+           span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
+            a = (lb + sqrt(lb^2 + 4.0)) / 2.0
             while true
                 r = rand(rng, Exponential(1.0 / a)) + lb
                 u = rand(rng)
@@ -163,7 +164,9 @@ function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
                     return r
                 end
             end
-        elseif ub < 0 && ub - lb > 2.0 / (-ub + sqrt(ub^2 + 4.0)) * exp((ub^2 + ub * sqrt(ub^2 + 4.0)) / 4.0)
+        elseif ub < 0 &&
+               ub - lb >
+               2.0 / (-ub + sqrt(ub^2 + 4.0)) * exp((ub^2 + ub * sqrt(ub^2 + 4.0)) / 4.0)
             a = (-ub + sqrt(ub^2 + 4.0)) / 2.0
             while true
                 r = rand(rng, Exponential(1.0 / a)) - ub

@@ -24,12 +24,12 @@ struct Lindley{T<:Real} <: ContinuousUnivariateDistribution
     Lindley{T}(θ::T) where {T} = new{T}(θ)
 end
 
-function Lindley(θ::Real; check_args::Bool=true)
+function Lindley(θ::Real; check_args::Bool = true)
     @check_args Lindley (θ, θ > zero(θ))
     return Lindley{typeof(θ)}(θ)
 end
 
-Lindley(θ::Integer; check_args::Bool=true) = Lindley(float(θ); check_args=check_args)
+Lindley(θ::Integer; check_args::Bool = true) = Lindley(float(θ); check_args = check_args)
 
 Lindley() = Lindley{Float64}(1.0)
 
@@ -50,7 +50,7 @@ mean(d::Lindley) = (2 + d.θ) / d.θ / (1 + d.θ)
 
 var(d::Lindley) = 2 / d.θ^2 - 1 / (1 + d.θ)^2
 
-skewness(d::Lindley) = 2 * @evalpoly(d.θ, 2, 6, 6, 1) / @evalpoly(d.θ, 2, 4, 1)^(3//2)
+skewness(d::Lindley) = 2 * @evalpoly(d.θ, 2, 6, 6, 1) / @evalpoly(d.θ, 2, 4, 1)^(3 // 2)
 
 kurtosis(d::Lindley) = 3 * @evalpoly(d.θ, 8, 32, 44, 24, 3) / @evalpoly(d.θ, 2, 4, 1)^2 - 3
 
@@ -140,8 +140,8 @@ end
 # Compute W₋₁(x) for x ∈ (-1/e, 0) using formula (27) in Lóczi. By Theorem 2.23, the
 # upper bound on the error for this algorithm is (1/2)^(2^n), where n is the number of
 # recursion steps. The default here is set such that this error is less than `eps()`.
-function _lambertwm1(x, n=6)
-    if -exp(-one(x)) < x <= -1//4
+function _lambertwm1(x, n = 6)
+    if -exp(-one(x)) < x <= -1 // 4
         β = -1 - sqrt2 * sqrt(1 + ℯ * x)
     elseif x < 0
         lnmx = log(-x)
@@ -149,7 +149,7 @@ function _lambertwm1(x, n=6)
     else
         throw(DomainError(x))
     end
-    for i in 1:n
+    for i = 1:n
         β = β / (1 + β) * (1 + log(x / β))
     end
     return β

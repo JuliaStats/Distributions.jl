@@ -25,21 +25,23 @@ External links
 struct LogLogistic{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
-    LogLogistic{T}(α::T,β::T) where {T} = new{T}(α,β)
+    LogLogistic{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function LogLogistic(α::T, β::T; check_args::Bool=true) where {T <: Real}
+function LogLogistic(α::T, β::T; check_args::Bool = true) where {T<:Real}
     check_args && @check_args(LogLogistic, α > zero(α) && β > zero(β))
     return LogLogistic{T}(α, β)
 end
 
-LogLogistic(α::Real, β::Real; check_args::Bool = true) = LogLogistic(promote(α, β)...; check_args)
+LogLogistic(α::Real, β::Real; check_args::Bool = true) =
+    LogLogistic(promote(α, β)...; check_args)
 
 @distr_support LogLogistic 0.0 Inf
 
 #### Coversions
 convert(::Type{LogLogistic{T}}, d::LogLogistic{T}) where {T<:Real} = d
-convert(::Type{LogLogistic{T}}, d::LogLogistic) where {T<:Real} = LogLogistic{T}(T(d.α), T(d.β))
+convert(::Type{LogLogistic{T}}, d::LogLogistic) where {T<:Real} =
+    LogLogistic{T}(T(d.α), T(d.β))
 
 #### Parameters
 params(d::LogLogistic) = (d.α, d.β)
@@ -50,24 +52,32 @@ partype(::LogLogistic{T}) where {T} = T
 median(d::LogLogistic) = d.α
 function mean(d::LogLogistic)
     (; α, β) = d
-	if !(β > 1)
-        throw(ArgumentError("the mean of a log-logistic distribution is defined only when its shape β > 1"))
-	end
-    return α/sinc(inv(β))
+    if !(β > 1)
+        throw(
+            ArgumentError(
+                "the mean of a log-logistic distribution is defined only when its shape β > 1",
+            ),
+        )
+    end
+    return α / sinc(inv(β))
 end
 
 function mode(d::LogLogistic)
     (; α, β) = d
-    return α*(max(β - 1, 0) / (β + 1))^inv(β)
+    return α * (max(β - 1, 0) / (β + 1))^inv(β)
 end
 
 function var(d::LogLogistic)
     (; α, β) = d
-	if !(β > 2)
-        throw(ArgumentError("the variance of a log-logistic distribution is defined only when its shape β > 2"))
-	end
+    if !(β > 2)
+        throw(
+            ArgumentError(
+                "the variance of a log-logistic distribution is defined only when its shape β > 2",
+            ),
+        )
+    end
     invβ = inv(β)
-	return α^2 * (inv(sinc(2 * invβ)) - inv(sinc(invβ))^2)
+    return α^2 * (inv(sinc(2 * invβ)) - inv(sinc(invβ))^2)
 end
 
 entropy(d::LogLogistic) = log(d.α / d.β) + 2
