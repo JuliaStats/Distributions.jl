@@ -57,7 +57,7 @@ Pull Request on the main repository.
 
 To format the code, run the following command:
 ```bash
-julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_all.jl")'
+julia --project=@format -e 'using Pkg; Pkg.add(PackageSpec(; name="JuliaFormatter", version="1")); using JuliaFormatter; paths=["docs","src"]; isdir("ext") && push!(paths,"ext"); format(paths; verbose=true)'
 ```
 
 ### Requirements

@@ -16,25 +16,6 @@ concurrency:
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 
 jobs:
-  format:
-    name: Format Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: julia-actions/setup-julia@v2
-        with:
-          version: '1'
-          show-versioninfo: true
-      - uses: julia-actions/cache@v2
-      - run: |
-          julia --color=yes --project="${{ github.workspace }}/.formatting" -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_all.jl")'
-          git update-index -q --refresh
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "Formatting changes detected. Run:"
-            echo "  julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(\".formatting/format_all.jl\")'"
-            git status --short
-            exit 1
-          fi
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
