@@ -66,6 +66,12 @@ To run the check locally:
 julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_check.jl")'
 ```
 
+This repository includes a `.git-blame-ignore-revs` file to ignore mass-formatting commits.
+When viewing blame information, run:
+```bash
+git blame --ignore-revs-file .git-blame-ignore-revs <filename>
+```
+
 ### Requirements
 
 Distributions is a central package which many rely on,
