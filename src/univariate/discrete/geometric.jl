@@ -24,12 +24,12 @@ External links
 struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    function Geometric{T}(p::T) where {T <: Real}
+    function Geometric{T}(p::T) where {T<:Real}
         new{T}(p)
     end
 end
 
-function Geometric(p::Real; check_args::Bool=true)
+function Geometric(p::Real; check_args::Bool = true)
     @check_args Geometric (p, zero(p) < p <= one(p))
     return Geometric{typeof(p)}(p)
 end
@@ -89,21 +89,21 @@ end
 function cdf(d::Geometric, x::Int)
     p = succprob(d)
     n = max(x + 1, 0)
-    p < 1/2 ? -expm1(log1p(-p)*n) : 1 - (1 - p)^n
+    p < 1 / 2 ? -expm1(log1p(-p) * n) : 1 - (1 - p)^n
 end
 
 ccdf(d::Geometric, x::Real) = ccdf_int(d, x)
 function ccdf(d::Geometric, x::Int)
     p = succprob(d)
     n = max(x + 1, 0)
-    p < 1/2 ? exp(log1p(-p)*n) : (1 - p)^n
+    p < 1 / 2 ? exp(log1p(-p) * n) : (1 - p)^n
 end
 
 logcdf(d::Geometric, x::Real) = logcdf_int(d, x)
 logcdf(d::Geometric, x::Int) = log1mexp(log1p(-d.p) * max(x + 1, 0))
 
 logccdf(d::Geometric, x::Real) = logccdf_int(d, x)
-logccdf(d::Geometric, x::Int) =  log1p(-d.p) * max(x + 1, 0)
+logccdf(d::Geometric, x::Int) = log1p(-d.p) * max(x + 1, 0)
 
 quantile(d::Geometric, p::Real) = invlogccdf(d, log1p(-p))
 
@@ -111,7 +111,7 @@ cquantile(d::Geometric, p::Real) = invlogccdf(d, log(p))
 
 invlogcdf(d::Geometric, lp::Real) = invlogccdf(d, log1mexp(lp))
 
-function invlogccdf(d::Geometric{T}, lp::Real) where T<:Real
+function invlogccdf(d::Geometric{T}, lp::Real) where {T<:Real}
     if (lp > zero(d.p)) || isnan(lp)
         return T(NaN)
     elseif isinf(lp)
@@ -119,7 +119,7 @@ function invlogccdf(d::Geometric{T}, lp::Real) where T<:Real
     elseif lp == zero(d.p)
         return zero(T)
     end
-    max(ceil(lp/log1p(-d.p)) - 1, zero(T))
+    max(ceil(lp / log1p(-d.p)) - 1, zero(T))
 end
 
 function laplace_transform(d::Geometric, t)
@@ -132,16 +132,16 @@ function cgf(d::Geometric, t)
     # log(p / (1 - (1-p) * exp(t)))
     log(p) - log1mexp(t + log1p(-p))
 end
-cf(d::Geometric, t::Real) = laplace_transform(d, -t*im)
+cf(d::Geometric, t::Real) = laplace_transform(d, -t * im)
 
 ### Sampling
 
 # Inlining is required to hoist the d.p == 1//2 check when generating in bulk
 @inline function rand(rng::AbstractRNG, d::Geometric)
-    if d.p == 1//2
+    if d.p == 1 // 2
         leading_zeros(rand(rng, UInt)) # This branch is a performance optimization
     else
-        floor(Int,-randexp(rng) / log1p(-d.p))
+        floor(Int, -randexp(rng) / log1p(-d.p))
     end
 end
 
@@ -154,15 +154,20 @@ struct GeometricStats <: SufficientStats
     GeometricStats(sx::Real, tw::Real) = new(sx, tw)
 end
 
-suffstats(::Type{<:Geometric}, x::AbstractArray{T}) where {T<:Integer} = GeometricStats(sum(x), length(x))
+suffstats(::Type{<:Geometric}, x::AbstractArray{T}) where {T<:Integer} =
+    GeometricStats(sum(x), length(x))
 
-function suffstats(::Type{<:Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function suffstats(
+    ::Type{<:Geometric},
+    x::AbstractArray{T},
+    w::AbstractArray{Float64},
+) where {T<:Integer}
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
-    sx = 0.
-    tw = 0.
+    sx = 0.0
+    tw = 0.0
     for i = 1:n
         wi = w[i]
         sx += wi * x[i]

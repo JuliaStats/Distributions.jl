@@ -13,7 +13,11 @@ struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVar
 
     function ProductDistribution{N,M,D}(dists::D) where {N,M,D}
         if isempty(dists)
-            throw(ArgumentError("a product distribution must consist of at least one distribution"))
+            throw(
+                ArgumentError(
+                    "a product distribution must consist of at least one distribution",
+                ),
+            )
         end
         return new{N,M,D,_product_valuesupport(dists),_product_eltype(dists)}(
             dists,
@@ -22,11 +26,18 @@ struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVar
     end
 end
 
-function ProductDistribution(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}},N}) where {M,N}
+function ProductDistribution(
+    dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}},N},
+) where {M,N}
     return ProductDistribution{M + N,M,typeof(dists)}(dists)
 end
 
-function ProductDistribution(dists::Tuple{Distribution{<:ArrayLikeVariate{M}},Vararg{Distribution{<:ArrayLikeVariate{M}}}}) where {M}
+function ProductDistribution(
+    dists::Tuple{
+        Distribution{<:ArrayLikeVariate{M}},
+        Vararg{Distribution{<:ArrayLikeVariate{M}}},
+    },
+) where {M}
     return ProductDistribution{M + 1,M,typeof(dists)}(dists)
 end
 
@@ -50,15 +61,24 @@ function __product_promote_type(f::F, ::Type{T}) where {F,T}
     )
 end
 
-function _product_size(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}},N}) where {M,N}
+function _product_size(
+    dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}},N},
+) where {M,N}
     size_d = size(first(dists))
-    all(size(d) == size_d for d in dists) || error("all distributions must be of the same size")
+    all(size(d) == size_d for d in dists) ||
+        error("all distributions must be of the same size")
     size_dists = size(dists)
     return ntuple(i -> i <= M ? size_d[i] : size_dists[i-M], Val(M + N))
 end
-function _product_size(dists::Tuple{Distribution{<:ArrayLikeVariate{M}},Vararg{Distribution{<:ArrayLikeVariate{M}}, N}}) where {M,N}
+function _product_size(
+    dists::Tuple{
+        Distribution{<:ArrayLikeVariate{M}},
+        Vararg{Distribution{<:ArrayLikeVariate{M}},N},
+    },
+) where {M,N}
     size_d = size(first(dists))
-    all(size(d) == size_d for d in dists) || error("all distributions must be of the same size")
+    all(size(d) == size_d for d in dists) ||
+        error("all distributions must be of the same size")
     return ntuple(i -> i <= M ? size_d[i] : N + 1, Val(M + 1))
 end
 
@@ -67,10 +87,13 @@ const VectorOfUnivariateDistribution{D,S<:ValueSupport,T} = ProductDistribution{
 const MatrixOfUnivariateDistribution{D,S<:ValueSupport,T} = ProductDistribution{2,0,D,S,T}
 const ArrayOfUnivariateDistribution{N,D,S<:ValueSupport,T} = ProductDistribution{N,0,D,S,T}
 
-const FillArrayOfUnivariateDistribution{N,D<:Fill{<:Any,N},S<:ValueSupport,T} = ProductDistribution{N,0,D,S,T}
+const FillArrayOfUnivariateDistribution{N,D<:Fill{<:Any,N},S<:ValueSupport,T} =
+    ProductDistribution{N,0,D,S,T}
 
 ## General definitions
-function Base.eltype(::Type{<:ProductDistribution{<:Any,<:Any,<:Any,<:ValueSupport,T}}) where {T}
+function Base.eltype(
+    ::Type{<:ProductDistribution{<:Any,<:Any,<:Any,<:ValueSupport,T}},
+) where {T}
     return T
 end
 
@@ -88,7 +111,10 @@ std(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(std, d.dists))
 var(d::ArrayOfUnivariateDistribution) = map(var, d.dists)
 var(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(var, d.dists))
 
-function insupport(d::ArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}) where {N}
+function insupport(
+    d::ArrayOfUnivariateDistribution{N},
+    x::AbstractArray{<:Real,N},
+) where {N}
     size(d) == size(x) && all(insupport(vi, xi) for (vi, xi) in zip(d.dists, x))
 end
 
@@ -147,13 +173,15 @@ end
 # more efficient implementation of `_logpdf` for `Fill` array of univariate distributions
 # we have to fix a method ambiguity
 function _logpdf(
-    d::FillArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}
+    d::FillArrayOfUnivariateDistribution{N},
+    x::AbstractArray{<:Real,N},
 ) where {N}
     return __logpdf(d, x)
 end
 _logpdf(d::FillArrayOfUnivariateDistribution{2}, x::AbstractMatrix{<:Real}) = __logpdf(d, x)
 function __logpdf(
-    d::FillArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}
+    d::FillArrayOfUnivariateDistribution{N},
+    x::AbstractArray{<:Real,N},
 ) where {N}
     return loglikelihood(first(d.dists), x)
 end
@@ -174,15 +202,11 @@ end
 # we have to fix some method ambiguities
 _logpdf(d::ProductDistribution{N}, x::AbstractArray{<:Real,N}) where {N} = __logpdf(d, x)
 _logpdf(d::ProductDistribution{2}, x::AbstractMatrix{<:Real}) = __logpdf(d, x)
-function __logpdf(
-    d::ProductDistribution{N,M},
-    x::AbstractArray{<:Real,N},
-) where {N,M}
+function __logpdf(d::ProductDistribution{N,M}, x::AbstractArray{<:Real,N}) where {N,M}
     # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
     # to compute `sum(logpdf.(d.dists, eachvariate))`
-    broadcasted = Broadcast.broadcasted(
-        logpdf, d.dists, eachvariate(x, ArrayLikeVariate{M}),
-    )
+    broadcasted =
+        Broadcast.broadcasted(logpdf, d.dists, eachvariate(x, ArrayLikeVariate{M}))
     return sum(Broadcast.instantiate(broadcasted))
 end
 
@@ -198,16 +222,10 @@ end
 
 # more efficient implementation of `_logpdf` for `Fill` arrays of distributions
 # we have to fix a method ambiguity
-function _logpdf(
-    d::ProductDistribution{N,M,<:Fill},
-    x::AbstractArray{<:Real,N},
-) where {N,M}
+function _logpdf(d::ProductDistribution{N,M,<:Fill}, x::AbstractArray{<:Real,N}) where {N,M}
     return __logpdf(d, x)
 end
-function _logpdf(
-    d::ProductDistribution{2,M,<:Fill},
-    x::AbstractMatrix{<:Real},
-) where {M}
+function _logpdf(d::ProductDistribution{2,M,<:Fill}, x::AbstractMatrix{<:Real}) where {M}
     return __logpdf(d, x)
 end
 function __logpdf(
@@ -231,7 +249,8 @@ function product_distribution(dists::AbstractArray{<:Distribution{<:ArrayLikeVar
 end
 
 function product_distribution(
-    dist::Distribution{ArrayLikeVariate{N}}, dists::Distribution{ArrayLikeVariate{N}}...,
+    dist::Distribution{ArrayLikeVariate{N}},
+    dists::Distribution{ArrayLikeVariate{N}}...,
 ) where {N}
     return ProductDistribution((dist, dists...))
 end

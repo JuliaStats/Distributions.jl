@@ -30,19 +30,21 @@ struct JohnsonSU{T<:Real} <: ContinuousUnivariateDistribution
     JohnsonSU{T}(ξ::T, λ::T, γ::T, δ::T) where {T<:Real} = new{T}(ξ, λ, γ, δ)
 end
 
-function JohnsonSU(ξ::T, λ::T, γ::T, δ::T; check_args::Bool=true) where {T<:Real}
+function JohnsonSU(ξ::T, λ::T, γ::T, δ::T; check_args::Bool = true) where {T<:Real}
     @check_args JohnsonSU (λ, λ ≥ zero(λ)) (δ, δ ≥ zero(δ))
     return JohnsonSU{T}(ξ, λ, γ, δ)
 end
 
 JohnsonSU() = JohnsonSU{Int}(0, 1, 0, 1)
-JohnsonSU(ξ::Real, λ::Real, γ::Real, δ::Real; check_args::Bool=true) = JohnsonSU(promote(ξ, λ, γ, δ)...; check_args=check_args)
+JohnsonSU(ξ::Real, λ::Real, γ::Real, δ::Real; check_args::Bool = true) =
+    JohnsonSU(promote(ξ, λ, γ, δ)...; check_args = check_args)
 
 @distr_support JohnsonSU -Inf Inf
 
 #### Conversions
 
-Base.convert(::Type{JohnsonSU{T}}, d::JohnsonSU) where {T<:Real} = JohnsonSU{T}(T(d.ξ), T(d.λ), T(d.γ), T(d.δ))
+Base.convert(::Type{JohnsonSU{T}}, d::JohnsonSU) where {T<:Real} =
+    JohnsonSU{T}(T(d.ξ), T(d.λ), T(d.γ), T(d.δ))
 Base.convert(::Type{JohnsonSU{T}}, d::JohnsonSU{T}) where {T<:Real} = d
 
 #### Parameters
@@ -56,18 +58,18 @@ partype(d::JohnsonSU{T}) where {T<:Real} = T
 #### Statistics
 
 function mean(d::JohnsonSU)
-    a = exp(1/(2*d.δ^2))
-    r = d.γ/d.δ
+    a = exp(1 / (2 * d.δ^2))
+    r = d.γ / d.δ
     d.ξ - d.λ * a * sinh(r)
 end
 function median(d::JohnsonSU)
-    r = d.γ/d.δ
+    r = d.γ / d.δ
     d.ξ + d.λ * sinh(-r)
 end
 function var(d::JohnsonSU)
     a = d.δ^-2
-    r = d.γ/d.δ
-    d.λ^2/2 * expm1(a) * (exp(a)*cosh(2r)+1)
+    r = d.γ / d.δ
+    d.λ^2 / 2 * expm1(a) * (exp(a) * cosh(2r) + 1)
 end
 
 #### Evaluation
@@ -77,7 +79,8 @@ zval(d::JohnsonSU, x::Real) = d.γ + d.δ * asinh(yval(d, x))
 xval(d::JohnsonSU, x::Real) = d.λ * sinh((x - d.γ) / d.δ) + d.ξ
 
 pdf(d::JohnsonSU, x::Real) = d.δ / (d.λ * hypot(1, yval(d, x))) * normpdf(zval(d, x))
-logpdf(d::JohnsonSU, x::Real) = log(d.δ) - log(d.λ) - log1psq(yval(d, x)) / 2 + normlogpdf(zval(d, x))
+logpdf(d::JohnsonSU, x::Real) =
+    log(d.δ) - log(d.λ) - log1psq(yval(d, x)) / 2 + normlogpdf(zval(d, x))
 cdf(d::JohnsonSU, x::Real) = normcdf(zval(d, x))
 logcdf(d::JohnsonSU, x::Real) = normlogcdf(zval(d, x))
 ccdf(d::JohnsonSU, x::Real) = normccdf(zval(d, x))

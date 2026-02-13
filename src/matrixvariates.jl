@@ -44,7 +44,7 @@ mean(d::MatrixDistribution)
 
 Compute the matrix of element-wise variances for distribution `d`.
 """
-var(d::MatrixDistribution) = ((n, p) = size(d); [var(d, i, j) for i in 1:n, j in 1:p])
+var(d::MatrixDistribution) = ((n, p) = size(d); [var(d, i, j) for i = 1:n, j = 1:p])
 
 """
     cov(d::MatrixDistribution)
@@ -73,7 +73,7 @@ Compute the 4-dimensional array whose `(i, j, k, l)` element is `cov(X[i,j], X[k
 """
 function cov(d::MatrixDistribution, ::Val{false})
     n, p = size(d)
-    [cov(d, i, j, k, l) for i in 1:n, j in 1:p, k in 1:n, l in 1:p]
+    [cov(d, i, j, k, l) for i = 1:n, j = 1:p, k = 1:n, l = 1:p]
 end
 
 # pdf & logpdf
@@ -83,11 +83,19 @@ _logpdf(d::MatrixDistribution, X::AbstractMatrix{<:Real}) = logkernel(d, X) + d.
 
 #  for testing
 is_univariate(d::MatrixDistribution) = size(d) == (1, 1)
-check_univariate(d::MatrixDistribution) = is_univariate(d) || throw(ArgumentError("not 1 x 1"))
+check_univariate(d::MatrixDistribution) =
+    is_univariate(d) || throw(ArgumentError("not 1 x 1"))
 
 ##### Specific distributions #####
 
-for fname in ["wishart.jl", "inversewishart.jl", "matrixnormal.jl",
-              "matrixtdist.jl", "matrixbeta.jl", "matrixfdist.jl", "lkj.jl"]
+for fname in [
+    "wishart.jl",
+    "inversewishart.jl",
+    "matrixnormal.jl",
+    "matrixtdist.jl",
+    "matrixbeta.jl",
+    "matrixfdist.jl",
+    "lkj.jl",
+]
     include(joinpath("matrix", fname))
 end

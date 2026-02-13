@@ -1,6 +1,11 @@
 # Various algorithms for computing quantile
 
-function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx::T) where {T<:Real}
+function quantile_bisect(
+    d::ContinuousUnivariateDistribution,
+    p::Real,
+    lx::T,
+    rx::T,
+) where {T<:Real}
     rx < lx && throw(ArgumentError("empty bracketing interval [$lx, $rx]"))
 
     # In some special cases, e.g. #1501, rx == lx`
@@ -18,10 +23,13 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx
     # find quantile using bisect algorithm
     cl = cdf(d, lx)
     cr = cdf(d, rx)
-    cl <= p <= cr ||
-        throw(ArgumentError("[$lx, $rx] is not a valid bracketing interval for `quantile(d, $p)`"))
+    cl <= p <= cr || throw(
+        ArgumentError(
+            "[$lx, $rx] is not a valid bracketing interval for `quantile(d, $p)`",
+        ),
+    )
     while rx - lx > tol
-        m = (lx + rx)/2
+        m = (lx + rx) / 2
         c = cdf(d, m)
         if p > c
             cl = c
@@ -31,7 +39,7 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx
             rx = m
         end
     end
-    return (lx + rx)/2
+    return (lx + rx) / 2
 end
 
 function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::Real, rx::Real)
@@ -47,12 +55,17 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   Distribution, with Application to the Inverse Gaussian Distribution
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
-function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
+function quantile_newton(
+    d::ContinuousUnivariateDistribution,
+    p::Real,
+    xs::Real = mode(d),
+    tol::Real = 1e-12,
+)
     x = xs + (p - cdf(d, xs)) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
-        while abs(x-x0) > max(abs(x),abs(x0)) * tol
+        while abs(x - x0) > max(abs(x), abs(x0)) * tol
             x0 = x
             x = x0 + (p - cdf(d, x0)) / pdf(d, x0)
         end
@@ -66,14 +79,19 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
     end
 end
 
-function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    x = xs + (ccdf(d, xs)-p) / pdf(d, xs)
+function cquantile_newton(
+    d::ContinuousUnivariateDistribution,
+    p::Real,
+    xs::Real = mode(d),
+    tol::Real = 1e-12,
+)
+    x = xs + (ccdf(d, xs) - p) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
-        while abs(x-x0) > max(abs(x),abs(x0)) * tol
+        while abs(x - x0) > max(abs(x), abs(x0)) * tol
             x0 = x
-            x = x0 + (ccdf(d, x0)-p) / pdf(d, x0)
+            x = x0 + (ccdf(d, x0) - p) / pdf(d, x0)
         end
         return x
     elseif p == 1
@@ -85,21 +103,26 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
     end
 end
 
-function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = typeof(lp - logpdf(d,xs))
+function invlogcdf_newton(
+    d::ContinuousUnivariateDistribution,
+    lp::Real,
+    xs::Real = mode(d),
+    tol::Real = 1e-12,
+)
+    T = typeof(lp - logpdf(d, xs))
     if -Inf < lp < 0
         x0 = T(xs)
-        if lp < logcdf(d,x0)
-            x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+        if lp < logcdf(d, x0)
+            x = x0 - exp(lp - logpdf(d, x0) + logexpm1(max(logcdf(d, x0) - lp, 0)))
+            while abs(x - x0) >= max(abs(x), abs(x0)) * tol
                 x0 = x
-                x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
+                x = x0 - exp(lp - logpdf(d, x0) + logexpm1(max(logcdf(d, x0) - lp, 0)))
             end
         else
-            x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0))*tol
+            x = x0 + exp(lp - logpdf(d, x0) + log1mexp(min(logcdf(d, x0) - lp, 0)))
+            while abs(x - x0) >= max(abs(x), abs(x0)) * tol
                 x0 = x
-                x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
+                x = x0 + exp(lp - logpdf(d, x0) + log1mexp(min(logcdf(d, x0) - lp, 0)))
             end
         end
         return x
@@ -112,21 +135,26 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
     end
 end
 
-function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = typeof(lp - logpdf(d,xs))
+function invlogccdf_newton(
+    d::ContinuousUnivariateDistribution,
+    lp::Real,
+    xs::Real = mode(d),
+    tol::Real = 1e-12,
+)
+    T = typeof(lp - logpdf(d, xs))
     if -Inf < lp < 0
         x0 = T(xs)
-        if lp < logccdf(d,x0)
-            x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+        if lp < logccdf(d, x0)
+            x = x0 + exp(lp - logpdf(d, x0) + logexpm1(max(logccdf(d, x0) - lp, 0)))
+            while abs(x - x0) >= max(abs(x), abs(x0)) * tol
                 x0 = x
-                x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
+                x = x0 + exp(lp - logpdf(d, x0) + logexpm1(max(logccdf(d, x0) - lp, 0)))
             end
         else
-            x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+            x = x0 - exp(lp - logpdf(d, x0) + log1mexp(min(logccdf(d, x0) - lp, 0)))
+            while abs(x - x0) >= max(abs(x), abs(x0)) * tol
                 x0 = x
-                x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
+                x = x0 - exp(lp - logpdf(d, x0) + log1mexp(min(logccdf(d, x0) - lp, 0)))
             end
         end
         return x
@@ -143,9 +171,9 @@ end
 # is computed using the newton method
 macro quantile_newton(D)
     esc(quote
-        quantile(d::$D, p::Real) = quantile_newton(d,p)
-        cquantile(d::$D, p::Real) = cquantile_newton(d,p)
-        invlogcdf(d::$D, lp::Real) = invlogcdf_newton(d,lp)
-        invlogccdf(d::$D, lp::Real) = invlogccdf_newton(d,lp)
+        quantile(d::$D, p::Real) = quantile_newton(d, p)
+        cquantile(d::$D, p::Real) = cquantile_newton(d, p)
+        invlogcdf(d::$D, lp::Real) = invlogcdf_newton(d, lp)
+        invlogccdf(d::$D, lp::Real) = invlogccdf_newton(d, lp)
     end)
 end

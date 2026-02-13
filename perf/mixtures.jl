@@ -1,6 +1,16 @@
 using BenchmarkTools: @btime
 import Random
-using Distributions: AbstractMixtureModel, MixtureModel, LogNormal, Normal, pdf, ncomponents, probs, component, components, ContinuousUnivariateDistribution
+using Distributions:
+    AbstractMixtureModel,
+    MixtureModel,
+    LogNormal,
+    Normal,
+    pdf,
+    ncomponents,
+    probs,
+    component,
+    components,
+    ContinuousUnivariateDistribution
 using Test
 
 # v0.22.1
@@ -40,8 +50,8 @@ function improved_no_inbound(d, x)
     p = probs(d)
     return sum(enumerate(p)) do (i, pi)
         if pi > 0
-           c = component(d, i)
-           pdf(c, x) * pi
+            c = component(d, i)
+            pdf(c, x) * pi
         else
             zero(eltype(p))
         end
@@ -92,11 +102,7 @@ function sumcomp_cond(d, x)
     sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
 end
 
-distributions = [
-    Normal(-1.0, 0.3),
-    Normal(0.0, 0.5),
-    Normal(3.0, 1.0),
-]
+distributions = [Normal(-1.0, 0.3), Normal(0.0, 0.5), Normal(3.0, 1.0)]
 
 priors = [0.25, 0.25, 0.5]
 
@@ -110,7 +116,7 @@ for x in rand(5)
     @info "evaluate_manual_pdf"
     vman = @btime evaluate_manual_pdf($distributions, $priors, $x)
     @info "current_master"
-    vmaster =  @btime current_master($gmm_normal, $x)
+    vmaster = @btime current_master($gmm_normal, $x)
     @info "improved_version"
     v1 = @btime improved_version($gmm_normal, $x)
     @info "improved_no_inbound"
@@ -131,8 +137,8 @@ for x in rand(5)
     @info "==================="
 end
 
-large_normals = [Normal(rand(), rand()) for _ in 1:1000]
-large_probs = [rand() for _ in 1:1000]
+large_normals = [Normal(rand(), rand()) for _ = 1:1000]
+large_probs = [rand() for _ = 1:1000]
 large_probs .= large_probs ./ sum(large_probs)
 
 gmm_large = MixtureModel(large_normals, large_probs)
@@ -145,7 +151,7 @@ for x in rand(5)
     @info "evaluate_manual_pdf"
     vman = @btime evaluate_manual_pdf($large_normals, $large_probs, $x)
     @info "current_master"
-    vmaster =  @btime current_master($gmm_large, $x)
+    vmaster = @btime current_master($gmm_large, $x)
     @info "improved_version"
     v1 = @btime improved_version($gmm_large, $x)
     @info "improved_no_inbound"
@@ -167,11 +173,11 @@ for x in rand(5)
 end
 
 large_het = append!(
-    ContinuousUnivariateDistribution[Normal(rand(), rand()) for _ in 1:1000],
-    ContinuousUnivariateDistribution[LogNormal(rand(), rand()) for _ in 1:1000],
+    ContinuousUnivariateDistribution[Normal(rand(), rand()) for _ = 1:1000],
+    ContinuousUnivariateDistribution[LogNormal(rand(), rand()) for _ = 1:1000],
 )
 
-large_het_probs = [rand() for _ in 1:2000]
+large_het_probs = [rand() for _ = 1:2000]
 large_het_probs .= large_het_probs ./ sum(large_het_probs)
 
 gmm_het = MixtureModel(large_het, large_het_probs)
@@ -184,7 +190,7 @@ for x in rand(5)
     @info "evaluate_manual_pdf"
     vman = @btime evaluate_manual_pdf($large_het, $large_het_probs, $x)
     @info "current_master"
-    vmaster =  @btime current_master($gmm_het, $x)
+    vmaster = @btime current_master($gmm_het, $x)
     @info "improved_version"
     v1 = @btime improved_version($gmm_het, $x)
     @info "improved_no_inbound"
@@ -208,12 +214,7 @@ end
 
 @info "Test with one NaN"
 
-distributions = [
-    Normal(-1.0, 0.3),
-    Normal(0.0, 0.5),
-    Normal(3.0, 1.0),
-    Normal(NaN, 1.0),
-]
+distributions = [Normal(-1.0, 0.3), Normal(0.0, 0.5), Normal(3.0, 1.0), Normal(NaN, 1.0)]
 
 priors = [0.25, 0.25, 0.5, 0.0]
 
@@ -223,7 +224,7 @@ Random.seed!(42)
 for x in rand(1)
     @info "sampling $x"
     @info "current_master"
-    vmaster =  @btime current_master($gmm_normal, $x)
+    vmaster = @btime current_master($gmm_normal, $x)
     @info "improved_version"
     v1 = @btime improved_version($gmm_normal, $x)
     @info "improved_no_inbound"

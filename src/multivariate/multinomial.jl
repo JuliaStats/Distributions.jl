@@ -19,13 +19,17 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
                     # over 1:k
 ```
 """
-struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
+struct Multinomial{T<:Real,TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
     n::Int
     p::TV
-    Multinomial{T, TV}(n::Int, p::TV) where {T <: Real, TV <: AbstractVector{T}} = new{T, TV}(n, p)
+    Multinomial{T,TV}(n::Int, p::TV) where {T<:Real,TV<:AbstractVector{T}} = new{T,TV}(n, p)
 end
 
-function Multinomial(n::Integer, p::AbstractVector{T}; check_args::Bool=true) where {T<:Real}
+function Multinomial(
+    n::Integer,
+    p::AbstractVector{T};
+    check_args::Bool = true,
+) where {T<:Real}
     @check_args(
         Multinomial,
         (n, n >= 0),
@@ -34,9 +38,9 @@ function Multinomial(n::Integer, p::AbstractVector{T}; check_args::Bool=true) wh
     return Multinomial{T,typeof(p)}(n, p)
 end
 
-function Multinomial(n::Integer, k::Integer; check_args::Bool=true)
+function Multinomial(n::Integer, k::Integer; check_args::Bool = true)
     @check_args Multinomial (n, n >= 0) (k, k >= 1)
-    return Multinomial{Float64, Vector{Float64}}(round(Int, n), fill(1.0 / k, k))
+    return Multinomial{Float64,Vector{Float64}}(round(Int, n), fill(1.0 / k, k))
 end
 
 # Parameters
@@ -50,18 +54,27 @@ params(d::Multinomial) = (d.n, d.p)
 @inline partype(d::Multinomial{T}) where {T<:Real} = T
 
 ### Conversions
-convert(::Type{Multinomial{T, TV}}, d::Multinomial) where {T<:Real, TV<:AbstractVector{T}} = Multinomial(d.n, TV(d.p))
-convert(::Type{Multinomial{T, TV}}, d::Multinomial{T, TV}) where {T<:Real, TV<:AbstractVector{T}} = d
-convert(::Type{Multinomial{T, TV}}, n, p::AbstractVector) where {T<:Real, TV<:AbstractVector} = Multinomial(n, TV(p))
+convert(::Type{Multinomial{T,TV}}, d::Multinomial) where {T<:Real,TV<:AbstractVector{T}} =
+    Multinomial(d.n, TV(d.p))
+convert(
+    ::Type{Multinomial{T,TV}},
+    d::Multinomial{T,TV},
+) where {T<:Real,TV<:AbstractVector{T}} = d
+convert(
+    ::Type{Multinomial{T,TV}},
+    n,
+    p::AbstractVector,
+) where {T<:Real,TV<:AbstractVector} = Multinomial(n, TV(p))
 convert(::Type{Multinomial{T}}, d::Multinomial) where {T<:Real} = Multinomial(d.n, T.(d.p))
 convert(::Type{Multinomial{T}}, d::Multinomial{T}) where {T<:Real} = d
-convert(::Type{Multinomial{T}}, n, p::AbstractVector) where {T<:Real} = Multinomial(n, T.(p))
+convert(::Type{Multinomial{T}}, n, p::AbstractVector) where {T<:Real} =
+    Multinomial(n, T.(p))
 
 # Statistics
 
 mean(d::Multinomial) = d.n .* d.p
 
-function var(d::Multinomial{T}) where T<:Real
+function var(d::Multinomial{T}) where {T<:Real}
     p = probs(d)
     k = length(p)
     n = ntrials(d)
@@ -74,7 +87,7 @@ function var(d::Multinomial{T}) where T<:Real
     v
 end
 
-function cov(d::Multinomial{T}) where T<:Real
+function cov(d::Multinomial{T}) where {T<:Real}
     p = probs(d)
     k = length(p)
     n = ntrials(d)
@@ -83,35 +96,35 @@ function cov(d::Multinomial{T}) where T<:Real
     for j = 1:k
         pj = p[j]
         for i = 1:j-1
-            C[i,j] = - n * p[i] * pj
+            C[i, j] = -n * p[i] * pj
         end
 
-        C[j,j] = n * pj * (1-pj)
+        C[j, j] = n * pj * (1 - pj)
     end
 
     for j = 1:k-1
         for i = j+1:k
-            C[i,j] = C[j,i]
+            C[i, j] = C[j, i]
         end
     end
     C
 end
 
-function mgf(d::Multinomial{T}, t::AbstractVector) where T<:Real
+function mgf(d::Multinomial{T}, t::AbstractVector) where {T<:Real}
     p = probs(d)
     n = ntrials(p)
     s = zero(T)
-    for i in 1:length(p)
+    for i = 1:length(p)
         s += p[i] * exp(t[i])
     end
     return s^n
 end
 
-function cf(d::Multinomial{T}, t::AbstractVector) where T<:Real
+function cf(d::Multinomial{T}, t::AbstractVector) where {T<:Real}
     p = probs(d)
     n = ntrials(d)
     s = zero(Complex{T})
-    for i in 1:length(p)
+    for i = 1:length(p)
         s += p[i] * exp(im * t[i])
     end
     return s^n
@@ -119,11 +132,11 @@ end
 
 function entropy(d::Multinomial)
     n, p = params(d)
-    s = -loggamma(n+1) + n*entropy(p)
+    s = -loggamma(n + 1) + n * entropy(p)
     for pr in p
         b = Binomial(n, pr)
-        for x in 0:n
-            s += pdf(b, x) * loggamma(x+1)
+        for x = 0:n
+            s += pdf(b, x) * loggamma(x + 1)
         end
     end
     return s
@@ -132,7 +145,7 @@ end
 
 # Evaluation
 
-function insupport(d::Multinomial, x::AbstractVector{T}) where T<:Real
+function insupport(d::Multinomial, x::AbstractVector{T}) where {T<:Real}
     k = length(d)
     length(x) == k || return false
     s = 0.0
@@ -146,12 +159,12 @@ function insupport(d::Multinomial, x::AbstractVector{T}) where T<:Real
     return s == ntrials(d)  # integer computation would not yield truncation errors
 end
 
-function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
+function _logpdf(d::Multinomial, x::AbstractVector{T}) where {T<:Real}
     p = probs(d)
     n = ntrials(d)
     S = eltype(p)
     R = promote_type(T, S)
-    insupport(d,x) || return -R(Inf)
+    insupport(d, x) || return -R(Inf)
     s = R(loggamma(n + 1))
     for i = 1:length(p)
         xi = x[i]
@@ -181,15 +194,15 @@ struct MultinomialStats <: SufficientStats
     MultinomialStats(n::Int, scnts::Vector{Float64}, tw::Real) = new(n, scnts, Float64(tw))
 end
 
-function suffstats(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real
+function suffstats(::Type{<:Multinomial}, x::Matrix{T}) where {T<:Real}
     K = size(x, 1)
     n::T = zero(T)
     scnts = zeros(K)
 
-    for j = 1:size(x,2)
+    for j = 1:size(x, 2)
         nj = zero(T)
         for i = 1:K
-            xi = x[i,j]
+            xi = x[i, j]
             scnts[i] += xi
             nj += xi
         end
@@ -200,23 +213,23 @@ function suffstats(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real
             error("Each sample in X should sum to the same value.")
         end
     end
-    MultinomialStats(n, scnts, size(x,2))
+    MultinomialStats(n, scnts, size(x, 2))
 end
 
-function suffstats(::Type{<:Multinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
+function suffstats(::Type{<:Multinomial}, x::Matrix{T}, w::Array{Float64}) where {T<:Real}
     length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     K = size(x, 1)
     n::T = zero(T)
     scnts = zeros(K)
-    tw = 0.
+    tw = 0.0
 
-    for j = 1:size(x,2)
+    for j = 1:size(x, 2)
         nj = zero(T)
         wj = w[j]
         tw += wj
         for i = 1:K
-            xi = x[i,j]
+            xi = x[i, j]
             scnts[i] += xi * wj
             nj += xi
         end
@@ -230,7 +243,8 @@ function suffstats(::Type{<:Multinomial}, x::Matrix{T}, w::Array{Float64}) where
     MultinomialStats(n, scnts, tw)
 end
 
-fit_mle(::Type{<:Multinomial}, ss::MultinomialStats) = Multinomial(ss.n, ss.scnts * inv(ss.tw * ss.n))
+fit_mle(::Type{<:Multinomial}, ss::MultinomialStats) =
+    Multinomial(ss.n, ss.scnts * inv(ss.tw * ss.n))
 
 function fit_mle(::Type{<:Multinomial}, x::Matrix{<:Real})
     ss = suffstats(Multinomial, x)

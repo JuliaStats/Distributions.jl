@@ -32,20 +32,23 @@ struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
     LogNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
+function LogNormal(μ::T, σ::T; check_args::Bool = true) where {T<:Real}
     @check_args LogNormal (σ, σ ≥ zero(σ))
     return LogNormal{T}(μ, σ)
 end
 
-LogNormal(μ::Real, σ::Real; check_args::Bool=true) = LogNormal(promote(μ, σ)...; check_args=check_args)
-LogNormal(μ::Integer, σ::Integer; check_args::Bool=true) = LogNormal(float(μ), float(σ); check_args=check_args)
-LogNormal(μ::Real=0.0) = LogNormal(μ, one(μ); check_args=false)
+LogNormal(μ::Real, σ::Real; check_args::Bool = true) =
+    LogNormal(promote(μ, σ)...; check_args = check_args)
+LogNormal(μ::Integer, σ::Integer; check_args::Bool = true) =
+    LogNormal(float(μ), float(σ); check_args = check_args)
+LogNormal(μ::Real = 0.0) = LogNormal(μ, one(μ); check_args = false)
 
 @distr_support LogNormal 0.0 Inf
 
 #### Conversions
-convert(::Type{LogNormal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = LogNormal(T(μ), T(σ))
-Base.convert(::Type{LogNormal{T}}, d::LogNormal) where {T<:Real} = LogNormal{T}(T(d.μ), T(d.σ))
+convert(::Type{LogNormal{T}}, μ::S, σ::S) where {T<:Real,S<:Real} = LogNormal(T(μ), T(σ))
+Base.convert(::Type{LogNormal{T}}, d::LogNormal) where {T<:Real} =
+    LogNormal{T}(T(d.μ), T(d.σ))
 Base.convert(::Type{LogNormal{T}}, d::LogNormal{T}) where {T<:Real} = d
 
 #### Parameters
@@ -59,9 +62,11 @@ meanlogx(d::LogNormal) = d.μ
 varlogx(d::LogNormal) = abs2(d.σ)
 stdlogx(d::LogNormal) = d.σ
 
-mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + σ^2/2))
+mean(d::LogNormal) = ((μ, σ) = params(d);
+exp(μ + σ^2 / 2))
 median(d::LogNormal) = exp(d.μ)
-mode(d::LogNormal) = ((μ, σ) = params(d); exp(μ - σ^2))
+mode(d::LogNormal) = ((μ, σ) = params(d);
+exp(μ - σ^2))
 partype(::LogNormal{T}) where {T<:Real} = T
 
 function var(d::LogNormal)
@@ -82,12 +87,12 @@ function kurtosis(d::LogNormal)
     e2 = e * e
     e3 = e2 * e
     e4 = e3 * e
-    e4 + 2*e3 + 3*e2 - 6
+    e4 + 2 * e3 + 3 * e2 - 6
 end
 
 function entropy(d::LogNormal)
     (μ, σ) = params(d)
-    (1 + log(twoπ * σ^2))/2 + μ
+    (1 + log(twoπ * σ^2)) / 2 + μ
 end
 
 function kldivergence(p::LogNormal, q::LogNormal)
@@ -128,8 +133,8 @@ ccdf(d::LogNormal, x::Real) = StatsFuns.normccdf(d.μ, d.σ, log(max(x, zero(x))
 logcdf(d::LogNormal, x::Real) = StatsFuns.normlogcdf(d.μ, d.σ, log(max(x, zero(x))))
 logccdf(d::LogNormal, x::Real) = StatsFuns.normlogccdf(d.μ, d.σ, log(max(x, zero(x))))
 
-quantile(d::LogNormal, q::Real) =  exp(StatsFuns.norminvcdf(d.μ, d.σ, q))
-cquantile(d::LogNormal, q::Real) =  exp(StatsFuns.norminvccdf(d.μ, d.σ, q))
+quantile(d::LogNormal, q::Real) = exp(StatsFuns.norminvcdf(d.μ, d.σ, q))
+cquantile(d::LogNormal, q::Real) = exp(StatsFuns.norminvccdf(d.μ, d.σ, q))
 invlogcdf(d::LogNormal, lq::Real) = exp(StatsFuns.norminvlogcdf(d.μ, d.σ, lq))
 invlogccdf(d::LogNormal, lq::Real) = exp(StatsFuns.norminvlogccdf(d.μ, d.σ, lq))
 
@@ -157,7 +162,7 @@ end
 
 ## Fitting
 
-function fit_mle(::Type{<:LogNormal}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:LogNormal}, x::AbstractArray{T}) where {T<:Real}
     lx = log.(x)
     μ, σ = mean_and_std(lx)
     LogNormal(μ, σ)

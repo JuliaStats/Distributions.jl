@@ -17,7 +17,7 @@ struct VonMisesFisher{T<:Real} <: ContinuousMultivariateDistribution
     κ::T
     logCκ::T
 
-    function VonMisesFisher{T}(μ::Vector{T}, κ::T; checknorm::Bool=true) where T
+    function VonMisesFisher{T}(μ::Vector{T}, κ::T; checknorm::Bool = true) where {T}
         if checknorm
             isunitvec(μ) || error("μ must be a unit vector")
         end
@@ -42,9 +42,11 @@ end
 show(io::IO, d::VonMisesFisher) = show(io, d, (:μ, :κ))
 
 ### Conversions
-convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} = VonMisesFisher{T}(convert(Vector{T}, d.μ), T(d.κ); checknorm=false)
+convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} =
+    VonMisesFisher{T}(convert(Vector{T}, d.μ), T(d.κ); checknorm = false)
 Base.convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher{T}) where {T<:Real} = d
-convert(::Type{VonMisesFisher{T}}, μ::Vector, κ, logCκ) where {T<:Real} =  VonMisesFisher{T}(convert(Vector{T}, μ), T(κ))
+convert(::Type{VonMisesFisher{T}}, μ::Vector, κ, logCκ) where {T<:Real} =
+    VonMisesFisher{T}(convert(Vector{T}, μ), T(κ))
 
 
 
@@ -63,30 +65,29 @@ params(d::VonMisesFisher) = (d.μ, d.κ)
 
 function _vmflck(p, κ)
     T = typeof(κ)
-    hp = T(p/2)
+    hp = T(p / 2)
     q = hp - 1
     q * log(κ) - hp * log2π - log(besselix(q, κ)) - κ
 end
 _vmflck3(κ) = log(κ) - log2π - κ - log1mexp(-2κ)
 vmflck(p, κ) = (p == 3 ? _vmflck3(κ) : _vmflck(p, κ))
 
-_logpdf(d::VonMisesFisher, x::AbstractVector{T}) where {T<:Real} = d.logCκ + d.κ * dot(d.μ, x)
+_logpdf(d::VonMisesFisher, x::AbstractVector{T}) where {T<:Real} =
+    d.logCκ + d.κ * dot(d.μ, x)
 
 
 ### Sampling
 
 sampler(d::VonMisesFisher) = VonMisesFisherSampler(d.μ, d.κ)
 
-_rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractVector) =
-    _rand!(rng, sampler(d), x)
-_rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractMatrix) =
-    _rand!(rng, sampler(d), x)
+_rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractVector) = _rand!(rng, sampler(d), x)
+_rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractMatrix) = _rand!(rng, sampler(d), x)
 
 
 ### Estimation
 
 function fit_mle(::Type{<:VonMisesFisher}, X::Matrix{Float64})
-    r = vec(sum(X, dims=2))
+    r = vec(sum(X, dims = 2))
     n = size(X, 2)
     r_nrm = norm(r)
     μ = rmul!(r, 1.0 / r_nrm)
@@ -95,7 +96,8 @@ function fit_mle(::Type{<:VonMisesFisher}, X::Matrix{Float64})
     VonMisesFisher(μ, κ)
 end
 
-fit_mle(::Type{<:VonMisesFisher}, X::Matrix{T}) where {T<:Real} = fit_mle(VonMisesFisher, Float64(X))
+fit_mle(::Type{<:VonMisesFisher}, X::Matrix{T}) where {T<:Real} =
+    fit_mle(VonMisesFisher, Float64(X))
 
 function _vmf_estkappa(p::Int, ρ::Float64)
     # Using the fixed-point iteration algorithm in the following paper:

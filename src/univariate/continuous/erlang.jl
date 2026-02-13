@@ -20,27 +20,27 @@ struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
     Erlang{T}(α::Int, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Erlang(α::Real, θ::Real; check_args::Bool=true)
+function Erlang(α::Real, θ::Real; check_args::Bool = true)
     @check_args Erlang (α, isinteger(α)) (α, α >= zero(α))
     return Erlang{typeof(θ)}(α, θ)
 end
 
-function Erlang(α::Integer, θ::Real; check_args::Bool=true)
+function Erlang(α::Integer, θ::Real; check_args::Bool = true)
     @check_args Erlang (α, α >= zero(α))
     return Erlang{typeof(θ)}(α, θ)
 end
 
-function Erlang(α::Integer, θ::Integer; check_args::Bool=true)
-    return Erlang(α, float(θ); check_args=check_args)
+function Erlang(α::Integer, θ::Integer; check_args::Bool = true)
+    return Erlang(α, float(θ); check_args = check_args)
 end
 
-Erlang(α::Integer=1) = Erlang(α, 1.0; check_args=false)
+Erlang(α::Integer = 1) = Erlang(α, 1.0; check_args = false)
 
 @distr_support Erlang 0.0 Inf
 
 #### Conversions
-function convert(::Type{Erlang{T}}, α::Integer, θ::S) where {T <: Real, S <: Real}
-    Erlang(α, T(θ), check_args=false)
+function convert(::Type{Erlang{T}}, α::Integer, θ::S) where {T<:Real,S<:Real}
+    Erlang(α, T(θ), check_args = false)
 end
 function Base.convert(::Type{Erlang{T}}, d::Erlang) where {T<:Real}
     Erlang{T}(d.α, T(d.θ))
@@ -62,12 +62,9 @@ var(d::Erlang) = d.α * d.θ^2
 skewness(d::Erlang) = 2 / sqrt(d.α)
 kurtosis(d::Erlang) = 6 / d.α
 
-function mode(d::Erlang; check_args::Bool=true)
+function mode(d::Erlang; check_args::Bool = true)
     α, θ = params(d)
-    @check_args(
-        Erlang,
-        (α, α >= 1, "Erlang has no mode when α < 1"),
-    )
+    @check_args(Erlang, (α, α >= 1, "Erlang has no mode when α < 1"),)
     θ * (α - 1)
 end
 
@@ -79,9 +76,9 @@ end
 mgf(d::Erlang, t::Real) = (1 - t * d.θ)^(-d.α)
 function cgf(d::Erlang, t)
     α, θ = params(d)
-    -α * log1p(-t*θ)
+    -α * log1p(-t * θ)
 end
-cf(d::Erlang, t::Real)  = (1 - im * t * d.θ)^(-d.α)
+cf(d::Erlang, t::Real) = (1 - im * t * d.θ)^(-d.α)
 
 
 #### Evaluation & Sampling

@@ -40,7 +40,8 @@
 
         # support
         for d in d1s, s in sizes
-            @test (size(d) == s) ⊻ (length(s) != length(size(d)) || !insupport(d, reshape(x1, s)))
+            @test (size(d) == s) ⊻
+                  (length(s) != length(size(d)) || !insupport(d, reshape(x1, s)))
         end
 
         # mean
@@ -120,7 +121,8 @@
         σ = rand(rng, 16, 16)
         μ = rand(rng, 16)
         d1 = MvNormal(μ, σ * σ')
-        sizes = [(4, 4), (8, 2), (2, 8), (1, 16), (16, 1), (4, 2, 2), (2, 4, 2), (2, 2, 2, 2)]
+        sizes =
+            [(4, 4), (8, 2), (2, 8), (1, 16), (16, 1), (4, 2, 2), (2, 4, 2), (2, 2, 2, 2)]
         test_reshaped(rng, d1, sizes)
     end
 
@@ -128,8 +130,16 @@
         α = rand(rng, 36) .+ 1 # mode is only defined if all alpha > 1
         d1 = Dirichlet(α)
         sizes = [
-        (6, 6), (4, 9), (9, 4), (3, 12), (12, 3), (1, 36), (36, 1), (6, 3, 2),
-        (3, 2, 6), (2, 3, 3, 2),
+            (6, 6),
+            (4, 9),
+            (9, 4),
+            (3, 12),
+            (12, 3),
+            (1, 36),
+            (36, 1),
+            (6, 3, 2),
+            (3, 2, 6),
+            (2, 3, 3, 2),
         ]
         test_reshaped(rng, d1, sizes)
     end

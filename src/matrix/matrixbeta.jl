@@ -25,7 +25,7 @@ are independent, and we use ``\\mathcal{L}(\\cdot)`` to denote the lower Cholesk
 
 has ``\\mathbf{U}\\sim \\textrm{MB}_p(n_1/2, n_2/2)``.
 """
-struct MatrixBeta{T <: Real, TW} <: ContinuousMatrixDistribution
+struct MatrixBeta{T<:Real,TW} <: ContinuousMatrixDistribution
     W1::TW
     W2::TW
     logc0::T
@@ -42,30 +42,30 @@ function MatrixBeta(p::Int, n1::Real, n2::Real)
     Ip = ScalMat(p, one(T))
     W1 = Wishart(T(n1), Ip)
     W2 = Wishart(T(n2), Ip)
-    MatrixBeta{T, typeof(W1)}(W1, W2, T(logc0))
+    MatrixBeta{T,typeof(W1)}(W1, W2, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
 #  REPL display
 #  -----------------------------------------------------------------------------
 
- show(io::IO, d::MatrixBeta) = show_multline(io, d, [(:n1, d.W1.df), (:n2, d.W2.df)])
+show(io::IO, d::MatrixBeta) = show_multline(io, d, [(:n1, d.W1.df), (:n2, d.W2.df)])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function convert(::Type{MatrixBeta{T}}, d::MatrixBeta) where T <: Real
+function convert(::Type{MatrixBeta{T}}, d::MatrixBeta) where {T<:Real}
     W1 = convert(Wishart{T}, d.W1)
     W2 = convert(Wishart{T}, d.W2)
-    MatrixBeta{T, typeof(W1)}(W1, W2, T(d.logc0))
+    MatrixBeta{T,typeof(W1)}(W1, W2, T(d.logc0))
 end
 Base.convert(::Type{MatrixBeta{T}}, d::MatrixBeta{T}) where {T<:Real} = d
 
-function convert(::Type{MatrixBeta{T}}, W1::Wishart, W2::Wishart, logc0) where T <: Real
+function convert(::Type{MatrixBeta{T}}, W1::Wishart, W2::Wishart, logc0) where {T<:Real}
     WW1 = convert(Wishart{T}, W1)
     WW2 = convert(Wishart{T}, W2)
-    MatrixBeta{T, typeof(WW1)}(WW1, WW2, T(logc0))
+    MatrixBeta{T,typeof(WW1)}(WW1, WW2, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -76,27 +76,31 @@ size(d::MatrixBeta) = size(d.W1)
 
 rank(d::MatrixBeta) = size(d, 1)
 
-insupport(d::MatrixBeta, U::AbstractMatrix) = isreal(U) && size(U) == size(d) && isposdef(U) && isposdef(I - U)
+insupport(d::MatrixBeta, U::AbstractMatrix) =
+    isreal(U) && size(U) == size(d) && isposdef(U) && isposdef(I - U)
 
 params(d::MatrixBeta) = (size(d, 1), d.W1.df, d.W2.df)
 
 mean(d::MatrixBeta) = ((p, n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, p, p))
 
-@inline partype(d::MatrixBeta{T}) where {T <: Real} = T
+@inline partype(d::MatrixBeta{T}) where {T<:Real} = T
 
 #  Konno (1988 JJSS) Corollary 3.3.i
 function cov(d::MatrixBeta, i::Integer, j::Integer, k::Integer, l::Integer)
     p, n1, n2 = params(d)
     n = n1 + n2
     Ω = Matrix{partype(d)}(I, p, p)
-    n1*n2*inv(n*(n - 1)*(n + 2))*(-(2/n)*Ω[i,j]*Ω[k,l] + Ω[j,l]*Ω[i,k] + Ω[i,l]*Ω[k,j])
+    n1 *
+    n2 *
+    inv(n * (n - 1) * (n + 2)) *
+    (-(2 / n) * Ω[i, j] * Ω[k, l] + Ω[j, l] * Ω[i, k] + Ω[i, l] * Ω[k, j])
 end
 
 function var(d::MatrixBeta, i::Integer, j::Integer)
     p, n1, n2 = params(d)
     n = n1 + n2
     Ω = Matrix{partype(d)}(I, p, p)
-    n1*n2*inv(n*(n - 1)*(n + 2))*((1 - (2/n))*Ω[i,j]^2 + Ω[j,j]*Ω[i,i])
+    n1 * n2 * inv(n * (n - 1) * (n + 2)) * ((1 - (2 / n)) * Ω[i, j]^2 + Ω[j, j] * Ω[i, i])
 end
 
 #  -----------------------------------------------------------------------------
@@ -120,10 +124,10 @@ end
 #  Mitra (1970 Sankhyā)
 
 function _rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix)
-    S1   = PDMat( rand(rng, d.W1) )
-    S2   = PDMat( rand(rng, d.W2) )
-    S    = S1 + S2
-    invL = Matrix( inv(S.chol.L) )
+    S1 = PDMat(rand(rng, d.W1))
+    S2 = PDMat(rand(rng, d.W2))
+    S = S1 + S2
+    invL = Matrix(inv(S.chol.L))
     A .= X_A_Xt(S1, invL)
 end
 
@@ -139,7 +143,7 @@ end
 
 function _rand_params(::Type{MatrixBeta}, elty, n::Int, p::Int)
     n == p || throw(ArgumentError("dims must be equal for MatrixBeta"))
-    n1 = elty( n + 1 + abs(10randn()) )
-    n2 = elty( n + 1 + abs(10randn()) )
+    n1 = elty(n + 1 + abs(10randn()))
+    n2 = elty(n + 1 + abs(10randn()))
     return n, n1, n2
 end

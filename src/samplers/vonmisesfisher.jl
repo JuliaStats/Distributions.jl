@@ -27,7 +27,7 @@ function VonMisesFisherSampler(μ::Vector{Float64}, κ::Float64)
     v = similar(μ)
     copyto!(v, μ)
     τ = LinearAlgebra.reflector!(v)
-    
+
     return VonMisesFisherSampler(p, κ, b, x0, c, τ, v)
 end
 
@@ -39,7 +39,7 @@ function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector{
 
     # Sample angle `w` assuming mean direction `(1, 0, ..., 0)`
     w = _vmf_angle(rng, spl)
-    
+
     # Transform to sample for mean direction `(flipsign(1.0, μ[1]), 0, ..., 0)`
     v = spl.v
     w = flipsign(w, v[1])
@@ -89,7 +89,7 @@ function _vmf_angle(rng::AbstractRNG, spl::VonMisesFisherSampler)
             while true
                 z = rand(rng, dist)
                 w = (1 - (1 + b) * z) / (1 - (1 - b) * z)
-                if κ * w + pm1 * log1p(- x0 * w) >= c - randexp(rng)
+                if κ * w + pm1 * log1p(-x0 * w) >= c - randexp(rng)
                     return w::Float64
                 end
             end
@@ -115,7 +115,7 @@ function _vmf_angle(rng::AbstractRNG, spl::VonMisesFisherSampler)
                 z2 = rand(rng, gammasampler)
                 b_z1 = b * z1
                 w = (z2 - b_z1) / (z2 + b_z1)
-                if κ * w + pm1 * log1p(- x0 * w) >= c - randexp(rng)
+                if κ * w + pm1 * log1p(-x0 * w) >= c - randexp(rng)
                     return w::Float64
                 end
             end
@@ -128,6 +128,6 @@ end
     # In this case, we can directly sample the angle
     # Ref https://www.mitsuba-renderer.org/~wenzel/files/vmf.pdf
     ξ = rand(rng)
-    w = 1.0 + (log(ξ + (1.0 - ξ)*exp(-2κ))/κ)
+    w = 1.0 + (log(ξ + (1.0 - ξ) * exp(-2κ)) / κ)
     return w::Float64
 end

@@ -12,12 +12,14 @@ Base.maximum(r::RealInterval) = r.ub
 Base.extrema(r::RealInterval) = (r.lb, r.ub)
 Base.in(x::Real, r::RealInterval) = r.lb <= x <= r.ub
 
-isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
+isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} =
+    isupperbounded(d) && islowerbounded(d)
 
 islowerbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = minimum(d) > -Inf
 isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(d) < +Inf
 
-hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
+hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} =
+    isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
 Base.:(==)(r1::RealInterval, r2::RealInterval) = r1.lb == r2.lb && r1.ub == r2.ub
@@ -90,12 +92,15 @@ Generic fallback methods are provided, but it is often the case that `insupport`
 done more efficiently, and a specialized `insupport` is thus desirable.
 You should also override this function if the support is composed of multiple disjoint intervals.
 """
-insupport{D<:UnivariateDistribution}(d::Union{D, Type{D}}, x::Any)
+insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, x::Any)
 
-function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray) where D<:UnivariateDistribution
-    length(r) == length(X) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    for i in 1 : length(X)
+function insupport!(
+    r::AbstractArray,
+    d::Union{D,Type{D}},
+    X::AbstractArray,
+) where {D<:UnivariateDistribution}
+    length(r) == length(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
+    for i = 1:length(X)
         r[i] = insupport(d, X[i])
     end
     return r
@@ -103,13 +108,17 @@ end
 
 
 insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistribution} =
-     insupport!(BitArray(undef, size(X)), d, X)
+    insupport!(BitArray(undef, size(X)), d, X)
 
-insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
-insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}}, x::Real) where {D<:ContinuousUnivariateDistribution} =
+    minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}}, x::Real) where {D<:DiscreteUnivariateDistribution} =
+    isinteger(x) && minimum(d) <= x <= maximum(d)
 
-support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = RealInterval(minimum(d), maximum(d))
-support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
+support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} =
+    RealInterval(minimum(d), maximum(d))
+support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} =
+    round(Int, minimum(d)):round(Int, maximum(d))
 
 # Type used for dispatch on finite support
 # T = true or false
@@ -118,10 +127,10 @@ struct FiniteSupport{T} end
 ## macros to declare support
 
 macro distr_support(D, lb, ub)
-    D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
-                           (isa(lb, Number) || lb == :(-Inf))
+    D_has_constantbounds =
+        (isa(ub, Number) || ub == :Inf) && (isa(lb, Number) || lb == :(-Inf))
 
-    paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{<:$D}}) : :(d::$D)
+    paramdecl = D_has_constantbounds ? :(d::Union{$D,Type{<:$D}}) : :(d::$D)
 
     # overall
     esc(quote
@@ -186,7 +195,7 @@ Return the median value of distribution `d`. The median is the smallest `x` in t
 of `d` for which `cdf(d, x) ≥ 1/2`.
 Corresponding to this definition as 1/2-quantile, a fallback is provided calling the `quantile` function.
 """
-median(d::UnivariateDistribution) = quantile(d, 1//2)
+median(d::UnivariateDistribution) = quantile(d, 1 // 2)
 
 """
     modes(d::UnivariateDistribution)
@@ -420,10 +429,15 @@ invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
 # gradlogpdf
 
-gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(gradlogpdf, (d, x)))
+gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) =
+    throw(MethodError(gradlogpdf, (d, x)))
 
 
-function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
+function _pdf_fill_outside!(
+    r::AbstractArray,
+    d::DiscreteUnivariateDistribution,
+    X::UnitRange,
+)
     vl = vfirst = first(X)
     vr = vlast = last(X)
     n = vlast - vfirst + 1
@@ -442,7 +456,7 @@ function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution,
 
     # fill left part
     if vl > vfirst
-        for i = 1:(vl - vfirst)
+        for i = 1:(vl-vfirst)
             r[i] = 0.0
         end
     end
@@ -450,7 +464,7 @@ function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution,
     # fill central part: with non-zero pdf
     fm1 = vfirst - 1
     for v = vl:vr
-        r[v - fm1] = pdf(d, v)
+        r[v-fm1] = pdf(d, v)
     end
 
     # fill right part
@@ -463,12 +477,12 @@ function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution,
 end
 
 function _pdf!(r::AbstractArray{<:Real}, d::DiscreteUnivariateDistribution, X::UnitRange)
-    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
+    vl, vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
 
     # fill central part: with non-zero pdf
     fm1 = vfirst - 1
     for v = vl:vr
-        r[v - fm1] = pdf(d, v)
+        r[v-fm1] = pdf(d, v)
     end
     return r
 end
@@ -476,15 +490,20 @@ end
 
 abstract type RecursiveProbabilityEvaluator end
 
-function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
-    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
+function _pdf!(
+    r::AbstractArray,
+    d::DiscreteUnivariateDistribution,
+    X::UnitRange,
+    rpe::RecursiveProbabilityEvaluator,
+)
+    vl, vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
 
     # fill central part: with non-zero pdf
     if vl <= vr
         fm1 = vfirst - 1
-        r[vl - fm1] = pv = pdf(d, vl)
+        r[vl-fm1] = pv = pdf(d, vl)
         for v = (vl+1):vr
-            r[v - fm1] = pv = nextpdf(rpe, pv, v)
+            r[v-fm1] = pv = nextpdf(rpe, pv, v)
         end
     end
 
@@ -563,13 +582,15 @@ function integerunitrange_cdf(d::DiscreteUnivariateDistribution, x::Integer)
     minimum_d, maximum_d = extrema(d)
     isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
 
-    result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
-        c = sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
-        x < minimum_d ? zero(c) : c
-    else
-        c = 1 - sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
-        x >= maximum_d ? one(c) : c
-    end
+    result =
+        if isfinite(minimum_d) &&
+           !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
+            c = sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
+            x < minimum_d ? zero(c) : c
+        else
+            c = 1 - sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
+            x >= maximum_d ? one(c) : c
+        end
 
     return result
 end
@@ -578,13 +599,15 @@ function integerunitrange_ccdf(d::DiscreteUnivariateDistribution, x::Integer)
     minimum_d, maximum_d = extrema(d)
     isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
 
-    result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
-        c = 1 - sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
-        x < minimum_d ? one(c) : c
-    else
-        c = sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
-        x >= maximum_d ? zero(c) : c
-    end
+    result =
+        if isfinite(minimum_d) &&
+           !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
+            c = 1 - sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
+            x < minimum_d ? one(c) : c
+        else
+            c = sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
+            x >= maximum_d ? zero(c) : c
+        end
 
     return result
 end
@@ -593,13 +616,15 @@ function integerunitrange_logcdf(d::DiscreteUnivariateDistribution, x::Integer)
     minimum_d, maximum_d = extrema(d)
     isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
 
-    result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
-        c = logsumexp(logpdf(d, y) for y in minimum_d:(max(x, minimum_d)))
-        x < minimum_d ? oftype(c, -Inf) : c
-    else
-        c = log1mexp(logsumexp(logpdf(d, y) for y in (min(x + 1, maximum_d)):maximum_d))
-        x >= maximum_d ? zero(c) : c
-    end
+    result =
+        if isfinite(minimum_d) &&
+           !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
+            c = logsumexp(logpdf(d, y) for y = minimum_d:(max(x, minimum_d)))
+            x < minimum_d ? oftype(c, -Inf) : c
+        else
+            c = log1mexp(logsumexp(logpdf(d, y) for y = (min(x + 1, maximum_d)):maximum_d))
+            x >= maximum_d ? zero(c) : c
+        end
 
     return result
 end
@@ -608,13 +633,15 @@ function integerunitrange_logccdf(d::DiscreteUnivariateDistribution, x::Integer)
     minimum_d, maximum_d = extrema(d)
     isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
 
-    result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
-        c = log1mexp(logsumexp(logpdf(d, y) for y in minimum_d:(max(x, minimum_d))))
-        x < minimum_d ? zero(c) : c
-    else
-        c = logsumexp(logpdf(d, y) for y in (min(x + 1, maximum_d)):maximum_d)
-        x >= maximum_d ? oftype(c, -Inf) : c
-    end
+    result =
+        if isfinite(minimum_d) &&
+           !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
+            c = log1mexp(logsumexp(logpdf(d, y) for y = minimum_d:(max(x, minimum_d))))
+            x < minimum_d ? zero(c) : c
+        else
+            c = logsumexp(logpdf(d, y) for y = (min(x + 1, maximum_d)):maximum_d)
+            x >= maximum_d ? oftype(c, -Inf) : c
+        end
 
     return result
 end
@@ -651,8 +678,10 @@ macro _delegate_statsfuns(D, fpre, psyms...)
 
         $Distributions.quantile(d::$D, q::Real) = convert($T, $(finvcdf)($(pargs...), q))
         $Distributions.cquantile(d::$D, q::Real) = convert($T, $(finvccdf)($(pargs...), q))
-        $Distributions.invlogcdf(d::$D, lq::Real) = convert($T, $(finvlogcdf)($(pargs...), lq))
-        $Distributions.invlogccdf(d::$D, lq::Real) = convert($T, $(finvlogccdf)($(pargs...), lq))
+        $Distributions.invlogcdf(d::$D, lq::Real) =
+            convert($T, $(finvlogcdf)($(pargs...), lq))
+        $Distributions.invlogccdf(d::$D, lq::Real) =
+            convert($T, $(finvlogccdf)($(pargs...), lq))
     end
 end
 
@@ -674,7 +703,7 @@ const discrete_distributions = [
     "poisson",
     "skellam",
     "soliton",
-    "poissonbinomial"
+    "poissonbinomial",
 ]
 
 const continuous_distributions = [
@@ -691,7 +720,8 @@ const continuous_distributions = [
     "exponential",
     "fdist",
     "frechet",
-    "gamma", "erlang",
+    "gamma",
+    "erlang",
     "pgeneralizedgaussian", # GeneralizedGaussian depends on Gamma
     "generalizedpareto",
     "generalizedextremevalue",
@@ -731,7 +761,7 @@ const continuous_distributions = [
     "loguniform", # depends on Uniform
     "vonmises",
     "weibull",
-    "skewedexponentialpower"
+    "skewedexponentialpower",
 ]
 
 include(joinpath("univariate", "locationscale.jl"))

@@ -1,5 +1,5 @@
 struct AliasTable <: Sampleable{Univariate,Discrete}
-    at::AliasTables.AliasTable{UInt64, Int}
+    at::AliasTables.AliasTable{UInt64,Int}
     AliasTable(probs::AbstractVector{<:Real}) = new(AliasTables.AliasTable(probs))
 end
 ncategories(s::AliasTable) = length(s.at)

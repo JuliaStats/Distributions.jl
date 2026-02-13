@@ -9,18 +9,18 @@ using Test
         μ = randn()
         for p in (-0.2, 0)
             @test_throws DomainError PGeneralizedGaussian(p)
-            PGeneralizedGaussian(p; check_args=false)
+            PGeneralizedGaussian(p; check_args = false)
 
             @test_throws DomainError PGeneralizedGaussian(μ, 1.0, p)
-            PGeneralizedGaussian(μ, 1.0, p; check_args=false)
+            PGeneralizedGaussian(μ, 1.0, p; check_args = false)
         end
         for α in (-1.2, 0)
             @test_throws DomainError PGeneralizedGaussian(μ, α, 1.0)
-            PGeneralizedGaussian(μ, α, 1.0; check_args=false)
+            PGeneralizedGaussian(μ, α, 1.0; check_args = false)
 
             for p in (-0.2, 0)
                 @test_throws DomainError PGeneralizedGaussian(μ, α, p)
-                PGeneralizedGaussian(μ, α, p; check_args=false)
+                PGeneralizedGaussian(μ, α, p; check_args = false)
             end
         end
 

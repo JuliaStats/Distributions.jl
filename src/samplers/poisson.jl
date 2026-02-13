@@ -1,7 +1,7 @@
 
 function poissonpvec(μ::Float64, n::Int)
     # Poisson probabilities, from 0 to n
-    pv = Vector{Float64}(undef, n+1)
+    pv = Vector{Float64}(undef, n + 1)
     pv[1] = p = exp(-μ)
     for i = 1:n
         pv[i+1] = (p *= (μ / i))
@@ -102,7 +102,7 @@ function rand(rng::AbstractRNG, sampler::PoissonADSampler)
         c = 0.1069 / μ
 
         # Step H
-        if c*abs(U) <= py*exp(px + E) - fy*exp(fx + E)
+        if c * abs(U) <= py * exp(px + E) - fy * exp(fx + E)
             return K
         end
     end
@@ -111,28 +111,28 @@ end
 # Procedure F
 function procf(μ, K::Int, s)
     # can be pre-computed, but does not seem to affect performance
-    ω = 0.3989422804014327/s
-    b1 = 0.041666666666666664/μ
-    b2 = 0.3*b1*b1
-    c3 = 0.14285714285714285*b1*b2
+    ω = 0.3989422804014327 / s
+    b1 = 0.041666666666666664 / μ
+    b2 = 0.3 * b1 * b1
+    c3 = 0.14285714285714285 * b1 * b2
     c2 = b2 - 15 * c3
     c1 = b1 - 6 * b2 + 45 * c3
     c0 = 1 - b1 + 3 * b2 - 15 * c3
 
     if K < 10
         px = -μ
-        py = μ^K/factorial(K)
+        py = μ^K / factorial(K)
     else
-        δ = 0.08333333333333333/K
-        δ -= 4.8*δ^3
-        V = (μ-K)/K
-        px = K*log1pmx(V) - δ # avoids need for table
-        py = 0.3989422804014327/sqrt(K)
+        δ = 0.08333333333333333 / K
+        δ -= 4.8 * δ^3
+        V = (μ - K) / K
+        px = K * log1pmx(V) - δ # avoids need for table
+        py = 0.3989422804014327 / sqrt(K)
 
     end
-    X = (K-μ+0.5)/s
+    X = (K - μ + 0.5) / s
     X2 = X^2
     fx = -X2 / 2 # missing negation in pseudo-algorithm, but appears in fortran code.
-    fy = ω*(((c3*X2+c2)*X2+c1)*X2+c0)
-    return px,py,fx,fy
+    fy = ω * (((c3 * X2 + c2) * X2 + c1) * X2 + c0)
+    return px, py, fx, fy
 end

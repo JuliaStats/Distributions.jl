@@ -27,14 +27,16 @@ struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
     Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Pareto(α::T, θ::T; check_args::Bool=true) where {T <: Real}
+function Pareto(α::T, θ::T; check_args::Bool = true) where {T<:Real}
     @check_args Pareto (α, α > zero(α)) (θ, θ > zero(θ))
     return Pareto{T}(α, θ)
 end
 
-Pareto(α::Real, θ::Real; check_args::Bool=true) = Pareto(promote(α, θ)...; check_args=check_args)
-Pareto(α::Integer, θ::Integer; check_args::Bool=true) = Pareto(float(α), float(θ); check_args=check_args)
-Pareto(α::Real; check_args::Bool=true) = Pareto(α, one(α); check_args=check_args)
+Pareto(α::Real, θ::Real; check_args::Bool = true) =
+    Pareto(promote(α, θ)...; check_args = check_args)
+Pareto(α::Integer, θ::Integer; check_args::Bool = true) =
+    Pareto(float(α), float(θ); check_args = check_args)
+Pareto(α::Real; check_args::Bool = true) = Pareto(α, one(α); check_args = check_args)
 Pareto() = Pareto{Float64}(1.0, 1.0)
 
 @distr_support Pareto d.θ Inf
@@ -55,39 +57,41 @@ params(d::Pareto) = (d.α, d.θ)
 
 #### Statistics
 
-function mean(d::Pareto{T}) where T<:Real
+function mean(d::Pareto{T}) where {T<:Real}
     (α, θ) = params(d)
     α > 1 ? α * θ / (α - 1) : T(Inf)
 end
-median(d::Pareto) = ((α, θ) = params(d); θ * 2^(1/α))
+median(d::Pareto) = ((α, θ) = params(d);
+θ * 2^(1 / α))
 mode(d::Pareto) = d.θ
 
-function var(d::Pareto{T}) where T<:Real
+function var(d::Pareto{T}) where {T<:Real}
     (α, θ) = params(d)
     α > 2 ? (θ^2 * α) / ((α - 1)^2 * (α - 2)) : T(Inf)
 end
 
-function skewness(d::Pareto{T}) where T<:Real
+function skewness(d::Pareto{T}) where {T<:Real}
     α = shape(d)
     α > 3 ? ((2(1 + α)) / (α - 3)) * sqrt((α - 2) / α) : T(NaN)
 end
 
-function kurtosis(d::Pareto{T}) where T<:Real
+function kurtosis(d::Pareto{T}) where {T<:Real}
     α = shape(d)
     α > 4 ? (6(α^3 + α^2 - 6α - 2)) / (α * (α - 3) * (α - 4)) : T(NaN)
 end
 
-entropy(d::Pareto) = ((α, θ) = params(d); log(θ / α) + 1 / α + 1)
+entropy(d::Pareto) = ((α, θ) = params(d);
+log(θ / α) + 1 / α + 1)
 
 
 #### Evaluation
 
-function pdf(d::Pareto{T}, x::Real) where T<:Real
+function pdf(d::Pareto{T}, x::Real) where {T<:Real}
     (α, θ) = params(d)
-    x >= θ ? α * (θ / x)^α * (1/x) : zero(T)
+    x >= θ ? α * (θ / x)^α * (1 / x) : zero(T)
 end
 
-function logpdf(d::Pareto{T}, x::Real) where T<:Real
+function logpdf(d::Pareto{T}, x::Real) where {T<:Real}
     (α, θ) = params(d)
     x >= θ ? log(α) + α * log(θ) - (α + 1) * log(x) : -T(Inf)
 end
@@ -121,7 +125,7 @@ end
 
 ## Fitting
 
-function fit_mle(::Type{<:Pareto}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:Pareto}, x::AbstractArray{T}) where {T<:Real}
     # Based on
     # https://en.wikipedia.org/wiki/Pareto_distribution#Parameter_estimation
 
@@ -130,10 +134,10 @@ function fit_mle(::Type{<:Pareto}, x::AbstractArray{T}) where T<:Real
     n = length(x)
     lθ = log(θ)
     temp1 = zero(T)
-    for i=1:n
+    for i = 1:n
         temp1 += log(x[i]) - lθ
     end
-    α = n/temp1
+    α = n / temp1
 
     return Pareto(α, θ)
 end

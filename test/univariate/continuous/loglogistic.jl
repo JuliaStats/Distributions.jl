@@ -6,27 +6,27 @@ import Optim
 @testset "LogLogistic" begin
     @testset "Constructors" begin
         for T1 in (Int, Float32, Float64), T2 in (Int, Float32, Float64)
-           d = @inferred(LogLogistic(T1(1), T2(2)))
-           @test d isa LogLogistic{promote_type(T1, T2)}
-           @test partype(d) === promote_type(T1, T2)
-           @test d.α == 1
-           @test d.β == 2
+            d = @inferred(LogLogistic(T1(1), T2(2)))
+            @test d isa LogLogistic{promote_type(T1, T2)}
+            @test partype(d) === promote_type(T1, T2)
+            @test d.α == 1
+            @test d.β == 2
 
-           @test_throws ArgumentError LogLogistic(T1(-1), T2(2))
-           @test_throws ArgumentError LogLogistic(T1(-1), T2(2); check_args=true)
-           d = @inferred(LogLogistic(T1(-1), T2(2); check_args=false))
-           @test d isa LogLogistic{promote_type(T1, T2)}
-           @test partype(d) === promote_type(T1, T2)
-           @test d.α == -1
-           @test d.β == 2
+            @test_throws ArgumentError LogLogistic(T1(-1), T2(2))
+            @test_throws ArgumentError LogLogistic(T1(-1), T2(2); check_args = true)
+            d = @inferred(LogLogistic(T1(-1), T2(2); check_args = false))
+            @test d isa LogLogistic{promote_type(T1, T2)}
+            @test partype(d) === promote_type(T1, T2)
+            @test d.α == -1
+            @test d.β == 2
 
-           @test_throws ArgumentError LogLogistic(T1(1), T2(-2))
-           @test_throws ArgumentError LogLogistic(T1(1), T2(-2); check_args=true)
-           d = @inferred(LogLogistic(T1(1), T2(-2); check_args=false))
-           @test d isa LogLogistic{promote_type(T1, T2)}
-           @test partype(d) === promote_type(T1, T2)
-           @test d.α == 1
-           @test d.β == -2
+            @test_throws ArgumentError LogLogistic(T1(1), T2(-2))
+            @test_throws ArgumentError LogLogistic(T1(1), T2(-2); check_args = true)
+            d = @inferred(LogLogistic(T1(1), T2(-2); check_args = false))
+            @test d isa LogLogistic{promote_type(T1, T2)}
+            @test partype(d) === promote_type(T1, T2)
+            @test d.α == 1
+            @test d.β == -2
         end
     end
 
@@ -40,7 +40,7 @@ import Optim
     @testset "median" begin
         for α in (0.5, 1, 2, 3), β in (0.5, 1, 2, 3)
             d = LogLogistic(α, β)
-            @test median(d) ≈ quantile(d, 1//2)
+            @test median(d) ≈ quantile(d, 1 // 2)
         end
     end
 
@@ -58,7 +58,9 @@ import Optim
             if β > 1
                 @test mean(d) ≈ Distributions.expectation(identity, d)
             else
-                @test_throws ArgumentError("the mean of a log-logistic distribution is defined only when its shape β > 1") mean(d)
+                @test_throws ArgumentError(
+                    "the mean of a log-logistic distribution is defined only when its shape β > 1",
+                ) mean(d)
             end
         end
     end
@@ -70,7 +72,9 @@ import Optim
                 m = mean(d)
                 @test var(d) ≈ Distributions.expectation(x -> (x - m)^2, d)
             else
-                @test_throws ArgumentError("the variance of a log-logistic distribution is defined only when its shape β > 2") var(d)
+                @test_throws ArgumentError(
+                    "the variance of a log-logistic distribution is defined only when its shape β > 2",
+                ) var(d)
             end
         end
     end
@@ -121,16 +125,13 @@ import Optim
     @testset "entropy" begin
         for α in (0.5, 1, 2, 3), β in (0.5, 1, 2, 3)
             d = LogLogistic(α, β)
-            @test entropy(d) ≈ -Distributions.expectation(Base.Fix1(logpdf, d), d) rtol = 1e-6
+            @test entropy(d) ≈ -Distributions.expectation(Base.Fix1(logpdf, d), d) rtol =
+                1e-6
         end
     end
 
     @testset "Default tests" begin
-        for d in [
-            LogLogistic(1, 1),
-            LogLogistic(2, 1),
-            LogLogistic(2, 2),
-        ]
+        for d in [LogLogistic(1, 1), LogLogistic(2, 1), LogLogistic(2, 2)]
             test_distr(d, 10^6)
         end
     end

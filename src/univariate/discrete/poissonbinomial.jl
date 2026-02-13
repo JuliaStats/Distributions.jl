@@ -23,11 +23,15 @@ External links:
 * [Poisson-binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_binomial_distribution)
 
 """
-mutable struct PoissonBinomial{T<:Real,P<:AbstractVector{T}} <: DiscreteUnivariateDistribution
+mutable struct PoissonBinomial{T<:Real,P<:AbstractVector{T}} <:
+               DiscreteUnivariateDistribution
     p::P
     pmf::Union{Nothing,Vector{T}} # lazy computation of the probability mass function
 
-    function PoissonBinomial{T}(p::AbstractVector{T}; check_args::Bool=true) where {T <: Real}
+    function PoissonBinomial{T}(
+        p::AbstractVector{T};
+        check_args::Bool = true,
+    ) where {T<:Real}
         @check_args(
             PoissonBinomial,
             (
@@ -40,8 +44,8 @@ mutable struct PoissonBinomial{T<:Real,P<:AbstractVector{T}} <: DiscreteUnivaria
     end
 end
 
-function PoissonBinomial(p::AbstractVector{T}; check_args::Bool=true) where {T<:Real}
-    return PoissonBinomial{T}(p; check_args=check_args)
+function PoissonBinomial(p::AbstractVector{T}; check_args::Bool = true) where {T<:Real}
+    return PoissonBinomial{T}(p; check_args = check_args)
 end
 
 function Base.getproperty(d::PoissonBinomial, x::Symbol)
@@ -64,11 +68,11 @@ end
 
 #### Conversions
 
-function PoissonBinomial(::Type{PoissonBinomial{T}}, p::AbstractVector{S}) where {T, S}
+function PoissonBinomial(::Type{PoissonBinomial{T}}, p::AbstractVector{S}) where {T,S}
     return PoissonBinomial(AbstractVector{T}(p))
 end
-function PoissonBinomial(::Type{PoissonBinomial{T}}, d::PoissonBinomial{S}) where {T, S}
-    return PoissonBinomial(AbstractVector{T}(d.p), check_args=false)
+function PoissonBinomial(::Type{PoissonBinomial{T}}, d::PoissonBinomial{S}) where {T,S}
+    return PoissonBinomial(AbstractVector{T}(d.p), check_args = false)
 end
 
 #### Parameters
@@ -88,7 +92,7 @@ var(d::PoissonBinomial) = sum(p * (1 - p) for p in succprob(d))
 function skewness(d::PoissonBinomial{T}) where {T}
     v = zero(T)
     s = zero(T)
-    p,  = params(d)
+    p, = params(d)
     for i in eachindex(p)
         v += p[i] * (one(T) - p[i])
         s += p[i] * (one(T) - p[i]) * (one(T) - T(2) * p[i])
@@ -99,7 +103,7 @@ end
 function kurtosis(d::PoissonBinomial{T}) where {T}
     v = zero(T)
     s = zero(T)
-    p,  = params(d)
+    p, = params(d)
     for i in eachindex(p)
         v += p[i] * (one(T) - p[i])
         s += p[i] * (one(T) - p[i]) * (one(T) - T(6) * (one(T) - p[i]) * p[i])
@@ -130,7 +134,7 @@ function cf(d::PoissonBinomial, t::Real)
     end
 end
 
-pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[Int(k+1)] : zero(eltype(d.pmf))
+pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[Int(k + 1)] : zero(eltype(d.pmf))
 logpdf(d::PoissonBinomial, k::Real) = log(pdf(d, k))
 
 cdf(d::PoissonBinomial, k::Int) = integerunitrange_cdf(d, k)
@@ -155,8 +159,8 @@ function poissonbinomial_pdf(p)
     S[1] = 1
     for (col, p_col) in enumerate(p)
         q_col = 1 - p_col
-        for row in col:(-1):1
-            S[row + 1] = q_col * S[row + 1] + p_col * S[row]
+        for row = col:(-1):1
+            S[row+1] = q_col * S[row+1] + p_col * S[row]
         end
         S[1] *= q_col
     end
@@ -170,25 +174,25 @@ end
 #     On computing the distribution function for the Poisson binomial
 #     distribution. Computational Statistics and Data Analysis, 59, 41–51.
 #
-function poissonbinomial_pdf_fft(p::AbstractArray{T}) where {T <: Real}
+function poissonbinomial_pdf_fft(p::AbstractArray{T}) where {T<:Real}
     n = length(p)
     ω = 2 * one(T) / (n + 1)
 
-    x = Vector{Complex{T}}(undef, n+1)
-    lmax = ceil(Int, n/2)
-    x[1] = one(T)/(n + 1)
-    for l=1:lmax
+    x = Vector{Complex{T}}(undef, n + 1)
+    lmax = ceil(Int, n / 2)
+    x[1] = one(T) / (n + 1)
+    for l = 1:lmax
         logz = zero(T)
         argz = zero(T)
-        for j=1:n
-            zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
+        for j = 1:n
+            zjl = 1 - p[j] + p[j] * cospi(ω * l) + im * p[j] * sinpi(ω * l)
             logz += log(abs(zjl))
             argz += atan(imag(zjl), real(zjl))
         end
         dl = exp(logz)
-        x[l + 1] = dl * cos(argz) / (n + 1) + dl * sin(argz) * im / (n + 1)
+        x[l+1] = dl * cos(argz) / (n + 1) + dl * sin(argz) * im / (n + 1)
         if n + 1 - l > l
-            x[n + 1 - l + 1] = conj(x[l + 1])
+            x[n+1-l+1] = conj(x[l+1])
         end
     end
     [max(0, real(xi)) for xi in _dft(x)]
@@ -196,7 +200,7 @@ end
 
 # A simple implementation of a DFT to avoid introducing a dependency
 # on an external FFT package just for this one distribution
-function _dft(x::Vector{T}) where T
+function _dft(x::Vector{T}) where {T}
     n = length(x)
     y = zeros(complex(float(T)), n)
     for j = 0:n-1, k = 0:n-1
@@ -222,28 +226,28 @@ sampler(d::PoissonBinomial) = PoissBinAliasSampler(d)
 function poissonbinomial_pdf_partialderivatives(p::AbstractVector{<:Real})
     n = length(p)
     A = zeros(eltype(p), n, n + 1)
-    for j in 1:n
+    for j = 1:n
         A[j, end] = 1
     end
     for (i, pi) in enumerate(p)
         qi = 1 - pi
-        for k in (n - i + 1):n
+        for k = (n-i+1):n
             kp1 = k + 1
-            for j in 1:(i - 1)
+            for j = 1:(i-1)
                 A[j, k] = pi * A[j, k] + qi * A[j, kp1]
             end
-            for j in (i+1):n
+            for j = (i+1):n
                 A[j, k] = pi * A[j, k] + qi * A[j, kp1]
             end
         end
-        for j in 1:(i-1)
+        for j = 1:(i-1)
             A[j, end] *= pi
         end
-        for j in (i+1):n
+        for j = (i+1):n
             A[j, end] *= pi
         end
     end
-    for j in 1:n, i in 1:n
+    for j = 1:n, i = 1:n
         A[i, j] -= A[i, j+1]
     end
     return A
