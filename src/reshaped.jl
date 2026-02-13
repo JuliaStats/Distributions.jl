@@ -52,7 +52,7 @@ _logpdf(d::ReshapedDistribution{N}, x::AbstractArray{<:Real,N}) where {N} = __lo
 _logpdf(d::ReshapedDistribution{2}, x::AbstractMatrix{<:Real}) = __logpdf(d, x)
 function __logpdf(d::ReshapedDistribution{N}, x::AbstractArray{<:Real,N}) where {N}
     dist = d.dist
-    return @inbounds logpdf(dist, reshape(x, size(dist)))
+    return logpdf(dist, reshape(x, size(dist)))
 end
 
 # loglikelihood
@@ -66,7 +66,7 @@ end
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
     dist = d.dist
-    return @inbounds loglikelihood(dist, reshape(x, size(dist)))
+    return loglikelihood(dist, reshape(x, size(dist)))
 end
 @inline function loglikelihood(
     d::ReshapedDistribution{N},
@@ -82,7 +82,7 @@ end
     end
     dist = d.dist
     trailingsize = ntuple(i -> size(x, N + i), Val(M - N))
-    return @inbounds loglikelihood(dist, reshape(x, size(dist)..., trailingsize...))
+    return loglikelihood(dist, reshape(x, size(dist)..., trailingsize...))
 end
 
 # sampling
@@ -92,7 +92,7 @@ function _rand!(
     x::AbstractArray{<:Real,N}
 ) where {N}
     dist = d.dist
-    @inbounds rand!(rng, dist, reshape(x, size(dist)))
+    rand!(rng, dist, reshape(x, size(dist)))
     return x
 end
 

@@ -96,7 +96,7 @@ function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray) whe
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : length(X)
-        @inbounds r[i] = insupport(d, X[i])
+        r[i] = insupport(d, X[i])
     end
     return r
 end
@@ -144,7 +144,7 @@ end
 
 function _rand!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray{<:Real})
     for i in eachindex(A)
-        @inbounds A[i] = rand(rng, sampler)
+        A[i] = rand(rng, sampler)
     end
     return A
 end
@@ -707,6 +707,7 @@ const continuous_distributions = [
     "levy",
     "lindley",
     "logistic",
+    "loglogistic",
     "noncentralbeta",
     "noncentralchisq",
     "noncentralf",
