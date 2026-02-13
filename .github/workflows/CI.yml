@@ -26,8 +26,15 @@ jobs:
           version: '1'
           show-versioninfo: true
       - uses: julia-actions/cache@v2
-      - run: 'using Pkg; Pkg.instantiate(); include(".formatting/format_check.jl")'
-        shell: julia --color=yes --project=.formatting {0}
+      - run: |
+          julia --color=yes --project="${{ github.workspace }}/.formatting" -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_all.jl")'
+          git update-index -q --refresh
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Formatting changes detected. Run:"
+            echo "  julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(\".formatting/format_all.jl\")'"
+            git status --short
+            exit 1
+          fi
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}

@@ -60,18 +60,6 @@ To format the code, run the following command:
 julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_all.jl")'
 ```
 
-Code formatting is automatically checked in CI.
-To run the check locally:
-```bash
-julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_check.jl")'
-```
-
-This repository includes a `.git-blame-ignore-revs` file to ignore mass-formatting commits.
-When viewing blame information, run:
-```bash
-git blame --ignore-revs-file .git-blame-ignore-revs <filename>
-```
-
 ### Requirements
 
 Distributions is a central package which many rely on,
