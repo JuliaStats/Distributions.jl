@@ -234,8 +234,6 @@ function rand(rng::AbstractRNG, d::Truncated)
 end
 
 function rand(rng::AbstractRNG, d::Truncated, n::Int)
-    n == 0 && return rand(d.untruncated, 0)
-
     d0 = d.untruncated
     tp = d.tp
     lower = d.lower
