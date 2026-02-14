@@ -68,7 +68,14 @@ function pdf(d::Cosine{T}, x::Real) where T<:Real
     end
 end
 
-logpdf(d::Cosine, x::Real) = log(pdf(d, x))
+function logpdf(d::Cosine{T}, x::Real) where T<:Real
+    if insupport(d, x)
+        z = (x - d.μ) / d.σ
+        return log1p(cospi(z)) - log(2d.σ)
+    else
+        return typemin(T)
+    end
+end
 
 function cdf(d::Cosine{T}, x::Real) where T<:Real
     if x < d.μ - d.σ
@@ -93,3 +100,27 @@ function ccdf(d::Cosine{T}, x::Real) where T<:Real
 end
 
 quantile(d::Cosine, p::Real) = quantile_bisect(d, p)
+
+function mgf(d::Cosine, t::Real)
+    σt, μt = d.σ * t, d.μ * t
+    z = iszero(σt) ? one(float(σt)) : sinh(σt)/σt
+    return exp(μt) * (z / (1 + (invπ * σt)^2))
+end
+
+function cgf(d::Cosine, t::Real)
+    σt, μt = d.σ * t, d.μ * t
+    z = iszero(σt) ? zero(float(σt)) : logabssinh(σt) - log(σt)
+    return μt + z - log1psq(invπ * σt)
+end
+
+function cf(d::Cosine, t::Real)
+    σt, μt = d.σ * t, d.μ * t
+    abs(σt) ≈ π && return cis(μt) / 2
+    z = iszero(σt) ? one(float(σt)) : sin(σt)/σt
+    return cis(μt) * z / (1 - (invπ * σt)^2)
+end
+
+#### Affine transformations
+
+Base.:+(d::Cosine, a::Real) = Cosine(d.μ + a, d.σ)
+Base.:*(c::Real, d::Cosine) = Cosine(c * d.μ, abs(c) * d.σ)
