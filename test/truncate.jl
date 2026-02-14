@@ -30,19 +30,23 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
         end
 
         # perform testing
-        dtype = eval(dsym)
-        dtypet = Truncated
         d0 = eval(Meta.parse(ex))
         if minimum(d0) > lower || maximum(d0) < upper
             continue
         end
 
-        println("    testing truncated($(ex),$lower,$upper)")
-        d = truncated(eval(Meta.parse(ex)),lower,upper)
-        if dtype != Uniform && dtype != DiscreteUniform # Uniform is truncated to Uniform
-            @assert isa(dtype, Type) && dtype <: UnivariateDistribution
-            @test isa(d, dtypet)
-            # verification and testing
+        println("    testing truncated(", ex, ", ", lower, ", ", upper, ")")
+        d = truncated(d0,lower,upper)
+        if d0 isa Uniform
+            @test d isa Uniform
+            @test minimum(d) == lower
+            @test maximum(d) == upper
+        elseif d0 isa DiscreteUniform
+            @test d isa DiscreteUniform
+            @test minimum(d) == lower
+            @test maximum(d) == upper
+        else
+            @test d isa Truncated
             verify_and_test(d, dct, n_tsamples)
         end
     end

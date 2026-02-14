@@ -27,8 +27,11 @@ Normal <- R6Class("Normal",
     )
 )
 
-NormalCanon = list(
-    new = function(c1=0, c2=1) {
-        Normal$new(c1/c2, 1/sqrt(c2))
-    }
+NormalCanon = R6Class("NormalCanon",
+    inherit = Normal,
+    public = list(
+        initialize = function(c1=0, c2=1) {
+            super$initialize(c1/c2, 1/sqrt(c2))
+        }
+    )
 )
