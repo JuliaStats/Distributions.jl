@@ -2,7 +2,7 @@ using Distributions, Test
 
 @testset "Cosine" begin
     @testset "values outside of the support" begin
-        for (d, xmin, xmax) in ((Cosine(), -1.1, 1.1), (Cosine(1.5), (-1.0, 3.0)), (Cosine(2.0, 2.8), -0.9, 5.0))
+        for (d, xmin, xmax) in ((Cosine(), -1.1, 1.1), (Cosine(1.5), -1.0, 3.0), (Cosine(2.0, 2.8), -0.9, 5.0))
             for x in (xmin, xmax)
                 @test iszero(@inferred(pdf(d, x)))
                 @test @inferred(logpdf(d, x)) == -Inf
