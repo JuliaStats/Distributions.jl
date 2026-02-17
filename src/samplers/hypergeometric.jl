@@ -31,11 +31,7 @@ struct HypergeometricSampler{T} <: Sampleable{Univariate,Discrete}
 
         # Step 0: Set-up constants
         N = dist.ns + dist.nf
-        ns_opt, nf_opt = if dist.ns > dist.nf
-            dist.nf, dist.ns
-        else
-            dist.ns, dist.nf
-        end
+        ns_opt, nf_opt = minmax(dist.nf, dist.ns)
         n_opt = if dist.n > N / 2
             N - dist.n
         else
