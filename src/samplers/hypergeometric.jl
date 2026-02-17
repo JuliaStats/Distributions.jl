@@ -32,11 +32,7 @@ struct HypergeometricSampler{T} <: Sampleable{Univariate,Discrete}
         # Step 0: Set-up constants
         N = dist.ns + dist.nf
         ns_opt, nf_opt = minmax(dist.nf, dist.ns)
-        n_opt = if dist.n > N / 2
-            N - dist.n
-        else
-            dist.n
-        end
+        n_opt = min(N - dist.n, dist.n)
         M = floor(Int, (n_opt + 1) * (ns_opt + 1) / (N + 2))
         cache = if M - max(0, n_opt - nf_opt) < 10
             # for the HIN algorithm
