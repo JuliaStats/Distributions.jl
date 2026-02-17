@@ -125,7 +125,7 @@ function _marginalize_range(dist, i, j, xᵢ, xⱼ, T)
     return k * T(logdiffcdf(dist, xⱼ, xᵢ)) - loggamma(T(k + 1))
 end
 
-function _rand!(rng::AbstractRNG, d::JointOrderStatistics{<:ContinuousUnivariateDistribution}, x::AbstractVector{<:Real})
+function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
     n = d.n
     if n == length(d.ranks)  # ranks == 1:n
         # direct method, slower than inversion method for large `n` and distributions with
@@ -139,10 +139,13 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics{<:ContinuousUnivariate
         # Carlo computations." The American Statistician 26.1 (1972): 26-27.
         # this is slow if length(d.ranks) is close to n and quantile for d.dist is expensive,
         # but this branch is probably taken when length(d.ranks) is small or much smaller than n.
-        T = typeof(one(eltype(x)))
-        s = zero(eltype(x))
+        
+        u = eltype(x) <: Integer ? similar(x, float(eltype(x))) : x
+
+        T = typeof(one(eltype(u)))
+        s = zero(eltype(u))
         i = 0
-        for (m, j) in zip(eachindex(x), d.ranks)
+        for (m, j) in zip(eachindex(u), d.ranks)
             k = j - i
             if k > 1
                 # specify GammaMTSampler directly to avoid unnecessarily checking the shape
@@ -153,7 +156,7 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics{<:ContinuousUnivariate
                 s += randexp(rng, T)
             end
             i = j
-            x[m] = s
+            u[m] = s
         end
         j = n + 1
         k = j - i
@@ -162,7 +165,7 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics{<:ContinuousUnivariate
         else
             s += randexp(rng, T)
         end
-        x .= Base.Fix1(quantile, d.dist).(x ./ s)
+        x .= Base.Fix1(quantile, d.dist).(u ./ s)
     end
     return x
 end
