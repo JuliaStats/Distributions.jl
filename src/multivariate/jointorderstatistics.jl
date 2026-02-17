@@ -3,13 +3,13 @@
 # A first course in order statistics. Society for Industrial and Applied Mathematics, 2008.
 
 """
-    JointOrderStatistics <: ContinuousMultivariateDistribution
+    JointOrderStatistics <: MultivariateDistribution
 
-The joint distribution of a subset of order statistics from a sample from a continuous
+The joint distribution of a subset of order statistics from a sample from a
 univariate distribution.
 
     JointOrderStatistics(
-        dist::ContinuousUnivariateDistribution,
+        dist::UnivariateDistribution,
         n::Int,
         ranks=Base.OneTo(n);
         check_args::Bool=true,
@@ -35,13 +35,13 @@ JointOrderStatistics(Cauchy(), 10, (1, 10))  # joint distribution of only the ex
 ```
 """
 struct JointOrderStatistics{
-    D<:ContinuousUnivariateDistribution,R<:Union{AbstractVector{Int},Tuple{Int,Vararg{Int}}}
-} <: ContinuousMultivariateDistribution
+    D<:UnivariateDistribution,R<:Union{AbstractVector{Int},Tuple{Int,Vararg{Int}}},S<:ValueSupport
+} <: MultivariateDistribution{S}
     dist::D
     n::Int
     ranks::R
     function JointOrderStatistics(
-        dist::ContinuousUnivariateDistribution,
+        dist::UnivariateDistribution,
         n::Int,
         ranks::Union{AbstractVector{Int},Tuple{Int,Vararg{Int}}}=Base.OneTo(n);
         check_args::Bool=true,
@@ -55,7 +55,7 @@ struct JointOrderStatistics{
                 "`ranks` must be a sorted vector or tuple of unique integers between 1 and `n`.",
             ),
         )
-        return new{typeof(dist),typeof(ranks)}(dist, n, ranks)
+        return new{typeof(dist),typeof(ranks),value_support(typeof(dist))}(dist, n, ranks)
     end
 end
 
@@ -91,7 +91,7 @@ partype(d::JointOrderStatistics) = partype(d.dist)
 Base.eltype(::Type{<:JointOrderStatistics{D}}) where {D} = Base.eltype(D)
 Base.eltype(d::JointOrderStatistics) = eltype(d.dist)
 
-function logpdf(d::JointOrderStatistics, x::AbstractVector{<:Real})
+function logpdf(d::JointOrderStatistics{<:ContinuousUnivariateDistribution}, x::AbstractVector{<:Real})
     n = d.n
     ranks = d.ranks
     lp = loglikelihood(d.dist, x)
@@ -125,7 +125,7 @@ function _marginalize_range(dist, i, j, xᵢ, xⱼ, T)
     return k * T(logdiffcdf(dist, xⱼ, xᵢ)) - loggamma(T(k + 1))
 end
 
-function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
+function _rand!(rng::AbstractRNG, d::JointOrderStatistics{<:ContinuousUnivariateDistribution}, x::AbstractVector{<:Real})
     n = d.n
     if n == length(d.ranks)  # ranks == 1:n
         # direct method, slower than inversion method for large `n` and distributions with
