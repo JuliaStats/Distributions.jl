@@ -167,7 +167,7 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler{HINCache})
     return _hg_correct_variate(spl, y)
 end
 
-"***Internal:*** Addapts the sampled variable from the optimized distribution for output"
+# Adapt the sampled variable from the optimized distribution for output
 function _hg_correct_variate(spl::HypergeometricSampler, y::Integer)
     dist = spl.dist
     if dist.n < spl.N / 2
