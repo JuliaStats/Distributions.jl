@@ -35,7 +35,9 @@ JointOrderStatistics(Cauchy(), 10, (1, 10))  # joint distribution of only the ex
 ```
 """
 struct JointOrderStatistics{
-    D<:UnivariateDistribution,R<:Union{AbstractVector{Int},Tuple{Int,Vararg{Int}}},S<:ValueSupport
+    D<:UnivariateDistribution,
+    R<:Union{AbstractVector{Int},Tuple{Int,Vararg{Int}}},
+    S<:ValueSupport,
 } <: MultivariateDistribution{S}
     dist::D
     n::Int
@@ -91,7 +93,9 @@ partype(d::JointOrderStatistics) = partype(d.dist)
 Base.eltype(::Type{<:JointOrderStatistics{D}}) where {D} = Base.eltype(D)
 Base.eltype(d::JointOrderStatistics) = eltype(d.dist)
 
-function logpdf(d::JointOrderStatistics{<:ContinuousUnivariateDistribution}, x::AbstractVector{<:Real})
+function logpdf(
+    d::JointOrderStatistics{<:ContinuousUnivariateDistribution}, x::AbstractVector{<:Real}
+)
     n = d.n
     ranks = d.ranks
     lp = loglikelihood(d.dist, x)
@@ -139,7 +143,7 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
         # Carlo computations." The American Statistician 26.1 (1972): 26-27.
         # this is slow if length(d.ranks) is close to n and quantile for d.dist is expensive,
         # but this branch is probably taken when length(d.ranks) is small or much smaller than n.
-        
+
         u = eltype(x) <: Integer ? similar(x, float(eltype(x))) : x
 
         T = typeof(one(eltype(u)))
