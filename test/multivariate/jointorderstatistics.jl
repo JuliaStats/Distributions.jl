@@ -207,24 +207,28 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
 
                 m = length(r)
 
-                xcor = cor(x; dims=2)
-                if dist isa Uniform
-                    # Arnold (2008). A first course in order statistics. Eq 2.3.16
-                    s = @. n - r + 1
-                    xcor_exact = Symmetric(sqrt.((r .* collect(s)') ./ (collect(r)' .* s)))
-                elseif dist isa Exponential
-                    # Arnold (2008).  A first course in order statistics. Eq 4.6.8
-                    v = [sum(k -> inv((n - k + 1)^2), 1:i) for i in r]
-                    xcor_exact = Symmetric(sqrt.(v ./ v'))
-                end
-                for ii in 1:m, ji in (ii + 1):m
-                    i = r[ii]
-                    j = r[ji]
-                    ρ = xcor[ii, ji]
-                    ρ_exact = xcor_exact[ii, ji]
-                    # use variance-stabilizing transformation, recommended in §3.6 of
-                    # Van der Vaart, A. W. (2000). Asymptotic statistics (Vol. 3).
-                    @test atanh(ρ) ≈ atanh(ρ_exact) atol = tol
+                if Distributions.value_support(typeof(dist)) === Continuous
+                    xcor = cor(x; dims=2)
+                    if dist isa Uniform
+                        # Arnold (2008). A first course in order statistics. Eq 2.3.16
+                        s = @. n - r + 1
+                        xcor_exact = Symmetric(
+                            sqrt.((r .* collect(s)') ./ (collect(r)' .* s))
+                        )
+                    elseif dist isa Exponential
+                        # Arnold (2008).  A first course in order statistics. Eq 4.6.8
+                        v = [sum(k -> inv((n - k + 1)^2), 1:i) for i in r]
+                        xcor_exact = Symmetric(sqrt.(v ./ v'))
+                    end
+                    for ii in 1:m, ji in (ii + 1):m
+                        i = r[ii]
+                        j = r[ji]
+                        ρ = xcor[ii, ji]
+                        ρ_exact = xcor_exact[ii, ji]
+                        # use variance-stabilizing transformation, recommended in §3.6 of
+                        # Van der Vaart, A. W. (2000). Asymptotic statistics (Vol. 3).
+                        @test atanh(ρ) ≈ atanh(ρ_exact) atol = tol
+                    end
                 end
             end
         end
