@@ -1,4 +1,6 @@
 using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
+using StatsFuns: logsumexp
+using StatsBase: rle
 
 @testset "JointOrderStatistics" begin
     Random.seed!(123)
@@ -33,7 +35,13 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
     end
 
     @testset for T in [Float32, Float64],
-        dist in [Uniform(T(2), T(10)), Exponential(T(10)), Normal(T(100), T(10))],
+        dist in [
+            Uniform(T(2), T(10)),
+            Exponential(T(10)),
+            Normal(T(100), T(10)),
+            Poisson(T(10)),
+            Categorical(T.(1:20) ./ 210),
+        ],
         n in [16, 40],
         r in [
             1:n,
@@ -71,7 +79,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             @test !insupport(d, fill(NaN, length(x)))
         end
 
-        @testset "pdf/logpdf" begin
+        Distributions.value_support(typeof(dist)) === Continuous && @testset "pdf/logpdf" begin
             x = convert(Vector{T}, sort(rand(dist, length(r))))
             @test @inferred(logpdf(d, x)) isa T
             @test @inferred(pdf(d, x)) isa T
@@ -120,6 +128,79 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                     @test logpdf(d, x4) == T(-Inf)
                     @test pdf(d, x4) == zero(T)
                 end
+            end
+        end
+
+        Distributions.value_support(typeof(dist)) === Discrete && @testset "logpdf" begin
+            rvec = collect(r)
+            @testset "basic properties" begin
+                x = sort!(rand(dist, n))[rvec]
+                lp = @inferred logpdf(d, x)
+                @test typeof(lp) === typeof(logpdf(d.dist, first(x)))
+                @test @inferred(pdf(d, x)) ≈ exp(lp)
+
+                if length(r) == 1
+                    @test logpdf(d, x) ≈ logpdf(OrderStatistic(dist, n, r[1]), x[1])
+                elseif length(r) == n && isbounded(dist)
+                    y, y_counts = rle(x)
+                    xsupport = support(dist)
+                    probs = pdf.(Ref(dist), xsupport)
+                    counts = zeros(Int, length(xsupport))
+                    for (y_i, c_i) in zip(y, y_counts)
+                        counts[searchsortedfirst(xsupport, y_i)] = c_i
+                    end
+                    @test logpdf(d, x) ≈ logpdf(Multinomial(n, probs), counts)
+                end
+            end
+
+            isbounded(dist) && @testset "sums to 1 over bounded support" begin
+                x_support = support(dist)
+                n_marginal_support = length(x_support)
+                n_joint_support = binomial(length(r) + n_marginal_support - 1, length(r))
+                if n_joint_support < 10^6
+                    log_probs = Iterators.map(
+                        Iterators.filter(
+                            issorted,
+                            Iterators.product(fill(1:n_marginal_support, length(r))...),
+                        ),
+                    ) do idx
+                        x = [x_support[i] for i in idx]
+                        return logpdf(d, x)
+                    end
+                    @test exp(logsumexp(log_probs)) ≈ 1
+                end
+            end
+
+            @testset "probability in Clopper-Pearson interval" begin
+                nreps = 10
+                ndraws = 100_000
+
+                xs = sort!(rand(dist, n, nreps); dims=1)[rvec, :]
+                lps = logpdf.(Ref(d), eachcol(xs))
+
+                nmatches = sum(
+                    Iterators.map(1:ndraws) do _
+                        x = @views sort!(rand(dist, n))[rvec]
+                        return Ref(x) .== eachcol(xs)
+                    end,
+                )
+
+                α = 0.01 / 32 / nreps
+                ps_lower = map(nmatches) do nmatch
+                    if nmatch == 0
+                        0.0
+                    else
+                        quantile(Beta(nmatch, ndraws - nmatch + 1), α / 2)
+                    end
+                end
+                ps_upper = map(nmatches) do nmatch
+                    if nmatch == ndraws
+                        1.0
+                    else
+                        quantile(Beta(nmatch + 1, ndraws - nmatch), 1 - α / 2)
+                    end
+                end
+                @test all(log.(ps_lower) .< lps .< log.(ps_upper))
             end
         end
     end
