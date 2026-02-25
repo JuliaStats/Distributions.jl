@@ -148,7 +148,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
         end
 
         ndraws = 300_000
-        dists = [Uniform(), Exponential()]
+        dists = [Uniform(), Exponential(), DiscreteUniform(1, 10), Binomial(10, 0.3)]
 
         @testset "marginal mean and standard deviation" begin
             n = 20
@@ -168,6 +168,18 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                     # Arnold (2008). A first course in order statistics. eq 4.6.6-7
                     m_exact = [sum(k -> inv(n - k + 1), 1:i) for i in r]
                     v_exact = [sum(k -> inv((n - k + 1)^2), 1:i) for i in r]
+                elseif Distributions.value_support(typeof(dist)) === Discrete
+                    isbounded(dist) || error("Discrete distribution $dist is not bounded")
+                    # analytically compute mean and variance using marginal distributions of order statistics
+                    x_support = support(dist)
+                    probs = stack(
+                        map(r) do r_i
+                            dist_orderstat = OrderStatistic(dist, n, r_i)
+                            return pdf.(Ref(dist_orderstat), x_support)
+                        end,
+                    )
+                    m_exact = probs' * x_support
+                    v_exact = (probs' * x_support .^ 2) .- m_exact .^ 2
                 end
                 # compute asymptotic sample standard deviation
                 mean_std = @. sqrt(v_exact / ndraws)
@@ -229,6 +241,47 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                         # Van der Vaart, A. W. (2000). Asymptotic statistics (Vol. 3).
                         @test atanh(ρ) ≈ atanh(ρ_exact) atol = tol
                     end
+                elseif isbounded(dist)
+                    # for discrete distributions, asymptotic joint distribution of order statistics is not necessarily
+                    # multivariate normal, so we can't use the above check. Instead, we use the asymptotic distribution
+                    # of the sample covariance matrix.
+                    xcov = cov(x; dims=2)
+                    x_support = support(dist)
+                    probs = stack(
+                        map(r) do r_i
+                            dist_orderstat = OrderStatistic(dist, n, r_i)
+                            return pdf.(Ref(dist_orderstat), x_support)
+                        end,
+                    )
+                    m_exact = probs' * x_support
+                    var_exact = probs' * x_support .^ 2 .- m_exact .^ 2
+                    kurt_marginal = probs' * (x_support .- m_exact') .^ 4
+
+                    xcov_exact = zeros(length(r), length(r))
+                    x4_central_exact = zeros(length(r), length(r))
+                    for ii in 1:m
+                        i = r[ii]
+                        xcov_exact[ii, ii] = var_exact[ii]
+                        x4_central_exact[ii, ii] = kurt_marginal[ii]
+                        for ji in (ii + 1):m
+                            j = r[ji]
+                            dist_pairwise = JointOrderStatistics(dist, n, (i, j))
+                            for (xi, xj) in Iterators.product(x_support, x_support)
+                                xi <= xj || continue
+                                pij = pdf(dist_pairwise, [xi, xj])
+                                zi = xi - m_exact[ii]
+                                zj = xj - m_exact[ji]
+                                xcov_exact[ii, ji] += pij * zi * zj
+                                x4_central_exact[ii, ji] += pij * (zi * zj)^2
+                            end
+                        end
+                    end
+                    xcov_exact = Symmetric(xcov_exact, :U)
+                    x4_central_exact = Symmetric(x4_central_exact, :U)
+                    # asymptotic variance of sample covariance from Theorem 1.2.17 of
+                    # Muirhead (1982), Aspects of Multivariate Statistical Theory
+                    xcov_var_scaled = x4_central_exact .- xcov_exact .^ 2
+                    @test all((abs.(xcov_exact - xcov) ./ sqrt.(xcov_var_scaled)) .< tol)
                 end
             end
         end
