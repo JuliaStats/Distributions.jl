@@ -89,7 +89,7 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
             p2 = p1 + kL / λL
             p3 = p2 + kR / λR
         end
-        new{typeof(cache)}(dist, ns_opt, nf_opt, n_opt, pop_size, use_HIN,
+        new{typeof(dist)}(dist, ns_opt, nf_opt, n_opt, pop_size, use_HIN,
             p, y, a, xL, xR, λL, λR, p1, p2, p3)
     end
 
