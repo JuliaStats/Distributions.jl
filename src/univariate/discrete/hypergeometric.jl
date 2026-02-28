@@ -1,8 +1,7 @@
 """
     Hypergeometric(s, f, n)
 
-A *Hypergeometric distribution* describes the number of successes in `n` draws without
-replacement from a finite population containing `s` successes and `f` failures.
+A *Hypergeometric distribution* describes the number of successes in `n` draws without replacement from a finite population containing `s` successes and `f` failures.
 
 ```math
 P(X = k) = {{{s \\choose k} {f \\choose {n-k}}}\\over {s+f \\choose n}}, \\quad \\text{for } k = \\max(0, n - f), \\ldots, \\min(n, s).
@@ -18,11 +17,12 @@ params(d)       # Get the parameters, i.e. (s, f, n)
 External links
 
 * [Hypergeometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Hypergeometric_distribution)
+
 """
 struct Hypergeometric <: DiscreteUnivariateDistribution
-    ns::Int # number of successes in population
-    nf::Int # number of failures in population
-    n::Int  # sample size
+    ns::Int     # number of successes in population
+    nf::Int     # number of failures in population
+    n::Int      # sample size
 
     function Hypergeometric(ns::Real, nf::Real, n::Real; check_args::Bool=true)
         @check_args(
@@ -64,19 +64,14 @@ function modes(d::Hypergeometric)
     end
 end
 
-skewness(d::Hypergeometric) = (d.nf - d.ns) *
-                              sqrt(d.ns + d.nf - 1) *
-                              (d.ns + d.nf - 2 * d.n) /
-                              sqrt(d.n * d.ns * d.nf * (d.ns + d.nf - d.n)) /
-                              (d.ns + d.nf - 2)
+skewness(d::Hypergeometric) = (d.nf - d.ns) * sqrt(d.ns + d.nf - 1) * (d.ns + d.nf - 2 * d.n) / sqrt(d.n * d.ns * d.nf * (d.ns + d.nf - d.n)) / (d.ns + d.nf - 2)
 
 function kurtosis(d::Hypergeometric)
     ns = float(d.ns)
     nf = float(d.nf)
     n = float(d.n)
     N = ns + nf
-    a = (N - 1) * N^2 * (N * (N + 1) - 6 * ns * (N - ns) - 6 * n * (N - n)) +
-        6 * n * ns * (nf) * (N - n) * (5 * N - 6)
+    a = (N - 1) * N^2 * (N * (N + 1) - 6 * ns * (N - ns) - 6 * n * (N - n)) + 6 * n * ns * (nf) * (N - n) * (5 * N - 6)
     b = (n * ns * (N - ns) * (N - n) * (N - 2) * (N - 3))
     a / b
 end
