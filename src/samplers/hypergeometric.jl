@@ -27,10 +27,6 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
 
     use_HIN::Bool
 
-    # fields for HIN
-    p::Float64
-    y::Int
-
     # fields for H2PE
     m::Int      # named M on the paper
     a::Float64  # named A on the paper
@@ -42,6 +38,10 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
     p2::Float64
     p3::Float64
 
+    # fields for HIN reuse fields from H2PE
+    # m is y
+    # a is p
+
     function HypergeometricSampler(dist::Hypergeometric)
 
         # Step 0: Set-up constants
@@ -49,7 +49,7 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
         ns_opt, nf_opt = minmax(dist.nf, dist.ns)
         n_opt = min(pop_size - dist.n, dist.n)
         m = fld((n_opt + 1) * (ns_opt + 1), pop_size + 2)
-        p = y = a = xL = xR = λL = λR = p1 = p2 = p3 = 0.0
+        a = xL = xR = λL = λR = p1 = p2 = p3 = 0.0
         use_HIN = false
         if m - max(0, n_opt - nf_opt) < 10
             use_HIN = true
@@ -66,6 +66,7 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
                         loggamma(pop_size + 1))
                 y = n_opt - nf_opt
             end
+            m, a = y, p
         else
             # for the H2PE algorithm
             a = loggamma(m + 1) +
@@ -91,7 +92,7 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
             p3 = p2 + kR / λR
         end
         new{typeof(dist)}(dist, ns_opt, nf_opt, n_opt, pop_size, use_HIN,
-            p, y, m, a, xL, xR, λL, λR, p1, p2, p3)
+            m, a, xL, xR, λL, λR, p1, p2, p3)
     end
 
 end
@@ -101,14 +102,12 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
     y = 0
     (; ns_opt, nf_opt, n_opt) = spl
     if spl.use_HIN
-        (; p, y) = spl
+        (; m, a) = spl
+        y, p = m, a
         u = rand(rng)
         while u > p
             u -= p
-            p *= (ns_opt - y) *
-                 (n_opt - y) /
-                 (y + 1) /
-                 (nf_opt - n_opt + 1 + y)
+            p *= (ns_opt - y) * (n_opt - y) / (y + 1) / (nf_opt - n_opt + 1 + y)
             y += 1
         end
     else # use H2PE:
