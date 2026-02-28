@@ -1,7 +1,6 @@
 # R6 classes for representing distributions in R
 
 library(R6)
-library(extraDistr)
 
 #################################################
 #

@@ -30,14 +30,17 @@ TriangularDist = R6Class("TriangularDist",
                  kurtosis = -0.6,
                  entropy = 0.5 + log((b - a) / 2))
         },
-        pdf = function(x, log=FALSE) { dtriang(x, self$a, self$b, self$c, log=log) },
-        cdf = function(x) { ptriang(x, self$a, self$b, self$c) },
-        quan = function(v) { qtriang(v, self$a, self$b, self$c) }
+        pdf = function(x, log=FALSE) { extraDistr::dtriang(x, self$a, self$b, self$c, log=log) },
+        cdf = function(x) { extraDistr::ptriang(x, self$a, self$b, self$c) },
+        quan = function(v) { extraDistr::qtriang(v, self$a, self$b, self$c) }
     )
 )
 
-SymTriangularDist = list(
-    new = function(u=0, s=1) {
-        TriangularDist$new(u-s, u+s, u)
-    }
+SymTriangularDist = R6Class("SymTriangularDist",
+    inherit = TriangularDist,
+    public = list(
+        initialize = function(u=0, s=1) {
+            super$initialize(u-s, u+s, u)
+        }
+    )
 )

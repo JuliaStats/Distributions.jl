@@ -79,6 +79,7 @@ end
 
 @_delegate_statsfuns NoncentralChisq nchisq ν λ
 
-# TODO: remove Rmath dependency
-@rand_rdist(NoncentralChisq)
-rand(d::NoncentralChisq) = Rmath.rnchisq(d.ν, d.λ)
+function rand(rng::AbstractRNG, d::NoncentralChisq)
+    J = rand(rng, Poisson(d.λ/2))
+    return rand(rng, Chisq(d.ν + 2 * J))
+end

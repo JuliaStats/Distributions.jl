@@ -9,6 +9,6 @@ Kumaraswamy <- R6Class("Kumaraswamy",
                                    },
                                    supp=function() { c(0, 1) },
                                    properties=function() { list() },
-                                   pdf=function(x, log=FALSE) { dkumar(x, self$a, self$b, log=log) },
-                                   cdf=function(x) { pkumar(x, self$a, self$b) },
-                                   quan=function(x) { qkumar(x, self$a, self$b) }))
+                                   pdf=function(x, log=FALSE) { extraDistr::dkumar(x, self$a, self$b, log=log) },
+                                   cdf=function(x) { extraDistr::pkumar(x, self$a, self$b) },
+                                   quan=function(x) { extraDistr::qkumar(x, self$a, self$b) }))
