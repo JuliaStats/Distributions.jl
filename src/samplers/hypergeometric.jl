@@ -32,6 +32,7 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
     y::Int
 
     # fields for H2PE
+    m::Int      # named M on the paper
     a::Float64  # named A on the paper
     xL::Float64
     xR::Float64
@@ -47,10 +48,10 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
         pop_size = dist.ns + dist.nf
         ns_opt, nf_opt = minmax(dist.nf, dist.ns)
         n_opt = min(pop_size - dist.n, dist.n)
-        M = fld((n_opt + 1) * (ns_opt + 1), pop_size + 2)
+        m = fld((n_opt + 1) * (ns_opt + 1), pop_size + 2)
         p = y = a = xL = xR = λL = λR = p1 = p2 = p3 = 0.0
         use_HIN = false
-        if M - max(0, n_opt - nf_opt) < 10
+        if m - max(0, n_opt - nf_opt) < 10
             use_HIN = true
             if n_opt < nf_opt
                 p = exp(loggamma(nf_opt + 1) +
@@ -67,14 +68,14 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
             end
         else
             # for the H2PE algorithm
-            a = loggamma(M + 1) +
-                loggamma(ns_opt - M + 1) +
-                loggamma(n_opt - M + 1) +
-                loggamma(nf_opt - n_opt + M + 1)
+            a = loggamma(m + 1) +
+                loggamma(ns_opt - m + 1) +
+                loggamma(n_opt - m + 1) +
+                loggamma(nf_opt - n_opt + m + 1)
             D = 1.5 * sqrt((pop_size - n_opt) * n_opt * ns_opt * nf_opt /
                            ((pop_size - 1) * pop_size * pop_size)) + 0.5
-            xL = M - D + 0.5
-            xR = M + D + 0.5
+            xL = m - D + 0.5
+            xR = m + D + 0.5
             kL = exp(a - loggamma(xL + 1) -
                      loggamma(ns_opt - xL + 1) -
                      loggamma(n_opt - xL + 1) -
@@ -90,7 +91,7 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
             p3 = p2 + kR / λR
         end
         new{typeof(dist)}(dist, ns_opt, nf_opt, n_opt, pop_size, use_HIN,
-            p, y, a, xL, xR, λL, λR, p1, p2, p3)
+            p, y, m, a, xL, xR, λL, λR, p1, p2, p3)
     end
 
 end
@@ -98,62 +99,73 @@ end
 
 function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
     y = 0
+    (; ns_opt, nf_opt, n_opt) = spl
     if spl.use_HIN
+        (; p, y) = spl
         u = rand(rng)
-        p = spl.p
-        y = spl.y
         while u > p
             u -= p
-            p *= (spl.ns_opt - y) *
-                 (spl.n_opt - y) /
+            p *= (ns_opt - y) *
+                 (n_opt - y) /
                  (y + 1) /
-                 (spl.nf_opt - spl.n_opt + 1 + y)
+                 (nf_opt - n_opt + 1 + y)
             y += 1
         end
     else # use H2PE:
         # Steps 1, 2, 3, 4: base variate generation
-        spl = spl.cache
         y::Int = 0
+        (; m, a, xL, xR, λL, λR, p1, p2, p3) = spl
         while true
-            u = rand(rng) * spl.p3
+            u = rand(rng) * p3
             v = rand(rng)
-            if u <= spl.p1
+            if u <= p1
                 # Region 1: central region
-                y = floor(Int, spl.xL + u)
-            elseif u <= spl.p2
+                y = floor(Int, xL + u)
+            elseif u <= p2
                 # Region 2: left exponential tail
-                y = floor(Int, spl.xL + log(v) / spl.λL)
-                if y < max(0, spl.n_opt - spl.nf_opt)
+                y = floor(Int, xL + log(v) / λL)
+                if y < max(0, n_opt - nf_opt)
                     continue
                 end
-                v = v * (u - spl.p1) * spl.λL
+                v = v * (u - p1) * λL
             else
                 # Region 3: right exponential tail
-                y = floor(Int, spl.xR - log(v) / spl.λR)
-                if y > min(spl.ns_opt, spl.n_opt)
+                y = floor(Int, xR - log(v) / λR)
+                if y > min(ns_opt, n_opt)
                     continue
                 end
-                v = v * (u - spl.p2) * spl.λR
+                v = v * (u - p2) * λR
             end
-            # Step 4: Acceptance/Regection Comparison
-            # note: seems like optimizations found in the paper don't improve the
-            # performance compared to this direct implementation with the lgamma function,
-            # so the check is done directly for simplicity.
-            if log(v) > spl.a -
-                        loggamma(y + 1) -
-                        loggamma(spl.ns_opt - y + 1) -
-                        loggamma(spl.n_opt - y + 1) -
-                        loggamma(spl.nf_opt - spl.n_opt + y + 1)
-                continue
-            else
+            # Step 4: Acceptance/Regection Comparison:
+            # optimizations implemented by @oscardssmidth
+
+            logv = log(v)
+            yn = ns_opt - y + 1
+            yk = n_opt - y + 1
+            nk = nf_opt - n_opt + y + 1
+            RSTE = (y - m) ./ (-y - 1, yn, yk, -nk)
+            G = yn * yk / muladd(y, nk, nk) - 1
+
+            coefs = (0.0, 1.0, -1 / 2, 1 / 3)
+            GU = evalpoly(G, coefs)
+            GL = GU - 0.25 * G^4 / (1 + max(0, G))
+
+            XMSTE = (m, ns_opt - m, n_opt - m, nf_opt - n_opt + m) .+ 0.5
+            Ub = sum(XMSTE .* evalpoly.(RSTE, Ref(coefs))) + y * GU - m * GL + 0.0034
+            logv > Ub && continue
+
+            DRSTE = XMSTE .* (RSTE .^ 2) .^ 2 ./ (1 .+ min.(RSTE, 0.0))
+            if logv < Ub - 0.25 * sum(DRSTE) + (y + m) * (GL - GU) - 0.0078 ||
+               logv < a -
+                      loggamma(y + 1) -
+                      loggamma(ns_opt - y + 1) -
+                      loggamma(n_opt - y + 1) -
+                      loggamma(nf_opt - n_opt + y + 1)
                 break
             end
         end
-
-        # Step 5: return appropriate random variate
-        return _hg_correct_variate(spl, y)
     end
-
+    return _hg_correct_variate(spl, y)
 end
 
 
