@@ -50,9 +50,8 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
         n_opt = min(pop_size - dist.n, dist.n)
         m = fld((n_opt + 1) * (ns_opt + 1), pop_size + 2)
         a = xL = xR = λL = λR = p1 = p2 = p3 = 0.0
-        use_HIN = false
-        if m - max(0, n_opt - nf_opt) < 10
-            use_HIN = true
+        use_HIN = m < 10 + max(0, n_opt - nf_opt)
+        if use_HIN
             if n_opt < nf_opt
                 p = exp(loggamma(nf_opt + 1) +
                         loggamma(pop_size - n_opt + 1) -
