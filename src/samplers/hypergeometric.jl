@@ -52,16 +52,16 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
         a = xL = xR = λL = λR = p1 = p2 = p3 = 0.0
         use_HIN = m < 10 + max(0, n_opt - nf_opt)
         if use_HIN
+            # m is y, a is p
             if n_opt < nf_opt
-                p = exp(logbeta(pop_size - n_opt + 1, n_opt) -
+                a = exp(logbeta(pop_size - n_opt + 1, n_opt) -
                         logbeta(nf_opt - n_opt + 1, n_opt))
-                y = 0
+                m = 0
             else
-                p = exp(logbeta(ns_opt + 1, nf_opt) -
+                a = exp(logbeta(ns_opt + 1, nf_opt) -
                         logbeta(n_opt - nf_opt + 1, nf_opt))
-                y = n_opt - nf_opt
+                m = n_opt - nf_opt
             end
-            m, a = y, p
         else
             # for the H2PE algorithm
             a = loggamma(m + 1) +
@@ -97,8 +97,8 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
     y = 0
     (; ns_opt, nf_opt, n_opt) = spl
     if spl.use_HIN
-        (; m, a) = spl
-        y, p = m, a
+        y = spl.m # reusing m and a fields from H2PE
+        p = spl.a
         u = rand(rng)
         while u > p
             u -= p
