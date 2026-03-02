@@ -54,13 +54,17 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
         if use_HIN
             # m is y, a is p
             if n_opt < nf_opt
-                a = exp(logbeta(pop_size - n_opt + 1, n_opt) -
-                        logbeta(nf_opt - n_opt + 1, n_opt))
-                m = 0
+                p = exp(loggamma(nf_opt + 1) +
+                        loggamma(pop_size - n_opt + 1) -
+                        loggamma(pop_size + 1) -
+                        loggamma(nf_opt - n_opt + 1))
+                y = 0
             else
-                a = exp(logbeta(ns_opt + 1, nf_opt) -
-                        logbeta(n_opt - nf_opt + 1, nf_opt))
-                m = n_opt - nf_opt
+                p = exp(loggamma(ns_opt + 1) +
+                        loggamma(n_opt + 1) -
+                        loggamma(n_opt - nf_opt + 1) -
+                        loggamma(pop_size + 1))
+                y = n_opt - nf_opt
             end
         else
             # for the H2PE algorithm
