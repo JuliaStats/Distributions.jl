@@ -149,11 +149,11 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
             GL = GU - 0.25 * G^4 / (1 + max(0.0, G))
 
             XMSTE = (m + 0.5, ns_opt - m + 0.5, n_opt - m + 0.5, nf_opt - n_opt + m + 0.5)
-            Ub = mapreduce((x, r) -> x * r * evalpoly(r, coefs), +, XMSTE, RSTE) +
+            Ub = sum(map((x, r) -> x * r * evalpoly(r, coefs), XMSTE, RSTE)) +
                  y * GU - m * GL + 0.0034
             logv > Ub && continue
 
-            DRSTE_sum = mapreduce((x, r) -> x * r^4 / (1.0 + min(r, 0.0)), +, XMSTE, RSTE)
+            DRSTE_sum = sum(map((x, r) -> x * r^4 / (1.0 + min(r, 0.0)), XMSTE, RSTE))
             if logv < Ub - 0.25 * DRSTE_sum + (y + m) * (GL - GU) - 0.0078 ||
                logv < a -
                       loggamma(y + 1) -
