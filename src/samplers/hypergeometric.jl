@@ -149,7 +149,7 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
             GL = GU - 0.25 * G^4 / (1 + max(0.0, G))
 
             XMSTE = (m + 0.5, ns_opt - m + 0.5, n_opt - m + 0.5, nf_opt - n_opt + m + 0.5)
-            Ub = G * mapreduce((x, r) -> x * evalpoly(r, coefs), +, XMSTE, RSTE) +
+            Ub = mapreduce((x, r) -> x * r * evalpoly(r, coefs), +, XMSTE, RSTE) +
                  y * GU - m * GL + 0.0034
             logv > Ub && continue
 
