@@ -53,16 +53,12 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
         use_HIN = m < 10 + max(0, n_opt - nf_opt)
         if use_HIN
             if n_opt < nf_opt
-                p = exp(loggamma(nf_opt + 1) +
-                        loggamma(pop_size - n_opt + 1) -
-                        loggamma(pop_size + 1) -
-                        loggamma(nf_opt - n_opt + 1))
+                p = exp(logbeta(pop_size - n_opt + 1, n_opt) -
+                        logbeta(nf_opt - n_opt + 1, n_opt))
                 y = 0
             else
-                p = exp(loggamma(ns_opt + 1) +
-                        loggamma(n_opt + 1) -
-                        loggamma(n_opt - nf_opt + 1) -
-                        loggamma(pop_size + 1))
+                p = exp(logbeta(ns_opt + 1, nf_opt) -
+                        logbeta(n_opt - nf_opt + 1, nf_opt))
                 y = n_opt - nf_opt
             end
             m, a = y, p
@@ -73,7 +69,7 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
                 loggamma(n_opt - m + 1) +
                 loggamma(nf_opt - n_opt + m + 1)
             D = 1.5 * sqrt((pop_size - n_opt) * n_opt * ns_opt * nf_opt /
-                           ((pop_size - 1) * pop_size * pop_size)) + 0.5
+                           ((pop_size - 1) * pop_size^2)) + 0.5
             xL = m - D + 0.5
             xR = m + D + 0.5
             kL = exp(a - loggamma(xL + 1) -
@@ -141,14 +137,15 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
             yn = ns_opt - y + 1
             yk = n_opt - y + 1
             nk = nf_opt - n_opt + y + 1
-            RSTE = (y - m) ./ (-y - 1, yn, yk, -nk)
+            ymm = y - m
+            RSTE = (-ymm/(y - 1), ymm/yn, ymm/yk, -ymm/nk)
             G = yn * yk / muladd(y, nk, nk) - 1
 
-            coefs = (0.0, 1.0, -1 / 2, 1 / 3)
-            GU = evalpoly(G, coefs)
-            GL = GU - 0.25 * G^4 / (1 + max(0, G))
+            coefs = (1.0, -0.5, 1 / 3)
+            GU = G * evalpoly(G, coefs)
+            GL = GU - 0.25 * G^4 / (1 + max(0.0, G))
 
-            XMSTE = (m, ns_opt - m, n_opt - m, nf_opt - n_opt + m) .+ 0.5
+            XMSTE = (m + 0.5, ns_opt - m + 0.5, n_opt - m + 0.5, nf_opt - n_opt + m + 0.5)
             Ub = sum(XMSTE .* evalpoly.(RSTE, Ref(coefs))) + y * GU - m * GL + 0.0034
             logv > Ub && continue
 
@@ -170,18 +167,10 @@ end
 # Adapt the sampled variable from the optimized distribution for output
 function _hg_correct_variate(spl::HypergeometricSampler, y::Integer)
     dist = spl.dist
-    if dist.n < spl.pop_size / 2
-        if dist.ns <= dist.nf
-            y
-        else
-            dist.n - y
-        end
+    if 2 * dist.n < spl.pop_size
+        return dist.ns <= dist.nf ? y : dist.n - y
     else
-        if dist.ns <= dist.nf
-            dist.ns - y
-        else
-            dist.n - dist.nf + y
-        end
+        return dist.ns <= dist.nf ? dist.ns - y : dist.n - dist.nf + y
     end
 end
 
