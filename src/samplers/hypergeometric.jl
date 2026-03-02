@@ -138,7 +138,7 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
             yk = n_opt - y + 1
             nk = nf_opt - n_opt + y + 1
             ymm = y - m
-            RSTE = (-ymm/(y - 1), ymm/yn, ymm/yk, -ymm/nk)
+            RSTE = (-ymm / (y - 1), ymm / yn, ymm / yk, -ymm / nk)
             G = yn * yk / muladd(y, nk, nk) - 1
 
             coefs = (1.0, -0.5, 1 / 3)
@@ -146,11 +146,12 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
             GL = GU - 0.25 * G^4 / (1 + max(0.0, G))
 
             XMSTE = (m + 0.5, ns_opt - m + 0.5, n_opt - m + 0.5, nf_opt - n_opt + m + 0.5)
-            Ub = sum(XMSTE .* evalpoly.(RSTE, Ref(coefs))) + y * GU - m * GL + 0.0034
+            Ub = G * mapreduce((x, r) -> x * evalpoly(r, coefs), +, XMSTE, RSTE) +
+                 y * GU - m * GL + 0.0034
             logv > Ub && continue
 
-            DRSTE = XMSTE .* (RSTE .^ 2) .^ 2 ./ (1 .+ min.(RSTE, 0.0))
-            if logv < Ub - 0.25 * sum(DRSTE) + (y + m) * (GL - GU) - 0.0078 ||
+            DRSTE_sum = mapreduce((x, r) -> x * r^4 / (1.0 + min(r, 0.0)), +, XMSTE, RSTE)
+            if logv < Ub - 0.25 * DRSTE_sum + (y + m) * (GL - GU) - 0.0078 ||
                logv < a -
                       loggamma(y + 1) -
                       loggamma(ns_opt - y + 1) -
