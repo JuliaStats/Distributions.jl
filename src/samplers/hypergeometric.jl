@@ -141,7 +141,7 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
             yk = n_opt - y + 1
             nk = nf_opt - n_opt + y + 1
             ymm = y - m
-            RSTE = (-ymm / (y - 1), ymm / yn, ymm / yk, -ymm / nk)
+            RSTE = (-ymm / (y + 1), ymm / yn, ymm / yk, -ymm / nk)
             G = yn * yk / muladd(y, nk, nk) - 1
 
             coefs = (1.0, -0.5, 1 / 3)
