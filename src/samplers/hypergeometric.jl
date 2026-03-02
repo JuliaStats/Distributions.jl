@@ -54,17 +54,17 @@ struct HypergeometricSampler{D<:Hypergeometric} <: Sampleable{Univariate,Discret
         if use_HIN
             # m is y, a is p
             if n_opt < nf_opt
-                p = exp(loggamma(nf_opt + 1) +
+                a = exp(loggamma(nf_opt + 1) +
                         loggamma(pop_size - n_opt + 1) -
                         loggamma(pop_size + 1) -
                         loggamma(nf_opt - n_opt + 1))
-                y = 0
+                m = 0
             else
-                p = exp(loggamma(ns_opt + 1) +
+                a = exp(loggamma(ns_opt + 1) +
                         loggamma(n_opt + 1) -
                         loggamma(n_opt - nf_opt + 1) -
                         loggamma(pop_size + 1))
-                y = n_opt - nf_opt
+                m = n_opt - nf_opt
             end
         else
             # for the H2PE algorithm
@@ -111,7 +111,6 @@ function Random.rand(rng::AbstractRNG, spl::HypergeometricSampler)
         end
     else # use H2PE:
         # Steps 1, 2, 3, 4: base variate generation
-        y::Int = 0
         (; m, a, xL, xR, λL, λR, p1, p2, p3) = spl
         while true
             u = rand(rng) * p3
