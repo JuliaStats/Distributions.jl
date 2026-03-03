@@ -1,13 +1,14 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.123"
 authors = ["JuliaStats"]
+version = "0.25.124"
 
 [deps]
 AliasTables = "66dad0bd-aa9a-41b7-9441-69ab47430ed8"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
+HypergeometricFunctions = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -42,6 +43,7 @@ Distributed = "<0.0.1, 1"
 FillArrays = "0.9, 0.10, 0.11, 0.12, 0.13, 1"
 FiniteDifferences = "0.12"
 ForwardDiff = "0.10, 1"
+HypergeometricFunctions = "0.3.28"
 JSON = "0.21, 1"
 LinearAlgebra = "<0.0.1, 1"
 OffsetArrays = "1"
