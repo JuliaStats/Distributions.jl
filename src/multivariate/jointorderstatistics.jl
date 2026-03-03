@@ -213,42 +213,24 @@ function _make_log_hankel_product_op(logh_work, udist, y, rank_ranges, gap_lengt
         (; logv_work, logc_work) = state
         gap_length_left = gap_lengths[i]
         gap_length_right = gap_lengths[i + 1]
-        gap_length_total = gap_length_left + gap_length_right
         min_num_ties = length(rank_ranges[i])
 
         log_tie_prob = log_tie_probs[i]
 
         logv = _view_first(logv_work, gap_length_left + 1)
         logc = _view_first(logc_work, gap_length_right + 1)
-        if gap_length_left == 0
-            _log_tie_terms!(logc, log_tie_prob, min_num_ties, gap_length_right)
-            logc .+= first(logv)
+        last_term = i == ilast
+        log_gap_prob = if last_term
+            T(logccdf(udist, y[i]))
         else
-            logh_ties = _view_first(logh_work, gap_length_total + 1)
-            _log_tie_terms!(logh_ties, log_tie_prob, min_num_ties, gap_length_total)
-            _log_xcorr_exp!(logc, logh_ties, logv)
-        end
-
-        if gap_length_right == 0
-            logv_work, logc_work = logc_work, logv_work
-            return (; logv_work, logc_work)
-        end
-
-        logh_gap = _view_first(logh_work, gap_length_right + 1)
-        if i == ilast
-            log_gap_prob = T(logccdf(udist, y[i]))
-            # for right-flanking gap, logc is a row vector, and logh is a column vector, so
-            # we only need an inner product (i.e. first term of a cross-correlation).
-            logv = _view_first(logv_work, 1)
-        else
-            log_gap_prob = logsubexp(
+            logsubexp(
                 T(logdiffcdf(udist, y[i + 1], y[i])), log_tie_probs[i + 1]
             )
-            logv = _view_first(logv_work, gap_length_right + 1)
         end
-        _log_gap_terms!(logh_gap, log_gap_prob, gap_length_right)
-        _log_xcorr_exp!(logv, logh_gap, logc)
-        return (; logv_work, logc_work)
+        _log_mul_tie_gap!(
+            logc, logv, log_tie_prob, log_gap_prob, min_num_ties, last_term
+        )
+        return (; logv_work=logc_work, logc_work=logv_work)
     end
     return log_hankel_product_op
 end
@@ -355,6 +337,52 @@ function _log_tie_terms!(logh, log_tie_prob, min_num_ties, gap_size_total)
     return logh
 end
 
+# Logarithm of fused vector-mat-mat product, using formulating of mat-mat product in terms of
+# regularized incomplete beta functions and then evaluating these on log-scale using recurrence
+# relations and optimally reusing accumulated quantities. 
+function _log_mul_tie_gap!(logc, logv, log_tie_prob, log_gap_prob, min_num_ties, last_term=false)
+    T = eltype(logc)
+    if last_term
+        logc[begin] = T(-Inf)
+    else
+        fill!(logc, T(-Inf))
+    end
+
+    logs = logaddexp(log_tie_prob, log_gap_prob)  # log-prob of draw being in tie OR gap
+
+    logq = log_gap_prob - logs  # log-prob of draw being in gap if it's either a tie or gap
+
+    logP0 = zero(T)
+    logα = log(T(min_num_ties))
+    for (u, logvu) in enumerate(logv)  # u - 1: number of ties from the left gap
+        α = min_num_ties + u - 1  # number of observed ties + ties from the left gap
+
+        logP = logP0
+        logπ = logS = zero(T)
+
+        if !last_term
+            logc[end] = logaddexp(logc[end], logvu + logP + logS)
+        end
+
+        logαwm1 = logα
+        for (w, idx) in enumerate(Iterators.drop(reverse(eachindex(logc)), 1))  # w: number of ties from the right gap
+            logπ += logq + logαwm1 - log(T(w))
+            logαwm1 = log(T(α + w))
+            logS = logaddexp(logS, logπ)
+            logP += logs - logαwm1
+            if !last_term
+                logc[idx] = logaddexp(logc[idx], logvu + logP + logS)
+            end
+        end
+        if last_term
+            logc[begin] = logaddexp(logc[begin], logvu + logP + logS)
+        end
+        logα = log(T(α + 1))
+        logP0 += log_tie_prob - logα
+    end
+
+    return logc
+end
 
 """
     _log_xcorr_exp!(log_c, log_a, log_b)
