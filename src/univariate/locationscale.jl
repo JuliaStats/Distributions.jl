@@ -61,14 +61,6 @@ function AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution; chec
 end
 
 # aliases
-const LocationScale{T,S,D} = AffineDistribution{T,S,D}
-function LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
-    Base.depwarn("`LocationScale` is deprecated. Use `+` and `*` instead", :LocationScale)
-    # preparation for future PR where I remove σ > 0 check
-    @check_args LocationScale (σ, σ > zero(σ))
-    return AffineDistribution(μ, σ, ρ; check_args=false)
-end
-
 const ContinuousAffineDistribution{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
 const DiscreteAffineDistribution{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,Discrete,D}
 
