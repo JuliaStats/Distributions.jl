@@ -23,8 +23,8 @@ Gumbel <- R6Class("Gumbel",
                  skewness = 1.13954709940464866,
                  kurtosis = 2.4)
         },
-        pdf = function(x, log=FALSE){ dgumbel(x, self$mu, self$beta, log=log) },
-        cdf = function(x){ pgumbel(x, self$mu, self$beta) },
-        quan = function(v){ qgumbel(v, self$mu, self$beta) }
+        pdf = function(x, log=FALSE){ extraDistr::dgumbel(x, self$mu, self$beta, log=log) },
+        cdf = function(x){ extraDistr::pgumbel(x, self$mu, self$beta) },
+        quan = function(v){ extraDistr::qgumbel(v, self$mu, self$beta) }
     )
 )
