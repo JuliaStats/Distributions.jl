@@ -34,6 +34,7 @@ Semicircle(r::Integer; check_args::Bool=true) = Semicircle(float(r); check_args=
 @distr_support Semicircle -d.r +d.r
 
 params(d::Semicircle) = (d.r,)
+partype(::Semicircle{T}) where {T<:Real} = T
 
 mean(d::Semicircle) = zero(d.r)
 var(d::Semicircle) = d.r^2 / 4

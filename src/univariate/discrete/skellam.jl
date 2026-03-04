@@ -75,7 +75,8 @@ kurtosis(d::Skellam) = 1 / var(d)
 function logpdf(d::Skellam, x::Real)
     μ1, μ2 = params(d)
     if insupport(d, x)
-        return - (μ1 + μ2) + (x/2) * log(μ1/μ2) + log(besseli(x, 2*sqrt(μ1)*sqrt(μ2)))
+        besselarg =  2*sqrt(μ1*μ2)
+        return - (μ1 + μ2) + xlogy(x/2, μ1/μ2) + besselarg + log(besselix(x, besselarg))
     else
         return one(x) / 2 * log(zero(μ1/μ2))
     end
@@ -91,17 +92,13 @@ function cf(d::Skellam, t::Real)
     exp(μ1 * (cis(t) - 1) + μ2 * (cis(-t) - 1))
 end
 
-"""
-    cdf(d::Skellam, t::Real)
-
+#=
 Implementation based on SciPy: https://github.com/scipy/scipy/blob/v0.15.1/scipy/stats/_discrete_distns.py
 
 Refer to Eqn (5) in On an Extension of the Connexion Between Poisson and χ2 Distributions, N.L Johnson(1959)
 Vol 46, No 3/4, doi:10.2307/2333532
 It relates the Skellam and Non-central chisquare PDFs, which is very similar to their CDFs computation as well.
-
-Computing cdf of the Skellam distribution.
-"""
+=#
 function cdf(d::Skellam, t::Integer)
     μ1, μ2 = params(d)
     return if t < 0

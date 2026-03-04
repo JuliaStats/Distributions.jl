@@ -9,7 +9,7 @@ function current_master(d::AbstractMixtureModel, x)
     p = probs(d)
     @assert length(p) == K
     v = 0.0
-    @inbounds for i in eachindex(p)
+    for i in eachindex(p)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
@@ -28,7 +28,7 @@ function improved_version(d, x)
     p = probs(d)
     return sum(enumerate(p)) do (i, pi)
         if pi > 0
-            @inbounds c = component(d, i)
+            c = component(d, i)
             pdf(c, x) * pi
         else
             zero(eltype(p))
@@ -59,7 +59,7 @@ function forloop(d, x)
     ps = probs(d)
     cs = components(d)
     s = zero(eltype(ps))
-    @inbounds for i in eachindex(ps)
+    for i in eachindex(ps)
         if ps[i] > 0
             s += ps[i] * pdf(cs[i], x)
         end
@@ -70,13 +70,13 @@ end
 function indexed_sum_comp(d, x)
     ps = probs(d)
     cs = components(d)
-    @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
+    sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
 end
 
 function indexed_boolprod(d, x)
     ps = probs(d)
     cs = components(d)
-    @inbounds sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
+    sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
 end
 
 function indexed_boolprod_noinbound(d, x)
@@ -89,7 +89,7 @@ function sumcomp_cond(d, x)
     ps = probs(d)
     cs = components(d)
     s = zero(eltype(ps))
-    @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
+    sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
 end
 
 distributions = [

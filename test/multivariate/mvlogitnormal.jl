@@ -143,7 +143,7 @@ end
         @test kldivergence(d1, d2) ≈ kldivergence(d1.normal, d2.normal)
     end
 
-    VERSION ≥ v"1.8" && @testset "show" begin
+    @testset "show" begin
         d = MvLogitNormal([1.0, 2.0, 3.0], Diagonal([4.0, 5.0, 6.0]))
         @test sprint(show, d) === """
         MvLogitNormal{DiagNormal}(

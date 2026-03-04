@@ -3,17 +3,6 @@ using Distributions, Test, Random, LinearAlgebra
 
 rng = MersenneTwister(123456)
 
-if VERSION >= v"1.6.0-DEV.254"
-    _redirect_stderr(f, ::Base.DevNull) = redirect_stderr(f, devnull)
-else
-    function _redirect_stderr(f, ::Base.DevNull)
-        nulldev = @static Sys.iswindows() ? "NUL" : "/dev/null"
-        open(nulldev, "w") do io
-            redirect_stderr(f, io)
-        end
-    end
-end
-
 function test_matrixreshaped(rng, d1, sizes)
     @testset "MatrixReshaped $(nameof(typeof(d1))) tests" begin
         x1 = rand(rng, d1)
@@ -117,7 +106,7 @@ end
         μ = rand(rng, 16)
         d1 = MvNormal(μ, σ * σ')
         sizes = [(4, 4), (8, 2), (2, 8), (1, 16), (16, 1), (4,)]
-        _redirect_stderr(devnull) do
+        redirect_stderr(devnull) do
             test_matrixreshaped(rng, d1, sizes)
         end
     end
@@ -127,7 +116,7 @@ end
         α = rand(rng, 36) .+ 1 # mode is only defined if all alpha > 1
         d1 = Dirichlet(α)
         sizes = [(6, 6), (4, 9), (9, 4), (3, 12), (12, 3), (1, 36), (36, 1), (6,)]
-        _redirect_stderr(devnull) do
+        redirect_stderr(devnull) do
             test_matrixreshaped(rng, d1, sizes)
         end
     end

@@ -157,8 +157,8 @@ params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 Base.eltype(::Type{<:MvNormalCanon{T}}) where {T} = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
-cov(d::MvNormalCanon) = Matrix(inv(d.J))
-invcov(d::MvNormalCanon) = Matrix(d.J)
+cov(d::MvNormalCanon) = inv(d.J)
+invcov(d::MvNormalCanon) = d.J
 logdetcov(d::MvNormalCanon) = -logdet(d.J)
 
 
@@ -170,20 +170,13 @@ sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J,
 
 # Sampling (for GenericMvNormal)
 
-unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
-unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
-unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
-if isdefined(PDMats, :PDSparseMat)
-    unwhiten_winv!(J::PDSparseMat, x::AbstractVecOrMat) = x[:] = J.chol.PtL' \ x
-end
-
 function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector)
-    unwhiten_winv!(d.J, randn!(rng, x))
+    invunwhiten!(d.J, randn!(rng, x))
     x .+= d.μ
     return x
 end
 function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix)
-    unwhiten_winv!(d.J, randn!(rng, x))
+    invunwhiten!(d.J, randn!(rng, x))
     x .+= d.μ
     return x
 end

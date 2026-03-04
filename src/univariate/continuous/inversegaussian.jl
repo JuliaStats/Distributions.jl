@@ -196,7 +196,7 @@ function suffstats(::Type{<:InverseGaussian}, x::AbstractVector{<:Real}, w::Abst
     sx = zero(T)
     sinvx = zero(T)
     sw = zero(T)
-    @inbounds @simd for i in eachindex(x)
+    @simd for i in eachindex(x)
         sx += w[i]*x[i]
         sinvx += w[i]/x[i]
         sw += w[i]

@@ -1,7 +1,6 @@
 # R6 classes for representing distributions in R
 
 library(R6)
-library(extraDistr)
 
 #################################################
 #
@@ -62,6 +61,7 @@ source("continuous/laplace.R")
 source("continuous/levy.R")
 source("continuous/lindley.R")
 source("continuous/logistic.R")
+source("continuous/loglogistic.R")
 source("continuous/lognormal.R")
 source("continuous/noncentralbeta.R")
 source("continuous/noncentralchisq.R")

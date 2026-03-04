@@ -19,9 +19,9 @@ size(d::MultivariateDistribution)
 # multiple multivariate, must allocate matrix
 # TODO: inconsistency with other `ArrayLikeVariate`s and `rand(s, (n,))` - maybe remove?
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
-    @inbounds rand!(rng, sampler(s), Matrix{eltype(s)}(undef, length(s), n))
+    rand!(rng, sampler(s), Matrix{eltype(s)}(undef, length(s), n))
 rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =
-    @inbounds rand!(rng, sampler(s), Matrix{float(eltype(s))}(undef, length(s), n))
+    rand!(rng, sampler(s), Matrix{float(eltype(s))}(undef, length(s), n))
 
 ## domain
 
@@ -38,7 +38,7 @@ function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix) wh
     size(X) == (length(d),n) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1:n
-        @inbounds r[i] = insupport(d, view(X, :, i))
+        r[i] = insupport(d, view(X, :, i))
     end
     return r
 end
@@ -61,6 +61,13 @@ mean(d::MultivariateDistribution)
 Compute the vector of element-wise variances for distribution `d`.
 """
 var(d::MultivariateDistribution)
+
+"""
+    std(d::MultivariateDistribution)
+
+Compute the vector of element-wise standard deviations for distribution `d`.
+"""
+std(d::MultivariateDistribution) = sqrt!!(var(d))
 
 """
     entropy(d::MultivariateDistribution)
@@ -96,11 +103,11 @@ function cor(d::MultivariateDistribution)
 
     for j = 1:n
         for i = 1:j-1
-            @inbounds R[i, j] = R[j, i]
+            R[i, j] = R[j, i]
         end
         R[j, j] = 1.0
         for i = j+1:n
-            @inbounds R[i, j] = C[i, j] / sqrt(C[i, i] * C[j, j])
+            R[i, j] = C[i, j] / sqrt(C[i, i] * C[j, j])
         end
     end
 

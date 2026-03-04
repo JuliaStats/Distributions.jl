@@ -73,14 +73,14 @@ using Test
         end
 
         @testset "minimum" begin
-            nt = (x=Normal(1.0, 2.0), y=Gamma(), z=MvNormal(ones(5)))
+            nt = (x=Normal(1.0, 2.0), y=Gamma(), z=MvNormal(Diagonal(ones(5))))
             d = ProductNamedTupleDistribution(nt)
             @test @inferred(minimum(d)) ==
                 (x=minimum(nt.x), y=minimum(nt.y), z=minimum(nt.z))
         end
 
         @testset "maximum" begin
-            nt = (x=Normal(1.0, 2.0), y=Gamma(), z=MvNormal(ones(5)))
+            nt = (x=Normal(1.0, 2.0), y=Gamma(), z=MvNormal(Diagonal(ones(5))))
             d = ProductNamedTupleDistribution(nt)
             @test @inferred(maximum(d)) ==
                 (x=maximum(nt.x), y=maximum(nt.y), z=maximum(nt.z))
@@ -118,7 +118,7 @@ using Test
     end
 
     @testset "Statistics" begin
-        nt = (x=Normal(1.0, 2.0), y=Gamma(), z=MvNormal(1.0:5.0), w=Poisson(100))
+        nt = (x=Normal(1.0, 2.0), y=Gamma(), z=MvNormal(Diagonal(abs2.(1.0:5.0))), w=Poisson(100))
         d = ProductNamedTupleDistribution(nt)
         @test @inferred(mode(d)) == (x=mode(nt.x), y=mode(nt.y), z=mode(nt.z), w=mode(nt.w))
         @test @inferred(mean(d)) == (x=mean(nt.x), y=mean(nt.y), z=mean(nt.z), w=mean(nt.w))

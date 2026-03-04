@@ -28,6 +28,7 @@ using SpecialFunctions
 using Base.MathConstants: eulergamma
 
 import AliasTables
+import Rmath
 
 export
     # re-export Statistics
@@ -123,6 +124,7 @@ export
     LKJCholesky,
     LocationScale,
     Logistic,
+    LogLogistic,
     LogNormal,
     LogUniform,
     MvLogitNormal,
@@ -322,13 +324,6 @@ include("statsapi.jl")
 # Testing utilities for other packages which implement distributions.
 include("test_utils.jl")
 
-# Extensions: Implementation of DensityInterface and ChainRulesCore API
-if !isdefined(Base, :get_extension)
-    include("../ext/DistributionsChainRulesCoreExt/DistributionsChainRulesCoreExt.jl")
-    include("../ext/DistributionsDensityInterfaceExt.jl")
-    include("../ext/DistributionsTestExt.jl")
-end
-
 include("deprecates.jl")
 
 """
@@ -361,7 +356,7 @@ Supported distributions:
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, JohnsonSU, Kolmogorov, KSDist, KSOneSided, Kumaraswamy,
     Laplace, Levy, Lindley, LKJ, LKJCholesky,
-    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
+    Logistic, LogLogistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,

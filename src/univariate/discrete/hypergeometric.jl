@@ -38,6 +38,7 @@ end
 
 @distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
+partype(::Hypergeometric) = Int
 
 ### Parameters
 
@@ -83,11 +84,10 @@ entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))
 
 ## sampling
 
-# TODO: remove RFunctions dependency. Implement:
+# TODO: remove Rmath dependency. Implement:
 #   V. Kachitvichyanukul & B. Schmeiser
 #   "Computer generation of hypergeometric random variates"
 #   Journal of Statistical Computation and Simulation, 22(2):127-145
 #   doi:10.1080/00949658508810839
 @rand_rdist(Hypergeometric)
-rand(d::Hypergeometric) =
-    convert(Int, StatsFuns.RFunctions.hyperrand(d.ns, d.nf, d.n))
+rand(d::Hypergeometric) = convert(Int, Rmath.rhyper(d.ns, d.nf, d.n))

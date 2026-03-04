@@ -29,8 +29,8 @@ InverseGamma <- R6Class("InverseGamma",
                  } else { NaN },
                  entropy = a + log(b) + lgamma(a) - (1 + a) * digamma(a))
         },
-        pdf = function(x, log=FALSE){ dinvgamma(x, self$alpha, self$beta, log=log) },
-        cdf = function(x){ pinvgamma(x, self$alpha, self$beta) },
-        quan = function(v){ qinvgamma(v, self$alpha, self$beta) }
+        pdf = function(x, log=FALSE){ extraDistr::dinvgamma(x, self$alpha, self$beta, log=log) },
+        cdf = function(x){ extraDistr::pinvgamma(x, self$alpha, self$beta) },
+        quan = function(v){ extraDistr::qinvgamma(v, self$alpha, self$beta) }
     )
 )

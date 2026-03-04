@@ -25,6 +25,7 @@ using LinearAlgebra
         @test length(d_product) == length(ds)
         @test eltype(d_product) === eltype(ds[1])
         @test mean(d_product) == mean.(ds)
+        @test std(d_product) == std.(ds)
         @test var(d_product) == var.(ds)
         @test cov(d_product) == Diagonal(var.(ds))
         @test entropy(d_product) ≈ sum(entropy.(ds))
@@ -65,6 +66,7 @@ end
         @test length(d_product) == length(ds)
         @test eltype(d_product) === eltype(ds[1])
         @test @inferred(mean(d_product)) == mean.(ds)
+        @test @inferred(std(d_product)) == std.(ds)
         @test @inferred(var(d_product)) == var.(ds)
         @test @inferred(cov(d_product)) == Diagonal(var.(ds))
         @test @inferred(entropy(d_product)) == sum(entropy.(ds))
@@ -115,6 +117,7 @@ end
             @test length(d_product) == length(ds)
             @test eltype(d_product) === eltype(ds[1])
             @test @inferred(mean(d_product)) == mean.(ds)
+            @test @inferred(std(d_product)) == std.(ds)
             @test @inferred(var(d_product)) == var.(ds)
             @test @inferred(cov(d_product)) == Diagonal(var.(ds))
             @test @inferred(entropy(d_product)) == sum(entropy.(ds))
@@ -150,6 +153,7 @@ end
     @test length(d_product) == 3
     @test eltype(d_product) === Float64
     @test @inferred(mean(d_product)) == mean.(ds_vec)
+    @test @inferred(std(d_product)) == std.(ds_vec)
     @test @inferred(var(d_product)) == var.(ds_vec)
     @test @inferred(cov(d_product)) == Diagonal(var.(ds_vec))
     @test @inferred(entropy(d_product)) == sum(entropy.(ds_vec))

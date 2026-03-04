@@ -76,8 +76,10 @@ end
 
 @testset "issue #1582" begin
     dp = mydiffp(1.0, 1.0, 0.0)
-    @test ForwardDiff.derivative(p -> logpdf(NegativeBinomial(1.0, p), 0.0), 1.0) == dp == 1.0
+    @test dp == 1
+    @test ForwardDiff.derivative(p -> logpdf(NegativeBinomial(1.0, p; check_args=false), 0.0), 1.0) == dp
 
     dr = mydiffr(1.0, 1.0, 0.0)
-    @test ForwardDiff.derivative(r -> logpdf(NegativeBinomial(r, 1.0), 0.0), 1.0) == dr == 0.0
+    @test dr == 0
+    @test ForwardDiff.derivative(r -> logpdf(NegativeBinomial(r, 1.0), 0.0), 1.0) == dr
 end

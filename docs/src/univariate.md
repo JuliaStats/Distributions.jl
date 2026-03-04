@@ -59,7 +59,6 @@ isplatykurtic(::UnivariateDistribution)
 isleptokurtic(::UnivariateDistribution)
 ismesokurtic(::UnivariateDistribution)
 entropy(::UnivariateDistribution)
-entropy(::UnivariateDistribution, ::Bool)
 entropy(::UnivariateDistribution, ::Real)
 mgf(::UnivariateDistribution, ::Any)
 cgf(::UnivariateDistribution, ::Any)
@@ -73,6 +72,7 @@ pdfsquaredL2norm
 insupport(::UnivariateDistribution, x::Any)
 pdf(::UnivariateDistribution, ::Real)
 logpdf(::UnivariateDistribution, ::Real)
+gradlogpdf(::Distribution, ::Any)
 loglikelihood(::UnivariateDistribution, ::AbstractArray)
 cdf(::UnivariateDistribution, ::Real)
 logcdf(::UnivariateDistribution, ::Real)
@@ -324,6 +324,13 @@ Logistic
 ```
 ```@example plotdensity
 plotdensity((-4, 8), Logistic, (2, 1)) # hide
+```
+
+```@docs
+LogLogistic
+```
+```@example plotdensity
+plotdensity((0, 2), LogLogistic, (2, 1)) # hide
 ```
 
 ```@docs

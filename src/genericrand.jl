@@ -26,13 +26,13 @@ rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
 
 # default fallback (redefined for univariate distributions)
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate})
-    return @inbounds rand!(rng, s, Array{eltype(s)}(undef, size(s)))
+    return rand!(rng, s, Array{eltype(s)}(undef, size(s)))
 end
 
 # multiple samples
 function rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims)
     out = Array{eltype(s)}(undef, dims)
-    return @inbounds rand!(rng, sampler(s), out)
+    return rand!(rng, sampler(s), out)
 end
 function rand(
     rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims,
@@ -40,16 +40,16 @@ function rand(
     sz = size(s)
     ax = map(Base.OneTo, dims)
     out = [Array{eltype(s)}(undef, sz) for _ in Iterators.product(ax...)]
-    return @inbounds rand!(rng, sampler(s), out, false)
+    return rand!(rng, sampler(s), out, false)
 end
 
 # these are workarounds for sampleables that incorrectly base `eltype` on the parameters
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
-    return @inbounds rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
+    return rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
 end
 function rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims)
     out = Array{float(eltype(s))}(undef, dims)
-    return @inbounds rand!(rng, sampler(s), out)
+    return rand!(rng, sampler(s), out)
 end
 function rand(
     rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims,
@@ -57,7 +57,7 @@ function rand(
     sz = size(s)
     ax = map(Base.OneTo, dims)
     out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax...)]
-    return @inbounds rand!(rng, sampler(s), out, false)
+    return rand!(rng, sampler(s), out, false)
 end
 
 """
@@ -113,7 +113,7 @@ function _rand!(
     s::Sampleable{<:ArrayLikeVariate},
     x::AbstractArray{<:Real},
 )
-    @inbounds for xi in eachvariate(x, variate_form(typeof(s)))
+    for xi in eachvariate(x, variate_form(typeof(s)))
         rand!(rng, s, xi)
     end
     return x
@@ -125,7 +125,7 @@ Base.@propagate_inbounds function rand!(
     x::AbstractArray{<:AbstractArray{<:Real,N}},
 ) where {N}
     sz = size(s)
-    allocate = !all(isassigned(x, i) && size(@inbounds x[i]) == sz for i in eachindex(x))
+    allocate = !all(isassigned(x, i) && size(x[i]) == sz for i in eachindex(x))
     return rand!(rng, s, x, allocate)
 end
 
@@ -160,11 +160,11 @@ function _rand!(
     allocate::Bool,
 ) where {N}
     if allocate
-        @inbounds for i in eachindex(x)
+        for i in eachindex(x)
             x[i] = rand(rng, s)
         end
     else
-        @inbounds for xi in x
+        for xi in x
             rand!(rng, s, xi)
         end
     end

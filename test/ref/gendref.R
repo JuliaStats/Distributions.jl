@@ -11,6 +11,7 @@
 #
 #       - continuous_test.json
 #       - discrete_test.json
+#       - matrixvariates/jsonfiles/{InverseWishart,LKJ,Wishart}_stan_output.json
 #
 #   To run this script:
 #
@@ -18,9 +19,9 @@
 #
 #   Note: this scripts depends on a number of R libraries for
 #         file I/O and the computation of statistical functions.
+#         Install them with `renv` before running this script.
 #
 
-library(stringr)
 source("rdistributions.R")
 
 options(
@@ -47,21 +48,21 @@ parse.entry <- function(entry) {
     # Parse an entry into a distribution name, and
     # a vector of argument values
 
-    lb <- str_locate(entry, "\\(")[1]
-    rb <- str_locate(entry, "\\)")[1]
+    lb <- stringr::str_locate(entry, "\\(")[1]
+    rb <- stringr::str_locate(entry, "\\)")[1]
     stopifnot(!is.na(lb), lb > 1)
     stopifnot(!is.na(rb), rb > lb)
 
-    name <- str_sub(entry, 1, lb-1)
+    name <- stringr::str_sub(entry, 1, lb-1)
     if (rb == lb + 1) {
         args <- NULL
     } else {
-        argstr <- entry %>% str_sub(lb+1, rb-1) %>% str_trim
-        sl <- str_length(argstr)
+        argstr <- stringr::str_trim(stringr::str_sub(entry, lb+1, rb-1))
+        sl <- stringr::str_length(argstr)
         if (sl == 0) {
             args <- NULL
         } else {
-            terms <- str_split(argstr, "\\s*,\\s*")[[1]]
+            terms <- stringr::str_split(argstr, "\\s*,\\s*")[[1]]
             args <- as.numeric(terms)
         }
     }
@@ -287,8 +288,8 @@ do.main <- function(lstname) {
         cat("\n")
         n <- n + 1
         info <- list(
-            dtype=class(distr)[1],
-            expr=e,
+            dtype=ifelse("dtype" %in% names(distr), distr$dtype, class(distr)[1]),
+            expr=ifelse("expr" %in% names(distr), distr$expr(), e),
             supp=distr$supp(),
             props=distr$properties(),
             points=eval.points(distr),
@@ -311,3 +312,8 @@ do.main <- function(lstname) {
 
 do.main("discrete_test")
 do.main("continuous_test")
+
+# Matrixvariate distributions
+cat("Matrixvariate distributions\n")
+cat("-------------------------------\n")
+source("matrixvariates/get_stan_output.R", chdir=TRUE)

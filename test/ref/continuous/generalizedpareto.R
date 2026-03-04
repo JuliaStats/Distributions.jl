@@ -46,8 +46,8 @@ GeneralizedPareto <- R6Class("GeneralizedPareto",
                  } else { Inf }
             )
         },
-        pdf = function(x, log=FALSE) { dgpd(x, self$mu, self$sigma, self$xi, log=log) },
-        cdf = function(x) { pgpd(x, self$mu, self$sigma, self$xi) },
-        quan = function(v) { qgpd(v, self$mu, self$sigma, self$xi) }
+        pdf = function(x, log=FALSE) { extraDistr::dgpd(x, self$mu, self$sigma, self$xi, log=log) },
+        cdf = function(x) { extraDistr::pgpd(x, self$mu, self$sigma, self$xi) },
+        quan = function(v) { extraDistr::qgpd(v, self$mu, self$sigma, self$xi) }
     )
 )

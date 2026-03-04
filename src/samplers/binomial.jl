@@ -11,9 +11,9 @@ function binompvec(n::Int, p::Float64)
     else
         q = 1.0 - p
         a = p / q
-        @inbounds pv[1] = pk = q ^ n
+        pv[1] = pk = q ^ n
         for k = 1:n
-            @inbounds pv[k+1] = (pk *= ((n - k + 1) / k) * a)
+            pv[k+1] = (pk *= ((n - k + 1) / k) * a)
         end
     end
     return pv
