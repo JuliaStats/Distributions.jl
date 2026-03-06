@@ -419,7 +419,14 @@ for which `logccdf(d, x) ≤ lp`.
 invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
 # gradlogpdf
+"""
+    gradlogpdf(d::ContinuousUnivariateDistribution, x::Real)
 
+The derivative of the logarithm of the probability density (mass) with respect to `x`,
+evaluated at `x`.
+
+See also: [`logpdf`](@ref), [`pdf`](@ref).
+"""
 gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(gradlogpdf, (d, x)))
 
 
