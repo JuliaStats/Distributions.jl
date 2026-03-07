@@ -422,8 +422,8 @@ invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 """
     gradlogpdf(d::ContinuousUnivariateDistribution, x::Real)
 
-The derivative of the logarithm of the probability density (mass) with respect to `x`,
-evaluated at `x`.
+The derivative of the logarithm of the probability density (mass) function `z -> logpdf(d, z)`
+with respect to `z`, evaluated at `z = x`.
 
 See also: [`logpdf`](@ref), [`pdf`](@ref).
 """
