@@ -427,7 +427,7 @@ with respect to `z`, evaluated at `z = x`.
 
 See also: [`logpdf`](@ref), [`pdf`](@ref).
 """
-gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(gradlogpdf, (d, x)))
+gradlogpdf(d::ContinuousUnivariateDistribution, x::Real)
 
 
 function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
