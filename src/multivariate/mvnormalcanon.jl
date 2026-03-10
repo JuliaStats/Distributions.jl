@@ -110,12 +110,6 @@ precision matrix `J`.
 """
 MvNormalCanon(J::AbstractMatrix{<:Real}) = MvNormalCanon(Zeros{eltype(J)}(size(J, 1)), J)
 
-# Deprecated constructors
-Base.@deprecate MvNormalCanon(h::AbstractVector{<:Real}, prec::AbstractVector{<:Real}) MvNormalCanon(h, LinearAlgebra.Diagonal(prec))
-Base.@deprecate MvNormalCanon(h::AbstractVector{<:Real}, prec::Real) MvNormalCanon(h, prec * I)
-Base.@deprecate MvNormalCanon(prec::AbstractVector) MvNormalCanon(LinearAlgebra.Diagonal(prec))
-Base.@deprecate MvNormalCanon(d::Int, prec::Real) MvNormalCanon(LinearAlgebra.Diagonal(FillArrays.Fill(prec, d)))
-
 ### Show
 
 distrname(d::IsoNormalCanon) = "IsoNormalCanon"
