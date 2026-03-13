@@ -26,6 +26,7 @@ for fname in ["aliastable.jl",
               "discretenonparametric.jl",
               "categorical.jl",
               "productnamedtuple.jl",
+              "hypergeometric.jl"
              ]
 
     include(joinpath("samplers", fname))
