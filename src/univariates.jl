@@ -737,6 +737,7 @@ const continuous_distributions = [
     "loguniform", # depends on Uniform
     "vonmises",
     "weibull",
+    "wrappedcauchy",
     "skewedexponentialpower"
 ]
 
