@@ -733,6 +733,7 @@ const continuous_distributions = [
     "tdist",
     "triangular",
     "triweight",
+    "tweedie",
     "uniform",
     "loguniform", # depends on Uniform
     "vonmises",
