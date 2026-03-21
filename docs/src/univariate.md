@@ -72,7 +72,7 @@ pdfsquaredL2norm
 insupport(::UnivariateDistribution, x::Any)
 pdf(::UnivariateDistribution, ::Real)
 logpdf(::UnivariateDistribution, ::Real)
-gradlogpdf(::Distribution, ::Any)
+gradlogpdf(::ContinuousUnivariateDistribution, ::Real)
 loglikelihood(::UnivariateDistribution, ::AbstractArray)
 cdf(::UnivariateDistribution, ::Real)
 logcdf(::UnivariateDistribution, ::Real)
