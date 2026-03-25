@@ -70,7 +70,7 @@ We use `Distribution`, a subtype of `Sampleable` as defined below, to capture pr
 abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
 ```
 
-```@doc
+```@docs
 Distributions.Distribution
 ```
 
