@@ -20,16 +20,59 @@ end
     @test isnan(pdf(d, 15))
 end
 
+
+@testset "Tweedie elementary statistics" begin
+    d = Tweedie(2.0, 1.5, 1.0)
+    @test mean(d) == 2.0
+    @test var(d) == 4.5
+    @test std(d) ≈ sqrt(4.5)
+    @test skewness(d) ≈ 1.0606601717798212
+    @test kurtosis(d) == 1.125
+end
+
 @testset "Tweedie custom type" begin
     d1 = Tweedie(2.0, 1.5, 1.0)
-    d2 = Tweedie(2.0f0, 1.5f0, 1.0f0)
-    @test pdf(d2, 1)::Float32 ≈ pdf(d1, 1)
-    @test cdf(d2, 1)::Float32 ≈ cdf(d1, 1)
-    @test quantile(d2, 0.1)::Float32 ≈ quantile(d1, 0.1)
-    @test mean(d2)::Float32 ≈ mean(d1)
-    @test median(d2)::Float32 ≈ median(d1)
-    @test skewness(d2)::Float32 ≈ skewness(d1)
-    @test kurtosis(d2)::Float32 ≈ kurtosis(d1)
+    d2 = Tweedie(2.0f0, 1.5f0, 1.0f0)::Tweedie{Float32}
+    @test @inferred(pdf(d2, 1))::Float32 ≈ pdf(d1, 1)
+    @test @inferred(cdf(d2, 1))::Float32 ≈ cdf(d1, 1)
+    @test @inferred(quantile(d2, 0.1))::Float32 ≈ quantile(d1, 0.1)
+    @test @inferred(mean(d2))::Float32 ≈ mean(d1)
+    @test @inferred(median(d2))::Float32 ≈ median(d1)
+    @test @inferred(skewness(d2))::Float32 ≈ skewness(d1)
+    @test @inferred(kurtosis(d2))::Float32 ≈ kurtosis(d1)
+    # return type depends on distribution and argument type via promotion
+    @test @inferred(pdf(d2, 1.0))::Float64 ≈ pdf(d1, 1.0)
+    @test @inferred(cdf(d2, 1.0))::Float64 ≈ cdf(d1, 1.0)
+
+
+    d1 = Tweedie(2.0, 2.0, 2.0)
+    d2 = Tweedie{Int}(2, 2, 2)::Tweedie{Int}
+    @test @inferred(pdf(d2, 1))::Float64 ≈ pdf(d1, 1)
+    @test @inferred(cdf(d2, 1))::Float64 ≈ cdf(d1, 1)
+    @test @inferred(quantile(d2, 0.1))::Float64 ≈ quantile(d1, 0.1)
+    @test @inferred(mean(d2))::Float64 ≈ mean(d1)
+    @test @inferred(median(d2))::Float64 ≈ median(d1)
+    @test @inferred(skewness(d2))::Float64 ≈ skewness(d1)
+    @test @inferred(kurtosis(d2))::Float64 ≈ kurtosis(d1)
+    # return type depends on distribution and argument type via promotion
+    @test @inferred(pdf(d2, big(1)))::BigFloat ≈ pdf(d1, 1.0)
+    @test @inferred(cdf(d2, big(1)))::BigFloat ≈ cdf(d1, 1.0)
+
+    for d2 in (
+        Tweedie(2.0, 1.5f0, 1.0f0),
+        Tweedie(2.0f0, 1.5, 1.0f0),
+        Tweedie(2.0f0, 1.5f0, 1.0),
+        Tweedie(2.0, 1.5, 1.0f0),
+        Tweedie(2.0f0, 1.5, 1.0),
+
+        Tweedie(2, 2.0, 1.0),
+        Tweedie(2.0, 2, 1.0),
+        Tweedie(2.0, 2.0, 1),
+        Tweedie(2, 2, 1.0),
+        Tweedie(2.0, 2, 1),
+        )
+        @test d2 isa Tweedie{Float64}
+    end
 end
 
 @testset "Tweedie (c)quantile and invlog(c)cdf" begin

@@ -14,18 +14,6 @@ Tweedie <- R6Class("Tweedie",
             self$p <- p
         },
         supp = function() { c(0, Inf) },
-        properties = function() {
-            mu <- self$mu
-            sigma <- self$sigma
-            p <- self$p
-            list(location=mu,
-                 scale=sigma,
-                 shape=p,
-                 mean=mu,
-                 var=mu^p * sigma^2,
-                 skewness=p * sigma / sqrt(mu ^ (2 - p)),
-                 kurtosis=p * (2 * p - 1) * sigma^2 / mu ^ (2 - p))
-        },
         pdf = function(x, log=FALSE) {
             val <- tweedie::dtweedie(x, mu=self$mu, phi=self$sigma^2, power=self$p)
             if (log) {

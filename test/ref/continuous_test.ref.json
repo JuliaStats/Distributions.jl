@@ -5463,13 +5463,6 @@
   "minimum": 0,
   "maximum": "inf",
   "properties": {
-    "location": 2,
-    "scale": 1.5,
-    "shape": 1,
-    "mean": 2,
-    "var": 4.5,
-    "skewness": 1.06066017177982,
-    "kurtosis": 1.125
   },
   "points": [
     { "x": 0, "pdf": 0.411112290507187, "logpdf": -0.888888888888889, "cdf": 0.411112290507187 },
@@ -5496,13 +5489,6 @@
   "minimum": 0,
   "maximum": "inf",
   "properties": {
-    "location": 2,
-    "scale": 1.5,
-    "shape": 1.01,
-    "mean": 2,
-    "var": 4.53129997525524,
-    "skewness": 1.07498594232179,
-    "kurtosis": 1.16703630862699
   },
   "points": [
     { "x": 0, "pdf": 0.409972358341713, "logpdf": -0.891665540235274, "cdf": 0.409972358341713 },
@@ -5529,13 +5515,6 @@
   "minimum": 0,
   "maximum": "inf",
   "properties": {
-    "location": 2,
-    "scale": 1.5,
-    "shape": 1.5,
-    "mean": 2,
-    "var": 6.36396103067893,
-    "skewness": 1.89201693432086,
-    "kurtosis": 4.7729707730092
   },
   "points": [
     { "x": 0, "pdf": 0.284483870247908, "logpdf": -1.25707872210942, "cdf": 0.284483870247908 },
@@ -5562,13 +5541,6 @@
   "minimum": 0,
   "maximum": "inf",
   "properties": {
-    "location": 2,
-    "scale": 1.5,
-    "shape": 1.99,
-    "mean": 2,
-    "var": 8.93783245893332,
-    "skewness": 2.97467268454119,
-    "kurtosis": 13.2507835119916
   },
   "points": [
     { "x": 0.0180116841854315, "pdf": 2.36802160266867, "logpdf": 0.862054839728742, "cdf": 0.100000000000001 },
@@ -5595,13 +5567,6 @@
   "minimum": 0,
   "maximum": "inf",
   "properties": {
-    "location": 2,
-    "scale": 1.5,
-    "shape": 2,
-    "mean": 2,
-    "var": 9,
-    "skewness": 3,
-    "kurtosis": 13.5
   },
   "points": [
     { "x": 0.0193166098973791, "pdf": 2.29401151609469, "logpdf": 0.830302038788168, "cdf": 0.1 },

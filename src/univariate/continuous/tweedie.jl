@@ -51,9 +51,12 @@ struct Tweedie{T <: Real} <: ContinuousUnivariateDistribution
 end
 
 function Tweedie(μ::T, σ::T, p::T; check_args::Bool=true) where {T <: Real}
-    @check_args Tweedie (μ, μ >= zero(μ))
-    @check_args Tweedie (σ, σ >= zero(σ))
-    @check_args Tweedie (p, 1 <= p <= 2)
+    @check_args(
+        Tweedie,
+        (μ, μ >= 0),
+        (σ, σ >= 0),
+        (p, 1 <= p <= 2)
+    )
     return Tweedie{T}(μ, σ, p)
 end
 
@@ -73,18 +76,19 @@ Base.convert(::Type{Tweedie{T}}, d::Tweedie{T}) where {T<:Real} = d
 #### Parameters
 
 params(d::Tweedie) = (d.μ, d.σ, d.p)
-partype(d::Tweedie{T}) where {T} = T
+partype(::Tweedie{T}) where {T} = T
 
 location(d::Tweedie) = d.μ
 scale(d::Tweedie) = d.σ
 shape(d::Tweedie) = d.p
 
-Base.eltype(::Type{Tweedie{T}}) where {T} = T
+Base.eltype(::Type{Tweedie{T}}) where {T} = float(T)
 
 #### Statistics
 
-mean(d::Tweedie) = d.μ
+mean(d::Tweedie) = float(d.μ)
 var(d::Tweedie) = d.σ^2 * d.μ^d.p
+std(d::Tweedie) = d.σ * d.μ^(d.p/2)
 
 # Clark, David R. and Charles A. Thayer. 2004.
 # “A Primer on the Exponential Family of Distributions.” CAS Discussion Paper Program, 117-148
@@ -92,8 +96,8 @@ var(d::Tweedie) = d.σ^2 * d.μ^d.p
 skewness(d::Tweedie) = d.p * d.σ / sqrt(d.μ ^ (2 - d.p))
 kurtosis(d::Tweedie) = d.p * (2 * d.p - 1) * d.σ^2 / d.μ ^ (2 - d.p)
 
-function logpdf(d::Tweedie{T}, x::Real) where {T <: Real}
-    isnan(x) && return eltype(d)(NaN)
+function logpdf(d::Tweedie{T}, x::Real)::promote_type(eltype(d), typeof(x)) where {T <: Real}
+    isnan(x) && return NaN
     x >= 0 || return -Inf
     # See: Dunn, Smyth (2005). "Series evaluation of Tweedie exponential dispersion model densities"
     # Statistics and Computing 15: 267–280.
@@ -128,14 +132,14 @@ function logpdf(d::Tweedie{T}, x::Real) where {T <: Real}
             wb == Inf && return NaN
             res += wb - log(x)
         end
-        return T(res)
+        return res
     end
 end
 
-function cdf(d::Tweedie, x::Real)
-    isnan(x) && return eltype(d)(NaN)
-    x == Inf && return one(eltype(d))
-    x >= 0 || return zero(eltype(d))
+function cdf(d::Tweedie, x::Real)::promote_type(eltype(d), typeof(x))
+    isnan(x) && return NaN
+    x == Inf && return 1
+    x >= 0 || return 0
     μ = d.μ
     p = d.p
     ϕ = d.σ^2
@@ -168,7 +172,7 @@ end
 
 # Implementation inspired by `qtweedie` in R package tweedie
 # licensed under MIT with authorization from Peter Dunn
-function quantile(d::Tweedie{T}, q::Real) where {T <: Real}
+function quantile(d::Tweedie{T}, q::Real)::eltype(d) where {T <: Real}
     μ, ϕ, p = d.μ, d.σ^2, d.p
 
     if q == 0
