@@ -28,7 +28,6 @@ using SpecialFunctions
 using Base.MathConstants: eulergamma
 
 import AliasTables
-import Rmath
 
 export
     # re-export Statistics
