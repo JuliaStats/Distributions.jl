@@ -27,8 +27,7 @@ The function `fit_mle` is for maximum likelihood estimation.
 ### Synopsis
 
 ```@docs
-fit(D, x)
-fit(D, x, w)
+fit(::Type{<:Distribution}, x)
 fit_mle(D, x)
 fit_mle(D, x, w)
 ```
