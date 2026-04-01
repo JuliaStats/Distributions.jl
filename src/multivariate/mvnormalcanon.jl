@@ -118,13 +118,13 @@ Base.@deprecate MvNormalCanon(d::Int, prec::Real) MvNormalCanon(LinearAlgebra.Di
 
 ### Show
 
-distrname(d::IsoNormalCanon) = "IsoNormalCanon"
-distrname(d::DiagNormalCanon) = "DiagNormalCanon"
-distrname(d::FullNormalCanon) = "FullNormalCanon"
+print_distrname(io::IO, ::IsoNormalCanon) = print(io, "IsoNormalCanon")
+print_distrname(io::IO, ::DiagNormalCanon) = print(io, "DiagNormalCanon")
+print_distrname(io::IO, ::FullNormalCanon) = print(io, "FullNormalCanon")
 
-distrname(d::ZeroMeanIsoNormalCanon) = "ZeroMeanIsoNormalCanon"
-distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
-distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
+print_distrname(io::IO, ::ZeroMeanIsoNormalCanon) = print(io, "ZeroMeanIsoNormalCanon")
+print_distrname(io::IO, ::ZeroMeanDiagNormalCanon) = print(io, "ZeroMeanDiagormalCanon")
+print_distrname(io::IO, ::ZeroMeanFullNormalCanon) = print(io, "ZeroMeanFullNormalCanon")
 
 ### Conversion
 function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where {T<:Real}
