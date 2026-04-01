@@ -177,6 +177,7 @@ export
     WalleniusNoncentralHypergeometric,
     Weibull,
     Wishart,
+    WrappedCauchy,
     ZeroMeanIsoNormal,
     ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal,
