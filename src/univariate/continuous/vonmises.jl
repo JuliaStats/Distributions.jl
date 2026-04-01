@@ -56,8 +56,6 @@ mean(d::VonMises) = d.μ
 median(d::VonMises) = d.μ
 mode(d::VonMises) = d.μ
 var(d::VonMises) = 1 - besselix(1, d.κ) / d.I0κx
-# deprecated 12 September 2016
-@deprecate circvar(d) var(d)
 entropy(d::VonMises) = log(twoπ * d.I0κx) + d.κ * (1 - besselix(1, d.κ) / d.I0κx)
 
 cf(d::VonMises, t::Real) = (besselix(abs(t), d.κ) / d.I0κx) * cis(t * d.μ)
