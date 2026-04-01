@@ -30,7 +30,7 @@ MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
 function Base.show(io::IO, d::MvLogitNormal; indent::String="  ")
-    print(io, distrname(d))
+    print_distrname(io, d)
     println(io, "(")
     normstr = strip(sprint(show, d.normal; context=IOContext(io)))
     normstr = replace(normstr, "\n" => "\n$indent")
