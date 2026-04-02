@@ -63,11 +63,11 @@ partype(d::Rician{T}) where {T<:Real} = T
 
 #### Statistics
 
-# helper
-_Lhalf(x) = exp(x/2) * ((1-x) * besseli(zero(x), -x/2) - x * besseli(oneunit(x), -x/2))
+# Laguerre function L_{1/2}
+_Lhalf(x::Real) = HypergeometricFunctions._₁F₁(-one(x)/2, one(x), x)
 
-mean(d::Rician) = d.σ * sqrthalfπ * _Lhalf(-d.ν^2/(2 * d.σ^2))
-var(d::Rician) = 2 * d.σ^2 + d.ν^2 - halfπ * d.σ^2 * _Lhalf(-d.ν^2/(2 * d.σ^2))^2
+mean(d::Rician) = d.σ * sqrthalfπ * _Lhalf(-(d.ν / d.σ)^2/2)
+var(d::Rician) = 2 * d.σ^2 + d.ν^2 - halfπ * d.σ^2 * _Lhalf(-(d.ν/d.σ)^2/2)^2
 
 function mode(d::Rician)
     m = mean(d)
@@ -91,7 +91,21 @@ function _minimize_gss(f, a, b; tol=1e-12)
     (b + a) / 2
 end
 
-#### PDF/CDF/quantile delegated to NoncentralChisq
+#### PDF
+
+function pdf(d::Rician, x::Real)
+    ν, σ = params(d)
+    result = x / σ^2 * exp(-((x-ν)/σ)^2/2) * besselix(0, (x * ν)/ σ^2)
+    return x < 0 || isinf(x) ? zero(result) : result
+end
+
+function logpdf(d::Rician, x::Real)
+    ν, σ = params(d)
+    result = log(abs(x) / σ^2 * besselix(0, (x * ν)/ σ^2)) - ((x-ν)/σ)^2/2
+    return x < 0 || isinf(x) ? oftype(result, -Inf) : result
+end
+
+#### quantile/CDF delegated to NoncentralChisq
 
 function quantile(d::Rician, x::Real)
     ν, σ = params(d)
@@ -103,16 +117,14 @@ function cquantile(d::Rician, x::Real)
     return sqrt(cquantile(NoncentralChisq(2, (ν / σ)^2), x)) * σ
 end
 
-function pdf(d::Rician, x::Real)
+function invlogcdf(d::Rician, lx::Real)
     ν, σ = params(d)
-    result = 2 * x / σ^2 * pdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
-    return x < 0 || isinf(x) ? zero(result) : result
+    return sqrt(invlogcdf(NoncentralChisq(2, (ν / σ)^2), lx)) * σ
 end
 
-function logpdf(d::Rician, x::Real)
+function invlogccdf(d::Rician, lx::Real)
     ν, σ = params(d)
-    result = log(2 * abs(x) / σ^2) + logpdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
-    return x < 0 || isinf(x) ? oftype(result, -Inf) : result
+    return sqrt(invlogccdf(NoncentralChisq(2, (ν / σ)^2), lx)) * σ
 end
 
 function cdf(d::Rician, x::Real)
@@ -125,6 +137,18 @@ function logcdf(d::Rician, x::Real)
     ν, σ = params(d)
     result = logcdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
     return x < 0 ? oftype(result, -Inf) : result
+end
+
+function ccdf(d::Rician, x::Real)
+    ν, σ = params(d)
+    result = ccdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
+    return x < 0 ? one(result) : result
+end
+
+function logccdf(d::Rician, x::Real)
+    ν, σ = params(d)
+    result = logccdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
+    return x < 0 ? zero(result) : result
 end
 
 #### Sampling
