@@ -209,7 +209,11 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
             w = Float64(s.n-y+1)
 
             if A > (s.xM*log(f1/x1) + ((s.n-s.Mi)+0.5)*log(z/w) + (y-s.Mi)*log(w*s.r/(x1*s.q)) +
-                    lstirling_asym(f1) + lstirling_asym(z) + lstirling_asym(x1) + lstirling_asym(w))
+                    # In the 1988 paper, all four Stirlings are added. According to one of the
+                    # authors of the GSL implementation, this was confirmed via personal
+                    # correspondence with Dr. Kachitvichyanukul (one of the paper authors)
+                    # to be a mistake; the third and fourth should be subtracted.
+                    lstirling_asym(f1) + lstirling_asym(z) - lstirling_asym(x1) - lstirling_asym(w))
                 # Goto 1
                 continue
             end
