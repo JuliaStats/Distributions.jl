@@ -10,6 +10,8 @@ using LinearAlgebra
 import JSON
 import ForwardDiff
 
+
+
 const tests = [
     "aqua",
     "univariate/continuous/loguniform",
@@ -98,6 +100,7 @@ const tests = [
     "density_interface",
     "reshaped",
     "univariate/continuous/skewedexponentialpower",
+    "univariate/continuous/asymmetricexponentialpower",
     "univariate/discrete/discreteuniform",
     "univariate/continuous/tdist",
     "univariate/orderstatistic",
@@ -157,7 +160,7 @@ const tests = [
     # "univariate/discrete/geometric",
     # "univariate/discrete/hypergeometric",
     # "univariate/discrete/noncentralhypergeometric",
-    # "univariate/discrete/poisson",
+    # "univariate/discrete/poisson",a
     # "univariate/discrete/skellam",
 
     ### file is present but was not included in list
