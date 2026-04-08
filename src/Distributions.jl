@@ -176,6 +176,7 @@ export
     WalleniusNoncentralHypergeometric,
     Weibull,
     Wishart,
+    Wrapped,
     ZeroMeanIsoNormal,
     ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal,
@@ -270,6 +271,7 @@ export
     truncated,          # truncate a distribution with a lower and upper bound
     var,                # variance of distribution
     varlogx,            # variance of log(x)
+    wrapped,            # wrap a distribution around a bounded interval
     expected_logdet,    # expected logarithm of random matrix determinant
     gradlogpdf,         # gradient (or derivative) of logpdf(d,x) wrt x
 
@@ -307,6 +309,7 @@ include("product.jl")
 include("reshaped.jl")
 include("truncate.jl")
 include("censored.jl")
+include("wrapped.jl")
 include("conversion.jl")
 include("convolution.jl")
 include("qq.jl")
@@ -364,7 +367,7 @@ Supported distributions:
     QQPair, Rayleigh, Rician, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
-    Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
+    Wishart, Wrapped, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,
     ZeroMeanFullNormalCanon
 
