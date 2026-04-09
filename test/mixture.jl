@@ -233,6 +233,23 @@ end
             @test extrema(g_u) == (-Inf, Inf)
         end
 
+        # edge case with numerical issues, see #1869
+        g_u = MixtureModel(
+            [Exponential(2.1656391815606704e-5), Exponential(79.77140291062331)],
+            [8.83763312432469e-25, 1.0]
+        )
+        q = 0.1066425045830068
+        @test isapprox(
+            cdf(g_u, @inferred(quantile(g_u, q))), q;
+            atol = cbrt(eps(Float64))^2
+        )
+        q = 0.001
+        g_u = MixtureModel([Normal(0, 1), Normal(eps(), 1)], [0.5, 0.5])
+        @test isapprox(
+            cdf(g_u, @inferred(quantile(g_u, q))), q;
+            atol = cbrt(eps(Float64))^2
+        )
+
         # https://github.com/JuliaStats/Distributions.jl/issues/1121
         @test @inferred(logpdf(UnivariateGMM(μ, σ, Categorical(p)), 42)) isa Float64
 

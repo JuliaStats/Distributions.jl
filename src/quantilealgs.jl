@@ -1,8 +1,17 @@
 # Various algorithms for computing quantile
 
+"""
+quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx::T) where {T<:Real}
+
+Compute the quantile of `d` at probability `p` using the bisection method, starting from
+the bracketing interval `[lx, rx]`.
+
+In theory, the interval `[lx, rx]` should satisfy `cdf(d, lx) <= p <= cdf(d, rx)`.
+However, due to numerical issues, this condition may not hold. In such cases, the algorithm
+attempts to recover a valid bracketing interval by expanding the initial interval.
+"""
 function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx::T) where {T<:Real}
     rx < lx && throw(ArgumentError("empty bracketing interval [$lx, $rx]"))
-
     # In some special cases, e.g. #1501, rx == lx`
     # If the distribution is degenerate the check below can fail, hence we skip it
     if rx == lx
@@ -15,23 +24,58 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx
     # ≈ 3.7e-11 for Float64
     # ≈ 2.4e-5 for Float32
     tol = cbrt(eps(float(T)))^2
+
+    # find a valid bracketing interval, if necessary
+    lx, rx = find_interval_quantile_bisect(d, p, lx, rx)
+
     # find quantile using bisect algorithm
-    cl = cdf(d, lx)
-    cr = cdf(d, rx)
-    cl <= p <= cr ||
-        throw(ArgumentError("[$lx, $rx] is not a valid bracketing interval for `quantile(d, $p)`"))
     while rx - lx > tol
         m = (lx + rx)/2
         c = cdf(d, m)
         if p > c
-            cl = c
             lx = m
         else
-            cr = c
             rx = m
         end
     end
     return (lx + rx)/2
+end
+
+@inline function find_interval_quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, x_left::T, x_right::T) where {T<:Real}
+    c_left = cdf(d, x_left)
+    c_right = cdf(d, x_right)
+    @show c_left c_right
+    c_left <= p <= c_right && return x_left, x_right
+    # expand the interval by eps() * 2^i at each iteration until it contains the quantile.
+    max_expand = 64 # max `i` in `eps() * 2^i`. Completely arbitrary to avoid infinite loop.
+    if p > c_right
+        step = max(abs(x_right), one(x_right)) * eps(float(T))
+        for i in 1:max_expand
+            x_right += step
+            c_right = cdf(d, x_right)
+            if p <= c_right
+                break
+            end
+            step *= 2
+        end
+    end
+    if p < c_left
+        step = max(abs(x_left), one(x_left)) * eps(float(T))
+        for i in 1:max_expand
+            x_left -= step
+            c_left = cdf(d, x_left)
+            if p >= c_left
+                break
+            end
+            step *= 2
+        end
+    end
+
+    # infinite loop in bisect if isinf(x_right). Still fine is isinf(x_left) though
+    if (!isinf(x_right)) && (c_left <= p <= c_right)
+        return x_left, x_right
+    end
+    throw(ArgumentError("[$x_left, $x_right] is not a valid bracketing interval for `quantile(d, $p)`"))
 end
 
 function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::Real, rx::Real)
