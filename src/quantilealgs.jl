@@ -44,13 +44,14 @@ end
 @inline function find_interval_quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, x_left::T, x_right::T) where {T<:Real}
     c_left = cdf(d, x_left)
     c_right = cdf(d, x_right)
-    @show c_left c_right
     c_left <= p <= c_right && return x_left, x_right
+
     # expand the interval by eps() * 2^i at each iteration until it contains the quantile.
     max_expand = 64 # max `i` in `eps() * 2^i`. Completely arbitrary to avoid infinite loop.
     if p > c_right
         step = max(abs(x_right), one(x_right)) * eps(float(T))
         for i in 1:max_expand
+            x_left = x_right # we can since we know c_right < p
             x_right += step
             c_right = cdf(d, x_right)
             if p <= c_right
@@ -59,9 +60,12 @@ end
             step *= 2
         end
     end
+
+    c_left = cdf(d, x_left)
     if p < c_left
         step = max(abs(x_left), one(x_left)) * eps(float(T))
         for i in 1:max_expand
+            x_right = x_left # we can since we know c_left > p
             x_left -= step
             c_left = cdf(d, x_left)
             if p >= c_left
