@@ -112,10 +112,30 @@ cdf(d::NegativeBinomial, x::Real) = nbinomcdf(d.r, d.p, x)
 ccdf(d::NegativeBinomial, x::Real) = nbinomccdf(d.r, d.p, x)
 logcdf(d::NegativeBinomial, x::Real) = nbinomlogcdf(d.r, d.p, x)
 logccdf(d::NegativeBinomial, x::Real) = nbinomlogccdf(d.r, d.p, x)
-quantile(d::NegativeBinomial, q::Real) = convert(Int, nbinominvcdf(d.r, d.p, q))
-cquantile(d::NegativeBinomial, q::Real) = convert(Int, nbinominvccdf(d.r, d.p, q))
-invlogcdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogcdf(d.r, d.p, lq))
-invlogccdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogccdf(d.r, d.p, lq))
+function quantile(d::NegativeBinomial, q::Real)::Int
+    _check_quantile_arg(q)
+    return nbinominvcdf(d.r, d.p, q)
+end
+function cquantile(d::NegativeBinomial, q::Real)::Int
+    _check_cquantile_arg(q)
+    return nbinominvccdf(d.r, d.p, q)
+end
+function invlogcdf(d::NegativeBinomial, lq::Real)::Int
+    _check_invlogcdf_arg(lq)
+    if isinf(lq)
+        return nbinominvcdf(d.r, d.p, zero(lq))
+    else
+        return nbinominvlogcdf(d.r, d.p, lq)
+    end
+end
+function invlogccdf(d::NegativeBinomial, lq::Real)::Int
+    _check_invlogccdf_arg(lq)
+    if isinf(lq)
+        return nbinominvccdf(d.r, d.p, zero(lq))
+    else
+        return nbinominvlogccdf(d.r, d.p, lq)
+    end
+end
 
 ## sampling
 function rand(rng::AbstractRNG, d::NegativeBinomial)
