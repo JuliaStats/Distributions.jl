@@ -233,13 +233,13 @@ end
 
 ### Show
 
-distrname(d::IsoNormal)  = "IsoNormal"    # Note: IsoNormal, etc are just alias names.
-distrname(d::DiagNormal) = "DiagNormal"
-distrname(d::FullNormal) = "FullNormal"
+print_distrname(io::IO, ::IsoNormal) = print(io, "IsoNormal") # Note: IsoNormal, etc are just alias names.
+print_distrname(io::IO, ::DiagNormal) = print(io, "DiagNormal")
+print_distrname(io::IO, ::FullNormal) = print(io, "FullNormal")
 
-distrname(d::ZeroMeanIsoNormal) = "ZeroMeanIsoNormal"
-distrname(d::ZeroMeanDiagNormal) = "ZeroMeanDiagNormal"
-distrname(d::ZeroMeanFullNormal) = "ZeroMeanFullNormal"
+print_distrname(io::IO, ::ZeroMeanIsoNormal) = print(io, "ZeroMeanIsoNormal")
+print_distrname(io::IO, ::ZeroMeanDiagNormal) = print(io, "ZeroMeanDiagNormal")
+print_distrname(io::IO, ::ZeroMeanFullNormal) = print(io, "ZeroMeanFullNormal")
 
 Base.show(io::IO, d::MvNormal) =
     show_multline(io, d, [(:dim, length(d)), (:μ, mean(d)), (:Σ, cov(d))])
