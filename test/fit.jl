@@ -336,6 +336,25 @@ end
     end
 end
 
+@testset "Testing fit for LogLogistic" begin
+    fit_samples = 20_000
+
+    for func in funcs, dist in (LogLogistic, LogLogistic{Float64})
+        d = fit(dist, func[2](dist(2.0, 3.5), fit_samples))
+        @test isa(d, dist)
+        @test isapprox(d.α, 2.0, atol=0.1)
+        @test isapprox(d.β, 3.5, atol=0.1)
+
+        d = fit_mle(dist, func[2](dist(2.0, 3.5), fit_samples))
+        @test isa(d, dist)
+        @test isapprox(d.α, 2.0, atol=0.1)
+        @test isapprox(d.β, 3.5, atol=0.1)
+    end
+
+    @test_throws ArgumentError fit_mle(LogLogistic, [0.0, 1.0, 2.0])
+    @test_throws ArgumentError fit_mle(LogLogistic, [-1.0, 1.0, 2.0])
+end
+
 @testset "Testing fit for Geometric" begin
     for func in funcs, dist in (Geometric, Geometric{Float64})
         x = func[2](dist(0.3), n0)
