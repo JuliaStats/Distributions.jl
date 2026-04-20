@@ -6,6 +6,7 @@
 
 using Distributions
 using OffsetArrays
+using ForwardDiff
 using Test, Random, LinearAlgebra
 
 
@@ -463,5 +464,66 @@ end
         @test isapprox(d.α, 8.1, atol = 0.1)
         @test isapprox(d.θ, 4.3, atol = 0.1)
 
+    end
+end
+
+@testset "Testing fit for Chi" begin
+    ν = 3.1
+    for func in funcs, D in (Chi, Chi{Float64}, Chi{Float32})
+        v = func[1](n0)
+        z = func[2](D(ν), n0)
+        for x in (z, OffsetArray(z, -n0 ÷ 2)), w in (v, OffsetArray(v, -n0 ÷ 2))
+            ss = @inferred suffstats(D, x)
+            @test ss isa Distributions.ChiStats
+            @test ss.mlogx ≈ mean(log.(x))
+
+            d = @inferred fit(D, x)
+            @test d isa D
+            @test ForwardDiff.derivative(ν -> sum(logpdf.(Chi(ν), x)), dof(d)) ≈ 0 atol = (eps(partype(d)))^(2/3)
+
+            if axes(x) == axes(w)
+                d = @inferred fit(D, x, w)
+                @test d isa D
+                @test ForwardDiff.derivative(ν -> dot(logpdf.(Chi(ν), x), w), dof(d)) ≈ 0 atol = (eps(partype(d)))^(2/3)
+
+                ss = @inferred suffstats(D, x, w)
+                @test ss isa Distributions.ChiStats
+                @test ss.mlogx ≈ dot(w ./ sum(w), log.(x))
+            else
+                @test_throws DimensionMismatch("Inconsistent array dimensions: Axes of samples and sample weights must be equal.") suffstats(D, x, w)
+                @test_throws DimensionMismatch("Inconsistent array dimensions: Axes of samples and sample weights must be equal.") fit(D, x, w)
+            end
+        end
+    end
+end
+
+
+@testset "Testing fit for Chisq" begin
+    ν = 4.3
+    for func in funcs, D in (Chisq, Chisq{Float64}, Chisq{Float32})
+        v = func[1](n0)
+        z = func[2](D(ν), n0)
+        for x in (z, OffsetArray(z, -n0 ÷ 2)), w in (v, OffsetArray(v, -n0 ÷ 2))
+            ss = @inferred suffstats(D, x)
+            @test ss isa Distributions.ChisqStats
+            @test ss.mlogx ≈ mean(log.(x))
+
+            d = @inferred fit(D, x)
+            @test d isa D
+            @test ForwardDiff.derivative(ν -> sum(logpdf.(Chisq(ν), x)), dof(d)) ≈ 0 atol = (eps(partype(d)))^(2/3)
+
+            if axes(x) == axes(w)
+                ss = @inferred suffstats(D, x, w)
+                @test ss isa Distributions.ChisqStats
+                @test ss.mlogx ≈ dot(w ./ sum(w), log.(x))
+
+                d = @inferred fit(D, x, w)
+                @test d isa D
+                @test ForwardDiff.derivative(ν -> dot(logpdf.(Chisq(ν), x), w), dof(d)) ≈ 0 atol = (eps(partype(d)))^(2/3)
+            else
+                @test_throws DimensionMismatch("Inconsistent array dimensions: Axes of samples and sample weights must be equal.") suffstats(D, x, w)
+                @test_throws DimensionMismatch("Inconsistent array dimensions: Axes of samples and sample weights must be equal.") fit(D, x, w)
+            end
+        end
     end
 end

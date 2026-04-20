@@ -43,6 +43,8 @@ The `fit_mle` method has been implemented for the following distributions:
 - [`Beta`](@ref)
 - [`Binomial`](@ref)
 - [`Categorical`](@ref)
+- [`Chi`](@ref)
+- [`Chisq`](@ref)
 - [`DiscreteUniform`](@ref)
 - [`Exponential`](@ref)
 - [`LogNormal`](@ref)
