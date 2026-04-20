@@ -25,6 +25,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
+import HypergeometricFunctions
 using Base.MathConstants: eulergamma
 
 import AliasTables
