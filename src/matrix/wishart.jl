@@ -217,7 +217,7 @@ function _wishart_genA!(rng::AbstractRNG, A::AbstractMatrix, df::Real)
     T = eltype(A)
     z = zero(T)
     axes1 = axes(A, 1)
-    @inbounds for (j, jdx) in enumerate(axes(A, 2)), (i, idx) in enumerate(axes1)
+    for (j, jdx) in enumerate(axes(A, 2)), (i, idx) in enumerate(axes1)
         A[idx, jdx] = if i < j
             z
         elseif i > j

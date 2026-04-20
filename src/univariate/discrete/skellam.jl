@@ -75,7 +75,8 @@ kurtosis(d::Skellam) = 1 / var(d)
 function logpdf(d::Skellam, x::Real)
     μ1, μ2 = params(d)
     if insupport(d, x)
-        return - (μ1 + μ2) + (x/2) * log(μ1/μ2) + log(besseli(x, 2*sqrt(μ1)*sqrt(μ2)))
+        besselarg =  2*sqrt(μ1*μ2)
+        return - (μ1 + μ2) + xlogy(x/2, μ1/μ2) + besselarg + log(besselix(x, besselarg))
     else
         return one(x) / 2 * log(zero(μ1/μ2))
     end

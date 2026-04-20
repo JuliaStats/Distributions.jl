@@ -68,7 +68,7 @@ function var(d::Multinomial{T}) where T<:Real
 
     v = Vector{T}(undef, k)
     for i = 1:k
-        @inbounds p_i = p[i]
+        p_i = p[i]
         v[i] = n * p_i * (1 - p_i)
     end
     v
@@ -83,15 +83,15 @@ function cov(d::Multinomial{T}) where T<:Real
     for j = 1:k
         pj = p[j]
         for i = 1:j-1
-            @inbounds C[i,j] = - n * p[i] * pj
+            C[i,j] = - n * p[i] * pj
         end
 
-        @inbounds C[j,j] = n * pj * (1-pj)
+        C[j,j] = n * pj * (1-pj)
     end
 
     for j = 1:k-1
         for i = j+1:k
-            @inbounds C[i,j] = C[j,i]
+            C[i,j] = C[j,i]
         end
     end
     C
@@ -137,7 +137,7 @@ function insupport(d::Multinomial, x::AbstractVector{T}) where T<:Real
     length(x) == k || return false
     s = 0.0
     for i = 1:k
-        @inbounds xi = x[i]
+        xi = x[i]
         if !(isinteger(xi) && xi >= 0)
             return false
         end
@@ -154,8 +154,8 @@ function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
     insupport(d,x) || return -R(Inf)
     s = R(loggamma(n + 1))
     for i = 1:length(p)
-        @inbounds xi = x[i]
-        @inbounds p_i = p[i]
+        xi = x[i]
+        p_i = p[i]
         s -= R(loggamma(R(xi) + 1))
         s += xlogy(xi, p_i)
     end
@@ -189,8 +189,8 @@ function suffstats(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real
     for j = 1:size(x,2)
         nj = zero(T)
         for i = 1:K
-            @inbounds xi = x[i,j]
-            @inbounds scnts[i] += xi
+            xi = x[i,j]
+            scnts[i] += xi
             nj += xi
         end
 
@@ -213,11 +213,11 @@ function suffstats(::Type{<:Multinomial}, x::Matrix{T}, w::Array{Float64}) where
 
     for j = 1:size(x,2)
         nj = zero(T)
-        @inbounds wj = w[j]
+        wj = w[j]
         tw += wj
         for i = 1:K
-            @inbounds xi = x[i,j]
-            @inbounds scnts[i] += xi * wj
+            xi = x[i,j]
+            scnts[i] += xi * wj
             nj += xi
         end
 

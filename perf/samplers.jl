@@ -46,9 +46,13 @@ if haskey(ENV, "binomial") && ENV["binomial"] != "skip"
         nvals = haskey(ENV, "CI") ? [2] : 2 .^ (1:12)
         pvals = haskey(ENV, "CI") ? [0.3] : [0.3, 0.5, 0.9]
         for n in nvals, p in pvals
-            s = ST(n, p)
-            b = @benchmark rand($mt, $s)
-            @info "(n,p): $((n,p)), result: $b"
+            try
+                s = ST(n, p)
+                b = @benchmark rand($mt, $s)
+                @info "(n,p): $((n,p)), result: $b"
+            catch e
+                @warn "Failed for (n,p): $((n,p)), error: $e"
+            end
         end
     end
 end
