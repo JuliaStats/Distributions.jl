@@ -118,3 +118,108 @@ function rand!(rng::AbstractRNG, d::LogLogistic, A::AbstractArray{<:Real})
     end
     return A
 end
+
+## Fitting
+
+function _loglogistic_log_samples(x::AbstractArray{<:Real})
+    isempty(x) && throw(ArgumentError("x cannot be empty."))
+
+    logx = Vector{Float64}(undef, length(x))
+    i = 0
+    for xi in x
+        i += 1
+        xi > zero(xi) || throw(ArgumentError("LogLogistic fit requires all samples to be greater than zero."))
+        logx[i] = log(float(xi))
+    end
+
+    return logx
+end
+
+function _loglogistic_mle_system(logx::AbstractVector{<:Real}, μ::Float64, φ::Float64)
+    θ = exp(φ)
+    invθ = inv(θ)
+    invθsq = invθ^2
+
+    gμ = 0.0
+    gφ = 0.0
+    hμμ = 0.0
+    hμφ = 0.0
+    hφφ = 0.0
+    ll = 0.0
+
+    for yi in logx
+        z = (yi - μ) * invθ
+        p = logistic(z)
+        t = muladd(2.0, p, -1.0)
+        s = 2.0 * p * (1.0 - p)
+
+        gμ += t * invθ
+        gφ += z * t - 1.0
+
+        hμμ -= s * invθsq
+        hμφ -= (t + z * s) * invθ
+        hφφ -= z * t + z^2 * s
+
+        u = -abs(z)
+        ll += u - 2.0 * log1pexp(u) - φ
+    end
+
+    return ll, gμ, gφ, hμμ, hμφ, hφφ
+end
+
+"""
+    fit_mle(::Type{<:LogLogistic}, x::AbstractArray{<:Real}; maxiter::Int=1000, tol::Real=1e-8)
+
+Compute the maximum likelihood estimate of the [`LogLogistic`](@ref) distribution
+by maximizing the logistic likelihood of `log.(x)` with Newton's method.
+"""
+function fit_mle(::Type{<:LogLogistic}, x::AbstractArray{<:Real};
+    maxiter::Int = 1000, tol::Real = 1e-8)
+
+    logx = _loglogistic_log_samples(x)
+
+    μ = median(logx)
+    q25, q75 = quantile(logx, (0.25, 0.75))
+    θ = max((q75 - q25) / (2.0 * log(3.0)), sqrt(eps(Float64)))
+    φ = log(θ)
+
+    ll, gμ, gφ, hμμ, hμφ, hφφ = _loglogistic_mle_system(logx, μ, φ)
+
+    converged = false
+    t = 0
+    while !converged && t < maxiter
+        t += 1
+
+        det = hμμ * hφφ - hμφ^2
+        (!isfinite(det) || det <= 0.0) && break
+
+        Δμ = (hφφ * gμ - hμφ * gφ) / det
+        Δφ = (-hμφ * gμ + hμμ * gφ) / det
+
+        step = 1.0
+        accepted = false
+        ll_old = ll
+
+        while step > tol
+            μ_new = μ - step * Δμ
+            φ_new = φ - step * Δφ
+            state_new = _loglogistic_mle_system(logx, μ_new, φ_new)
+            ll_new = state_new[1]
+
+            if isfinite(ll_new) && ll_new >= ll_old
+                μ = μ_new
+                φ = φ_new
+                ll, gμ, gφ, hμμ, hμφ, hφφ = state_new
+                accepted = true
+                break
+            end
+
+            step /= 2.0
+        end
+
+        !accepted && break
+        converged = max(abs(step * Δμ), abs(step * Δφ)) <= tol
+    end
+
+    return LogLogistic(exp(μ), exp(-φ))
+end
