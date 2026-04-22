@@ -9,7 +9,7 @@ end
         D,
         @setup(statements...),
         (arg₁, cond₁, message₁),
-        (cond₂, message₂),
+        (arg₂, cond₂),
         ...,
     )
 
@@ -21,14 +21,19 @@ the following Julia code:
 Distributions.check_args(check_args) do
     \$(statements...)
     cond₁ || throw(DomainError(arg₁, \$(string(D, ": ", message₁))))
-    cond₂ || throw(ArgumentError(\$(string(D, ": ", message₂))))
+    cond₂ || throw(DomainError(arg₂, \$(string(D, ": the condition ", cond₂, " is not satisfied."))))
     ...
 end
 ```
 
-The `@setup` argument can be elided if no setup code is needed. Moreover, error messages
-can be omitted. In this case the message `"the condition \$(cond) is not satisfied."` is
-used.
+Every check must provide the offending value(s) `argᵢ` so the resulting `DomainError`
+carries the parameter that violated the domain on `err.val`. For relational checks
+involving multiple parameters (e.g. `a < b`), pass a named tuple such as `(; a, b)` as
+the value so downstream catchers can read the individual parameters by name.
+
+The `@setup` argument can be elided if no setup code is needed. The third message
+element can also be elided; in that case the message `"the condition \$(cond) is not
+satisfied."` is used.
 """
 macro check_args(D, setup_or_check, checks...)
     # Extract setup statements
@@ -48,24 +53,14 @@ macro check_args(D, setup_or_check, checks...)
             message = string(D, ": ", check.args[3])
             return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
         elseif Meta.isexpr(check, :tuple, 2)
-            cond_or_message = check.args[2]
-            if cond_or_message isa String
-                # only condition and message specified
-                cond = check.args[1]
-                message = string(D, ": ", cond_or_message)
-                return :(($(esc(cond))) || throw(ArgumentError($message)))
-            else
-                # only argument and condition specified
-                arg = check.args[1]
-                cond = cond_or_message
-                message = string(D, ": the condition ", cond, " is not satisfied.")
-                return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
-            end
-        else
-            # only condition specified
-            cond = check
+            # argument and condition specified; auto-generate message
+            arg = check.args[1]
+            cond = check.args[2]
             message = string(D, ": the condition ", cond, " is not satisfied.")
-            return :(($(esc(cond))) || throw(ArgumentError($message)))
+            return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
+        else
+            error("`@check_args` requires each check to include an offending value; " *
+                  "use `(arg, cond)` or `(arg, cond, message)`. Got: `", check, "`.")
         end
     end
 

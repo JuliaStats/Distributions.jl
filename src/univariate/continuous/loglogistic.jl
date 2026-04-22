@@ -29,7 +29,7 @@ struct LogLogistic{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogLogistic(α::T, β::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(LogLogistic, α > zero(α) && β > zero(β))
+    @check_args LogLogistic (α, α > zero(α)) (β, β > zero(β))
     return LogLogistic{T}(α, β)
 end
 

@@ -6,9 +6,9 @@ using Test
 
 @testset "triangular" begin
     @testset "constructor" begin
-        @test_throws ArgumentError TriangularDist(1, 0, 0)
-        @test_throws ArgumentError TriangularDist(1, 1, 0)
-        @test_throws ArgumentError TriangularDist(0, 0, 1)
+        @test_throws DomainError TriangularDist(1, 0, 0)
+        @test_throws DomainError TriangularDist(1, 1, 0)
+        @test_throws DomainError TriangularDist(0, 0, 1)
     end
 
     @testset "type stability" begin

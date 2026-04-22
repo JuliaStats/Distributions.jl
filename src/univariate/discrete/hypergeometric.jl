@@ -29,7 +29,7 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
             Hypergeometric,
             (ns, ns >= zero(ns)),
             (nf, nf >= zero(nf)),
-            zero(n) <= n <= ns + nf,
+            ((; n, ns, nf), zero(n) <= n <= ns + nf, "n must satisfy 0 ≤ n ≤ ns + nf"),
         )
         new(ns, nf, n)
     end

@@ -43,12 +43,12 @@ end
 #  -----------------------------------------------------------------------------
 
 function Wishart(df::T, S::AbstractPDMat{T}) where T<:Real
-    df > 0 || throw(ArgumentError("df must be positive. got $(df)."))
+    df > 0 || throw(DomainError(df, "Wishart: df must be positive."))
     p = size(S, 1)
     singular = df <= p - 1
     if singular
         isinteger(df) || throw(
-            ArgumentError("df of a singular Wishart distribution must be an integer (got $df)")
+            DomainError(df, "Wishart: df of a singular Wishart distribution must be an integer.")
         )
     end
     rnk::Integer = ifelse(singular, df, p)

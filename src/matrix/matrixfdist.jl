@@ -42,8 +42,8 @@ end
 
 function MatrixFDist(n1::Real, n2::Real, B::AbstractPDMat)
     p = size(B, 1)
-    n1 > p - 1 || throw(ArgumentError("first degrees of freedom must be larger than $(p - 1)"))
-    n2 > p - 1 || throw(ArgumentError("second degrees of freedom must be larger than $(p - 1)"))
+    n1 > p - 1 || throw(DomainError(n1, "MatrixFDist: first degrees of freedom must be larger than dim - 1."))
+    n2 > p - 1 || throw(DomainError(n2, "MatrixFDist: second degrees of freedom must be larger than dim - 1."))
     logc0 = matrixfdist_logc0(n1, n2, B)
     T = Base.promote_eltype(n1, n2, logc0, B)
     prom_B = convert(AbstractArray{T}, B)

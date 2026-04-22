@@ -12,16 +12,16 @@ import Optim
            @test d.α == 1
            @test d.β == 2
 
-           @test_throws ArgumentError LogLogistic(T1(-1), T2(2))
-           @test_throws ArgumentError LogLogistic(T1(-1), T2(2); check_args=true)
+           @test_throws DomainError LogLogistic(T1(-1), T2(2))
+           @test_throws DomainError LogLogistic(T1(-1), T2(2); check_args=true)
            d = @inferred(LogLogistic(T1(-1), T2(2); check_args=false))
            @test d isa LogLogistic{promote_type(T1, T2)}
            @test partype(d) === promote_type(T1, T2)
            @test d.α == -1
            @test d.β == 2
 
-           @test_throws ArgumentError LogLogistic(T1(1), T2(-2))
-           @test_throws ArgumentError LogLogistic(T1(1), T2(-2); check_args=true)
+           @test_throws DomainError LogLogistic(T1(1), T2(-2))
+           @test_throws DomainError LogLogistic(T1(1), T2(-2); check_args=true)
            d = @inferred(LogLogistic(T1(1), T2(-2); check_args=false))
            @test d isa LogLogistic{promote_type(T1, T2)}
            @test partype(d) === promote_type(T1, T2)

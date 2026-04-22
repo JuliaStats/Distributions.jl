@@ -48,7 +48,7 @@ end
 
 @testset "censored" begin
     d0 = Normal(0, 1)
-    @test_throws ArgumentError censored(d0, 1, -1)
+    @test_throws DomainError censored(d0, 1, -1)
 
     # bound argument constructors
     d = censored(d0, -1, 1.0)
@@ -92,8 +92,8 @@ end
 @testset "Censored" begin
     @testset "basic" begin
         # check_args
-        @test_throws ArgumentError Censored(Normal(0, 1), 2, 1)
-        @test_throws ArgumentError Censored(Normal(0, 1), 2, 1; check_args=true)
+        @test_throws DomainError Censored(Normal(0, 1), 2, 1)
+        @test_throws DomainError Censored(Normal(0, 1), 2, 1; check_args=true)
         Censored(Normal(0, 1), 2, 1; check_args=false)
         Censored(Normal(0, 1), nothing, 1; check_args=true)
         Censored(Normal(0, 1), 2, nothing; check_args=true)
