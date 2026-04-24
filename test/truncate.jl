@@ -174,7 +174,7 @@ at = [0.0, 1.0, 0.0, 1.0]
 
     @testset "errors" begin
         @test_throws ErrorException truncated(Normal(), 1, 0)
-        @test_throws ArgumentError truncated(Uniform(), 1, 2)
+        @test_throws DomainError truncated(Uniform(), 1, 2)
         @test_throws ErrorException truncated(Exponential(), 3, 1)
     end
 

@@ -47,7 +47,7 @@ struct OrderStatistic{D<:UnivariateDistribution,S<:ValueSupport} <:
     function OrderStatistic(
         dist::UnivariateDistribution, n::Int, rank::Int; check_args::Bool=true
     )
-        @check_args(OrderStatistic, 1 ≤ rank ≤ n)
+        @check_args(OrderStatistic, ((; rank, n), 1 ≤ rank ≤ n, "rank must satisfy 1 ≤ rank ≤ n"))
         return new{typeof(dist),value_support(typeof(dist))}(dist, n, rank)
     end
 end

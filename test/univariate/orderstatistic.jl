@@ -16,11 +16,11 @@ using StatsBase
             @test d.n == n
             @test d.rank == i
         end
-        @test_throws ArgumentError OrderStatistic(Normal(), 0, 1)
+        @test_throws DomainError OrderStatistic(Normal(), 0, 1)
         OrderStatistic(Normal(), 0, 1; check_args=false)
-        @test_throws ArgumentError OrderStatistic(Normal(), 10, 11)
+        @test_throws DomainError OrderStatistic(Normal(), 10, 11)
         OrderStatistic(Normal(), 10, 11; check_args=false)
-        @test_throws ArgumentError OrderStatistic(Normal(), 10, 0)
+        @test_throws DomainError OrderStatistic(Normal(), 10, 0)
         OrderStatistic(Normal(), 10, 0; check_args=false)
     end
 

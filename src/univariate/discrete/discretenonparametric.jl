@@ -24,9 +24,10 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
     function DiscreteNonParametric{T,P,Ts,Ps}(xs::Ts, ps::Ps; check_args::Bool=true) where {
             T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
         check_args || return new{T,P,Ts,Ps}(xs, ps)
+        length(xs) == length(ps) ||
+            throw(DimensionMismatch("DiscreteNonParametric: length of support and probability vector must be equal."))
         @check_args(
             DiscreteNonParametric,
-            (length(xs) == length(ps), "length of support and probability vector must be equal"),
             (ps, isprobvec(ps), "vector is not a probability vector"),
             (xs, allunique(xs), "support must contain only unique elements"),
         )
@@ -275,7 +276,10 @@ end
 function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T},
                    w::AbstractArray{W}; check_args::Bool=true) where {T<:Real,W<:Real}
 
-    @check_args DiscreteNonParametric (length(x) == length(w))
+    if check_args
+        length(x) == length(w) ||
+            throw(DimensionMismatch("DiscreteNonParametric: length(x) must equal length(w)."))
+    end
 
     N = length(x)
     N == 0 && return DiscreteNonParametricStats(T[], W[])
