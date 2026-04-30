@@ -81,6 +81,7 @@ const tests = [
     "univariate/continuous/exponential",
     "univariate/continuous/fdist",
     "univariate/continuous/gamma",
+    "univariate/continuous/generalizedchisq",
     "univariate/continuous/gumbel",
     "univariate/continuous/levy",
     "univariate/continuous/lindley",
