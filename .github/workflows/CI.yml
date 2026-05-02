@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - 'min'
+          - 'min-patch'
           - '1'
           - pre
         os:
@@ -32,7 +32,7 @@ jobs:
           - windows-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.version }}
           show-versioninfo: true
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/setup-julia@v3
         with:
           version: '1'
           show-versioninfo: true
