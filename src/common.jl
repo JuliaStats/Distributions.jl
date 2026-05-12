@@ -100,6 +100,15 @@ Base.size(s::Sampleable{Univariate}) = ()
 Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
 """
+    axes(s::Sampleable{<:ArrayLikeVariate})
+
+Return a tuple of valid indices for a sample from `s`. This can e.g. be used to construct
+an empty sample array using `similar(Array{eltype(s)}, axes(s))`. This can be overloaded
+for a given distribution to return e.g. axes that define custom array types.
+"""
+Base.axes(s::Sampleable{<:ArrayLikeVariate})
+
+"""
     eltype(::Type{Sampleable})
 
 The default element type of a sample. This is the type of elements of the samples generated

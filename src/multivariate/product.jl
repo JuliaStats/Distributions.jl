@@ -35,6 +35,7 @@ function Product(v::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:Ab
 end
 
 length(d::Product) = length(d.v)
+Base.axes(d::Product) = axes(d.v)
 function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
                                                     T<:UnivariateDistribution{S}}
     return eltype(T)
