@@ -93,29 +93,8 @@ end
 
 #### Evaluation & Sampling
 
-# Implement native pdf and logpdf since it's relatively straight forward and allows for ForwardDiff
-function logpdf(d::NegativeBinomial, k::Real)
-    r, p = params(d)
-    z = xlogy(r, p) + xlog1py(k, -p)
-
-    if iszero(k)
-        # in this case `logpdf(d, k) = z - log(k + r) - logbeta(r, k + 1) = z` analytically
-        # but unfortunately not numerically, so we handle this case separately to improve accuracy
-        return z
-    end
-    
-    return insupport(d, k) ? z - log(k + r) - logbeta(r, k + 1) : oftype(z, -Inf)
-end
-
-# cdf and quantile functions are more involved so we still rely on Rmath
-cdf(d::NegativeBinomial, x::Real) = nbinomcdf(d.r, d.p, x)
-ccdf(d::NegativeBinomial, x::Real) = nbinomccdf(d.r, d.p, x)
-logcdf(d::NegativeBinomial, x::Real) = nbinomlogcdf(d.r, d.p, x)
-logccdf(d::NegativeBinomial, x::Real) = nbinomlogccdf(d.r, d.p, x)
-quantile(d::NegativeBinomial, q::Real) = convert(Int, nbinominvcdf(d.r, d.p, q))
-cquantile(d::NegativeBinomial, q::Real) = convert(Int, nbinominvccdf(d.r, d.p, q))
-invlogcdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogcdf(d.r, d.p, lq))
-invlogccdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogccdf(d.r, d.p, lq))
+# StatsFuns uses Julia implementations for all but (c)quantile and invlog(c)cdf
+@_delegate_statsfuns NegativeBinomial nbinom r p
 
 ## sampling
 function rand(rng::AbstractRNG, d::NegativeBinomial)
