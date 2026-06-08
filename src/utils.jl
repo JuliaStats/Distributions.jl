@@ -39,11 +39,14 @@ macro check_args(D, setup_or_check, checks...)
         checks = (setup_or_check, checks...)
     end
 
-    # Generate expressions for each condition
+    # Generate expressions for each condition, collecting the explicitly-named arguments so they can
+    # be forwarded to `check_args` (used to decide whether the checks can be evaluated at all).
+    args_exprs = Any[]
     conds_exprs = map(checks) do check
         if Meta.isexpr(check, :tuple, 3)
             # argument, condition, and message specified
             arg = check.args[1]
+            push!(args_exprs, esc(arg))
             cond = check.args[2]
             message = string(D, ": ", check.args[3])
             return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
@@ -57,6 +60,7 @@ macro check_args(D, setup_or_check, checks...)
             else
                 # only argument and condition specified
                 arg = check.args[1]
+                push!(args_exprs, esc(arg))
                 cond = cond_or_message
                 message = string(D, ": the condition ", cond, " is not satisfied.")
                 return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
@@ -73,10 +77,23 @@ macro check_args(D, setup_or_check, checks...)
         Distributions.check_args($(esc(:check_args))) do
             $(__source__)
             $(setup_stmts...)
-            $(conds_exprs...)
+            if all(Distributions._arg_checkable, ($(args_exprs...),))
+                $(conds_exprs...)
+            end
         end
     end
 end
+
+#=
+    _arg_checkable(x)::Bool
+
+Whether a constructor argument `x` supports `@check_args` validation. Defaults to `true`. Package
+extensions may specialize this to `false` for number-like types whose comparisons cannot be used in
+boolean context — for example sparsity-detection tracers, whose primal-free comparisons (`σ ≥ 0`)
+return a tracer rather than a `Bool`. When any checked argument is not checkable, `@check_args` skips
+the checks so distribution constructors can still be traced.
+=#
+_arg_checkable(@nospecialize(_)) = true
 
 """
     check_args(f, check::Bool)
