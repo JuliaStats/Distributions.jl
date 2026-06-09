@@ -106,4 +106,20 @@ using Test
         # Additional tests, including sampling
         test_distr(d, 10^6)
     end
+
+    # issue #1916
+    @testset "Underflow in logccdf" begin
+        d = PGeneralizedGaussian(2.5)
+
+        # (c)cdf became more accurate
+        @test isfinite(log(cdf(d, -5.0)))
+        @test isfinite(log(ccdf(d, 5.0)))
+        @test ccdf(d, 5.0) ≈ cdf(d, -5.0)
+
+        # We have to use -20 to provoke the issue
+        @test log(cdf(d, -20.0)) === -Inf
+        @test log(ccdf(d, 20.0)) === -Inf
+        @test isfinite(logcdf(d, -20.0))
+        @test logccdf(d, 20.0) ≈ logcdf(d, -20.0)
+    end
 end

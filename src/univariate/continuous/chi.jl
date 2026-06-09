@@ -23,7 +23,7 @@ External links
 """
 struct Chi{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
-    Chi{T}(ν::T) where {T} = new{T}(ν)
+    Chi{T}(ν::Real) where {T<:Real} = new{T}(ν)
 end
 
 function Chi(ν::Real; check_args::Bool=true)
@@ -119,3 +119,22 @@ end
 rand(rng::AbstractRNG, s::ChiSampler) = sqrt(rand(rng, s.s))
 
 sampler(d::Chi) = ChiSampler(sampler(Chisq(d.ν)))
+
+
+#### Fitting
+
+struct ChiStats{T<:Real} <: SufficientStats
+    # (Weighted) mean of log(x)
+    mlogx::T
+end
+
+suffstats(::Type{<:Chi}, x::AbstractArray{<:Real}) = ChiStats(mean(log, x))
+function suffstats(::Type{<:Chi}, x::AbstractArray{<:Real}, w::AbstractArray{<:Real})
+    if axes(x) != axes(w)
+        throw(DimensionMismatch("Inconsistent array dimensions: Axes of samples and sample weights must be equal."))
+    end
+    mlogx = sum(Broadcast.instantiate(Broadcast.broadcasted(xlogy, w, x))) / sum(w)
+    return ChiStats(mlogx)
+end
+
+fit_mle(::Type{T}, ss::ChiStats) where {T<:Chi} = T(2 * invdigamma(2 * ss.mlogx - logtwo))

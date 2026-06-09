@@ -142,7 +142,7 @@ function _logpdf!(r::AbstractArray{<:Real}, d::AbstractMvNormal, x::AbstractMatr
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
-        @inbounds r[i] = c0 - r[i]/2
+        r[i] = c0 - r[i]/2
     end
     r
 end
@@ -275,7 +275,7 @@ end
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     for i in eachindex(x)
-        @inbounds x[i] = randn(rng, eltype(x))
+        x[i] = randn(rng, eltype(x))
     end
     unwhiten!(d.Σ, x)
     x .+= d.μ
@@ -389,7 +389,7 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
         zj = view(z,:,j)
         swj = sqrt(w[j])
         for i = 1:d
-            @inbounds zj[i] = swj * (xj[i] - m[i])
+            zj[i] = swj * (xj[i] - m[i])
         end
     end
     s2 = z * z'
@@ -430,7 +430,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     for j = 1:n
         cj = sqrt(w[j])
         for i = 1:m
-            @inbounds z[i,j] = (x[i,j] - mu[i]) * cj
+            z[i,j] = (x[i,j] - mu[i]) * cj
         end
     end
     C = BLAS.syrk('U', 'N', inv_sw, z)
@@ -446,7 +446,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
     va = zeros(Float64, m)
     for j = 1:n
         for i = 1:m
-            @inbounds va[i] += abs2(x[i,j] - mu[i])
+            va[i] += abs2(x[i,j] - mu[i])
         end
     end
     lmul!(inv(n), va)
@@ -463,9 +463,9 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
 
     va = zeros(Float64, m)
     for j = 1:n
-        @inbounds wj = w[j]
+        wj = w[j]
         for i = 1:m
-            @inbounds va[i] += abs2(x[i,j] - mu[i]) * wj
+            va[i] += abs2(x[i,j] - mu[i]) * wj
         end
     end
     lmul!(inv_sw, va)
@@ -481,7 +481,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
     for j = 1:n
         va_j = 0.
         for i = 1:m
-            @inbounds va_j += abs2(x[i,j] - mu[i])
+            va_j += abs2(x[i,j] - mu[i])
         end
         va += va_j
     end
@@ -499,10 +499,10 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractVect
 
     va = 0.
     for j = 1:n
-        @inbounds wj = w[j]
+        wj = w[j]
         va_j = 0.
         for i = 1:m
-            @inbounds va_j += abs2(x[i,j] - mu[i]) * wj
+            va_j += abs2(x[i,j] - mu[i]) * wj
         end
         va += va_j
     end

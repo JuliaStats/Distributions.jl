@@ -122,11 +122,13 @@ end
 #  https://en.wikipedia.org/wiki/Matrix_normal_distribution#Drawing_values_from_the_distribution
 
 function _rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix)
-    n, p = size(d)
-    X = randn(rng, n, p)
+    randn!(rng, Y)
     A = cholesky(d.U).L
     B = cholesky(d.V).U
-    Y .= d.M .+ A * X * B
+    lmul!(A, Y)
+    rmul!(Y, B)
+    Y .+= d.M
+    return Y
 end
 
 #  -----------------------------------------------------------------------------

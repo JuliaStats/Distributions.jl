@@ -83,6 +83,8 @@ cov(d::ProductDistribution) = Diagonal(vec(var(d)))
 ## For product distributions of univariate distributions
 mean(d::ArrayOfUnivariateDistribution) = map(mean, d.dists)
 mean(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(mean, d.dists))
+std(d::ArrayOfUnivariateDistribution) = map(std, d.dists)
+std(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(std, d.dists))
 var(d::ArrayOfUnivariateDistribution) = map(var, d.dists)
 var(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(var, d.dists))
 
@@ -114,7 +116,7 @@ function _rand!(
     d::ArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
 ) where {N}
-    @inbounds for (i, di) in zip(eachindex(x), d.dists)
+    for (i, di) in zip(eachindex(x), d.dists)
         x[i] = rand(rng, di)
     end
     return x
@@ -139,7 +141,7 @@ function _rand!(
     d::FillArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
 ) where {N}
-    return @inbounds rand!(rng, sampler(first(d.dists)), x)
+    return rand!(rng, sampler(first(d.dists)), x)
 end
 
 # more efficient implementation of `_logpdf` for `Fill` array of univariate distributions
@@ -153,7 +155,7 @@ _logpdf(d::FillArrayOfUnivariateDistribution{2}, x::AbstractMatrix{<:Real}) = __
 function __logpdf(
     d::FillArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}
 ) where {N}
-    return @inbounds loglikelihood(first(d.dists), x)
+    return loglikelihood(first(d.dists), x)
 end
 
 # `_rand! for arrays of distributions
@@ -162,7 +164,7 @@ function _rand!(
     d::ProductDistribution{N,M},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
-    @inbounds for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
+    for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
         rand!(rng, di, Ai)
     end
     return A
@@ -178,7 +180,7 @@ function __logpdf(
 ) where {N,M}
     # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
     # to compute `sum(logpdf.(d.dists, eachvariate))`
-    @inbounds broadcasted = Broadcast.broadcasted(
+    broadcasted = Broadcast.broadcasted(
         logpdf, d.dists, eachvariate(x, ArrayLikeVariate{M}),
     )
     return sum(Broadcast.instantiate(broadcasted))
@@ -190,7 +192,7 @@ function _rand!(
     d::ProductDistribution{N,M,<:Fill},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
-    @inbounds rand!(rng, sampler(first(d.dists)), A)
+    rand!(rng, sampler(first(d.dists)), A)
     return A
 end
 
@@ -212,7 +214,7 @@ function __logpdf(
     d::ProductDistribution{N,M,<:Fill},
     x::AbstractArray{<:Real,N},
 ) where {N,M}
-    return @inbounds loglikelihood(first(d.dists), x)
+    return loglikelihood(first(d.dists), x)
 end
 
 """

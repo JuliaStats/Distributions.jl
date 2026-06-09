@@ -2,7 +2,7 @@
     DirichletMultinomial
 
 The [Dirichlet-multinomial distribution](https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution)
-is the distribution of a draw from a multinomial distribution where each sample has a 
+is the distribution of a draw from a multinomial distribution where each sample has a
 slightly different probability vector, drawn from a common Dirichlet distribution.
 
 This contrasts with the multinomial distribution, which assumes that all observations arise
@@ -29,25 +29,26 @@ vector α.
 DirichletMultinomial(n, k) # Dirichlet-multinomial distribution with n trials and parameter
 vector of length k of ones.
 ```
+
+`α` can be any `AbstractVector{<:Real}`.
 """
-struct DirichletMultinomial{T <: Real} <: DiscreteMultivariateDistribution
+struct DirichletMultinomial{T <: Real,V <: AbstractVector{T}} <: DiscreteMultivariateDistribution
     n::Int
-    α::Vector{T}
+    α::V
     α0::T
 
-    function DirichletMultinomial{T}(n::Integer, α::Vector{T}) where T
+    function DirichletMultinomial{T}(n::Integer, α::V) where {T <: Real, V <: AbstractVector{T}}
         α0 = sum(abs, α)
         sum(α) == α0 || throw(ArgumentError("alpha must be a positive vector."))
         n > 0 || throw(ArgumentError("n must be a positive integer."))
-        new{T}(Int(n), α, α0)
+        new{T,V}(Int(n), α, α0)
     end
 end
-DirichletMultinomial(n::Integer, α::Vector{T}) where {T <: Real} = DirichletMultinomial{T}(n, α)
-DirichletMultinomial(n::Integer, α::Vector{T}) where {T <: Integer} = DirichletMultinomial(n, float(α))
+DirichletMultinomial(n::Integer, α::AbstractVector{T}) where {T <: Real} = DirichletMultinomial{T}(n, α)
+DirichletMultinomial(n::Integer, α::AbstractVector{T}) where {T <: Integer} = DirichletMultinomial(n, float(α))
 DirichletMultinomial(n::Integer, k::Integer) = DirichletMultinomial(n, ones(k))
 
 Base.show(io::IO, d::DirichletMultinomial) = show(io, d, (:n, :α,))
-
 
 # Parameters
 ncategories(d::DirichletMultinomial) = length(d.α)
@@ -62,7 +63,7 @@ function var(d::DirichletMultinomial{T}) where T <: Real
     v = fill(d.n * (d.n + d.α0) / (1 + d.α0), length(d))
     p = d.α / d.α0
     for i in eachindex(v)
-        @inbounds v[i] *= p[i] * (1 - p[i])
+        v[i] *= p[i] * (1 - p[i])
     end
     v
 end
@@ -71,7 +72,7 @@ function cov(d::DirichletMultinomial{<:Real})
     c = d.α * d.α'
     lmul!(-d.n * (d.n + d.α0) / (d.α0^2 * (1 + d.α0)), c)
     for (i, vi) in zip(diagind(c), v)
-        @inbounds c[i] = vi
+        c[i] = vi
     end
     c
 end
@@ -89,7 +90,7 @@ end
 function _logpdf(d::DirichletMultinomial{S}, x::AbstractVector{T}) where {T<:Real, S<:Real}
     c = loggamma(S(d.n + 1)) + loggamma(d.α0) - loggamma(d.n + d.α0)
     for j in eachindex(x)
-        @inbounds xj, αj = x[j], d.α[j]
+        xj, αj = x[j], d.α[j]
         c += loggamma(xj + αj) - loggamma(xj + 1) - loggamma(αj)
     end
     c
@@ -114,7 +115,7 @@ function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}) where T<:Real
     all(ns .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)
     s = zeros(d, n)
-    @inbounds for k in 1:n, i in 1:m, j in 1:d
+    for k in 1:n, i in 1:m, j in 1:d
         if x[j, i] >= k
             s[j, k] += 1.0
         end
@@ -128,7 +129,7 @@ function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}, w::Array{Float6
     all(ns .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)
     s = zeros(d, n)
-    @inbounds for k in 1:n, i in 1:m, j in 1:d
+    for k in 1:n, i in 1:m, j in 1:d
         if x[j, i] >= k
             s[j, k] += w[i]
         end
@@ -140,7 +141,7 @@ function fit_mle(::Type{<:DirichletMultinomial}, ss::DirichletMultinomialStats;
     k = size(ss.s, 2)
     α = ones(size(ss.s, 1))
     rng = 0.0:(k - 1)
-    @inbounds for iter in 1:maxiter
+    for iter in 1:maxiter
         α_old = copy(α)
         αsum = sum(α)
         denom = ss.tw * sum(inv, αsum .+ rng)

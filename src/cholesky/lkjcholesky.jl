@@ -95,7 +95,7 @@ function insupport(d::LKJCholesky, R::LinearAlgebra.Cholesky)
     (isreal(factors) && size(factors, 1) == p) || return false
     iinds, jinds = axes(factors)
     # check that the diagonal of U'*U or L*L' is all ones
-    @inbounds if R.uplo === 'U'
+    if R.uplo === 'U'
         for (j, jind) in enumerate(jinds)
             col_iinds = view(iinds, 1:j)
             sum(abs2, view(factors, col_iinds, jind)) ≈ 1 || return false
@@ -247,12 +247,12 @@ function _lkj_cholesky_onion_tri!(
     β = η + (d - 2)//2
     #  1. Initialization
     w0 = 2 * rand(rng, Beta(β, β)) - 1
-    @inbounds if uplo === :L
+    if uplo === :L
         A[2, 1] = w0
     else
         A[1, 2] = w0
     end
-    @inbounds A[2, 2] = sqrt(1 - w0^2)
+    A[2, 2] = sqrt(1 - w0^2)
     #  2. Loop, each iteration k adds row/column k+1
     for k in 2:(d - 1)
         #  (a)
@@ -261,11 +261,11 @@ function _lkj_cholesky_onion_tri!(
         y = rand(rng, Beta(k//2, β))
         #  (c)-(e)
         # w is directionally uniform vector of length √y
-        @inbounds w = @views uplo === :L ? A[k + 1, 1:k] : A[1:k, k + 1]
+        w = @views uplo === :L ? A[k + 1, 1:k] : A[1:k, k + 1]
         Random.randn!(rng, w)
         rmul!(w, sqrt(y) / norm(w))
         # normalize so new row/column has unit norm
-        @inbounds A[k + 1, k + 1] = sqrt(1 - y)
+        A[k + 1, k + 1] = sqrt(1 - y)
     end
     #  3.
     return A

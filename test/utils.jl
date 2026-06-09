@@ -15,8 +15,10 @@ r = RealInterval(1.5, 4.0)
 
 # special cases
 @test partype(Kolmogorov()) == Float64
-@test partype(Hypergeometric(2, 2, 2)) == Float64
-@test partype(DiscreteUniform(0, 4)) == Float64
+@test partype(Hypergeometric(2, 2, 2)) == Int
+@test partype(Hypergeometric(2.0, 2, 2)) == Int
+@test partype(DiscreteUniform(0, 4)) == Int
+@test partype(DiscreteUniform(0.0, 4)) == Int
 
 A = rand(1:10, 5, 5)
 B = rand(Float32, 4)

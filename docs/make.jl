@@ -4,7 +4,8 @@ import Random: AbstractRNG, rand!
 makedocs(;
     sitename = "Distributions.jl",
     modules  = [Distributions],
-    format   = Documenter.HTML(; prettyurls = get(ENV, "CI", nothing) == "true"),
+    format   = Documenter.HTML(; prettyurls = get(ENV, "CI", nothing) == "true",
+                                 assets = ["assets/favicon.ico"]),
     pages    = [
         "index.md",
         "starting.md",

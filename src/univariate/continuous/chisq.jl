@@ -22,7 +22,7 @@ External links
 """
 struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
-    Chisq{T}(ν::T) where {T} = new{T}(ν)
+    Chisq{T}(ν::Real) where {T<:Real} = new{T}(ν)
 end
 
 function Chisq(ν::Real; check_args::Bool=true)
@@ -107,3 +107,21 @@ function sampler(d::Chisq)
     θ = oftype(α, 2)
     return sampler(Gamma{typeof(α)}(α, θ))
 end
+
+#### Fitting
+
+struct ChisqStats{T<:Real} <: SufficientStats
+    # (Weighted) mean of log(x)
+    mlogx::T
+end
+
+suffstats(::Type{<:Chisq}, x::AbstractArray{<:Real}) = ChisqStats(mean(log, x))
+function suffstats(::Type{<:Chisq}, x::AbstractArray{<:Real}, w::AbstractArray{<:Real})
+    if axes(x) != axes(w)
+        throw(DimensionMismatch("Inconsistent array dimensions: Axes of samples and sample weights must be equal."))
+    end
+    mlogx = sum(Broadcast.instantiate(Broadcast.broadcasted(xlogy, w, x))) / sum(w)
+    return ChisqStats(mlogx)
+end
+
+fit_mle(::Type{T}, ss::ChisqStats) where {T<:Chisq} = T(2 * invdigamma(ss.mlogx - logtwo))

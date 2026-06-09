@@ -42,6 +42,8 @@ span(d::DiscreteUniform) = d.b - d.a + 1
 probval(d::DiscreteUniform) = d.pv
 params(d::DiscreteUniform) = (d.a, d.b)
 
+partype(::DiscreteUniform) = Int
+
 ### Show
 
 show(io::IO, d::DiscreteUniform) = show(io, d, (:a, :b))

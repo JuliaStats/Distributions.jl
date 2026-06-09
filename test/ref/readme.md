@@ -7,25 +7,12 @@ for verifying the correctness of our implementations.
 
 ## Dependencies
 
-The reference implementation depends on several R packages
-in addition to the R language itself:
+The reference implementation depends on several R packages in addition to the R language itself.
+To install these dependencies, open `R` in this folder and run:
 
-| R packages  |  Functionalities |
-| ----------- | ---------------- |
-| stringr     | For string parsing  |
-| R6          | OOP for implementing distributions |
-| extraDistr  | A number of distributions |
-| VGAM        | For ``Frechet`` and ``Levy`` |
-| distr       | For ``Arcsine`` |
-| chi         | For ``Chi`` |
-| circular    | For ``VonMises`` |
-| statmod     | For ``InverseGaussian`` |
-| skellam     | For ``Skellam`` |
-| BiasedUrn   | For ``NoncentralHypergeometric`` |
-| fBasics     | For ``NormalInverseGaussian`` |
-| gnorm       | For ``PGeneralizedGaussian`` |
-| LindleyR    | For ``Lindley`` |
-| ExtDist     | For ``JohnsonSU`` |
+```r
+renv::restore()
+```
 
 ## Usage
 
@@ -33,7 +20,12 @@ All reference classes are in ``test/ref/continuous`` and ``test/ref/discrete``. 
 
 The test entries are listed in ``test/ref/continuous_test.lst`` and ``test/ref/discrete_test.lst``. Each entry is a Julia statement for constructing a distribution. The entries can be commented out using ``#``.
 
-One can enter ``Rscript gendref.R`` **within the directory** ``test/ref`` to generate the reference data files: ``test/ref/continuous_test.ref.json`` and ``test/ref/discrete_test.ref.json``.
+To generate the reference data files: ``test/ref/continuous_test.ref.json`` and ``test/ref/discrete_test.ref.json``,
+open a terminal, navigate to this directory and run
+
+```shell
+Rscript gendref.R
+```
 
 The testing script ``test/univariate.jl`` loads these reference data files to verify the implementations of Julia distribution classes.
 
@@ -108,17 +100,20 @@ When the testing script sees an entry ``Normal(3, 2)``, it will
 call the R expression ``Normal$new(3, 2)`` to construct a reference distribution
 for verification.
 
-### Mock Constructors
+### Alternative Parameterizations
 
 For certain distributions, Julia provides alternative ways to construct them,
-using different parameterization, *e.g.* ``NormalCanon``.
-For such cases, one can write a *mock* constructor -- a list with a ``new`` function
-to emulate the behavior:
+possibly using different parameterization, *e.g.* ``NormalCanon``.
+For such cases, one can define the alternative reference distribution as a subclass,
+possibly with a different ``initialize`` function:
 
 ```r
-NormalCanon = list(
-    new = function(c1=0, c2=1) {
-        Normal$new(c1/c2, 1/sqrt(c2))
-    }
+NormalCanon = R6Class("NormalCanon",
+    inherit = Normal,
+    public = list(
+        initialize = function(c1=0, c2=1) {
+            super$initialize(c1/c2, 1/sqrt(c2))
+        }
+    )
 )
 ```

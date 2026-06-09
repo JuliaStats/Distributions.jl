@@ -25,8 +25,8 @@ BetaPrime <- R6Class("BetaPrime",
                      sqrt((b - 2) / (a * (a + b - 1)))
                  } else { NaN })
         },
-        pdf = function(x, log=FALSE){ dbetapr(x, self$alpha, self$beta, log=log) },
-        cdf = function(x) { pbetapr(x, self$alpha, self$beta) },
-        quan = function(v) { qbetapr(v, self$alpha, self$beta) }
+        pdf = function(x, log=FALSE){ extraDistr::dbetapr(x, self$alpha, self$beta, log=log) },
+        cdf = function(x) { extraDistr::pbetapr(x, self$alpha, self$beta) },
+        quan = function(v) { extraDistr::qbetapr(v, self$alpha, self$beta) }
     )
 )
