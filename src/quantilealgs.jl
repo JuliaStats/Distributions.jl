@@ -47,12 +47,21 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   Distribution, with Application to the Inverse Gaussian Distribution
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
-function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
+function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12, maxiter::Int=10_000)
     x = xs + (p - cdf(d, xs)) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
-        while abs(x-x0) > max(abs(x),abs(x0)) * tol
+        x2 = x0
+        have_x2 = false
+        for _ in 1:maxiter
+            abs(x-x0) <= max(abs(x),abs(x0)) * tol && return x
+            if have_x2 && isfinite(x) && isfinite(x2) &&
+                    abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+                return quantile_bisect(d, p, minmax(x, x0)...)
+            end
+            x2 = x0
+            have_x2 = true
             x0 = x
             x = x0 + (p - cdf(d, x0)) / pdf(d, x0)
         end
@@ -66,12 +75,21 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
     end
 end
 
-function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
+function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12, maxiter::Int=10_000)
     x = xs + (ccdf(d, xs)-p) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
-        while abs(x-x0) > max(abs(x),abs(x0)) * tol
+        x2 = x0
+        have_x2 = false
+        for _ in 1:maxiter
+            abs(x-x0) <= max(abs(x),abs(x0)) * tol && return x
+            if have_x2 && isfinite(x) && isfinite(x2) &&
+                    abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+                return quantile_bisect(d, 1 - p, minmax(x, x0)...)
+            end
+            x2 = x0
+            have_x2 = true
             x0 = x
             x = x0 + (ccdf(d, x0)-p) / pdf(d, x0)
         end
@@ -85,19 +103,35 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
     end
 end
 
-function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
+function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12, maxiter::Int=10_000)
     T = typeof(lp - logpdf(d,xs))
     if -Inf < lp < 0
         x0 = T(xs)
+        x2 = x0
+        have_x2 = false
         if lp < logcdf(d,x0)
             x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+            for _ in 1:maxiter
+                abs(x-x0) < max(abs(x),abs(x0)) * tol && return x
+                if have_x2 && isfinite(x) && isfinite(x2) &&
+                        abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+                    return quantile_bisect(d, exp(lp), minmax(x, x0)...)
+                end
+                x2 = x0
+                have_x2 = true
                 x0 = x
                 x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
             end
         else
             x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0))*tol
+            for _ in 1:maxiter
+                abs(x-x0) < max(abs(x),abs(x0))*tol && return x
+                if have_x2 && isfinite(x) && isfinite(x2) &&
+                        abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+                    return quantile_bisect(d, exp(lp), minmax(x, x0)...)
+                end
+                x2 = x0
+                have_x2 = true
                 x0 = x
                 x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
             end
@@ -112,19 +146,35 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
     end
 end
 
-function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
+function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12, maxiter::Int=10_000)
     T = typeof(lp - logpdf(d,xs))
     if -Inf < lp < 0
         x0 = T(xs)
+        x2 = x0
+        have_x2 = false
         if lp < logccdf(d,x0)
             x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+            for _ in 1:maxiter
+                abs(x-x0) < max(abs(x),abs(x0)) * tol && return x
+                if have_x2 && isfinite(x) && isfinite(x2) &&
+                        abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+                    return quantile_bisect(d, -expm1(lp), minmax(x, x0)...)
+                end
+                x2 = x0
+                have_x2 = true
                 x0 = x
                 x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
             end
         else
             x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+            for _ in 1:maxiter
+                abs(x-x0) < max(abs(x),abs(x0)) * tol && return x
+                if have_x2 && isfinite(x) && isfinite(x2) &&
+                        abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+                    return quantile_bisect(d, -expm1(lp), minmax(x, x0)...)
+                end
+                x2 = x0
+                have_x2 = true
                 x0 = x
                 x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
             end
