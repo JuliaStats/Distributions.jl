@@ -31,4 +31,4 @@ Gamma <- R6Class("Gamma",
     )
 )
 
-Erlang = list(new = Gamma$new)
+Erlang = R6Class("Erlang", inherit = Gamma)

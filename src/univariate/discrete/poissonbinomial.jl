@@ -153,7 +153,7 @@ end
 function poissonbinomial_pdf(p)
     S = zeros(eltype(p), length(p) + 1)
     S[1] = 1
-    @inbounds for (col, p_col) in enumerate(p)
+    for (col, p_col) in enumerate(p)
         q_col = 1 - p_col
         for row in col:(-1):1
             S[row + 1] = q_col * S[row + 1] + p_col * S[row]
@@ -199,7 +199,7 @@ end
 function _dft(x::Vector{T}) where T
     n = length(x)
     y = zeros(complex(float(T)), n)
-    @inbounds for j = 0:n-1, k = 0:n-1
+    for j = 0:n-1, k = 0:n-1
         y[k+1] += x[j+1] * cis(-π * float(T)(2 * mod(j * k, n)) / n)
     end
     return y
@@ -222,10 +222,10 @@ sampler(d::PoissonBinomial) = PoissBinAliasSampler(d)
 function poissonbinomial_pdf_partialderivatives(p::AbstractVector{<:Real})
     n = length(p)
     A = zeros(eltype(p), n, n + 1)
-    @inbounds for j in 1:n
+    for j in 1:n
         A[j, end] = 1
     end
-    @inbounds for (i, pi) in enumerate(p)
+    for (i, pi) in enumerate(p)
         qi = 1 - pi
         for k in (n - i + 1):n
             kp1 = k + 1
@@ -243,7 +243,7 @@ function poissonbinomial_pdf_partialderivatives(p::AbstractVector{<:Real})
             A[j, end] *= pi
         end
     end
-    @inbounds for j in 1:n, i in 1:n
+    for j in 1:n, i in 1:n
         A[i, j] -= A[i, j+1]
     end
     return A

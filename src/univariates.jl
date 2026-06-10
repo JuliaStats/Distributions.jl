@@ -96,7 +96,7 @@ function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray) whe
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : length(X)
-        @inbounds r[i] = insupport(d, X[i])
+        r[i] = insupport(d, X[i])
     end
     return r
 end
@@ -144,7 +144,7 @@ end
 
 function _rand!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray{<:Real})
     for i in eachindex(A)
-        @inbounds A[i] = rand(rng, sampler)
+        A[i] = rand(rng, sampler)
     end
     return A
 end
@@ -419,8 +419,14 @@ for which `logccdf(d, x) ≤ lp`.
 invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
 # gradlogpdf
+"""
+    gradlogpdf(d::ContinuousUnivariateDistribution, x::Real)
 
-gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(gradlogpdf, (d, x)))
+The derivative of `z -> logpdf(d, z)` evaluated at `x`.
+
+See also: [`logpdf`](@ref), [`pdf`](@ref).
+"""
+gradlogpdf(d::ContinuousUnivariateDistribution, x::Real)
 
 
 function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
@@ -707,6 +713,7 @@ const continuous_distributions = [
     "levy",
     "lindley",
     "logistic",
+    "loglogistic",
     "noncentralbeta",
     "noncentralchisq",
     "noncentralf",
