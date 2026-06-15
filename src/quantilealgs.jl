@@ -47,17 +47,18 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   Distribution, with Application to the Inverse Gaussian Distribution
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
-function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12, maxiter::Int=10_000)
+function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12, max_iter::Int=150)
     x = xs + (p - cdf(d, xs)) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
         x2 = x0
         have_x2 = false
-        for _ in 1:maxiter
+        tol = max(tol, cbrt(eps(float(T)))^2)
+        for _ in 1:max_iter
             abs(x-x0) <= max(abs(x),abs(x0)) * tol && return x
-            if have_x2 && isfinite(x) && isfinite(x2) &&
-                    abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+            if have_x2 && abs(x-x2) <= max(abs(x),abs(x2)) * cbrt(eps(float(T)))^2
+                @warn "quantile_newton: 2-cycle detected, falling back to bisection" p=p maxlog=1
                 return quantile_bisect(d, p, minmax(x, x0)...)
             end
             x2 = x0
@@ -65,7 +66,8 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
             x0 = x
             x = x0 + (p - cdf(d, x0)) / pdf(d, x0)
         end
-        return x
+        @warn "quantile_newton: maximum iterations reached, falling back to bisection" p=p maxlog=1
+        return quantile_bisect(d, p, minmax(x, x0)...)
     elseif p == 0
         return T(minimum(d))
     elseif p == 1
@@ -75,17 +77,18 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
     end
 end
 
-function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12, maxiter::Int=10_000)
+function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12, max_iter::Int=150)
     x = xs + (ccdf(d, xs)-p) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
         x2 = x0
         have_x2 = false
-        for _ in 1:maxiter
+        tol = max(tol, cbrt(eps(float(T)))^2)
+        for _ in 1:max_iter
             abs(x-x0) <= max(abs(x),abs(x0)) * tol && return x
-            if have_x2 && isfinite(x) && isfinite(x2) &&
-                    abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+            if have_x2 && abs(x-x2) <= max(abs(x),abs(x2)) * cbrt(eps(float(T)))^2
+                @warn "cquantile_newton: 2-cycle detected, falling back to bisection" p=p maxlog=1
                 return quantile_bisect(d, 1 - p, minmax(x, x0)...)
             end
             x2 = x0
@@ -93,7 +96,8 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
             x0 = x
             x = x0 + (ccdf(d, x0)-p) / pdf(d, x0)
         end
-        return x
+        @warn "cquantile_newton: maximum iterations reached, falling back to bisection" p=p maxlog=1
+        return quantile_bisect(d, 1 - p, minmax(x, x0)...)
     elseif p == 1
         return T(minimum(d))
     elseif p == 0
@@ -103,18 +107,19 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
     end
 end
 
-function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12, maxiter::Int=10_000)
+function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12, max_iter::Int=150)
     T = typeof(lp - logpdf(d,xs))
     if -Inf < lp < 0
         x0 = T(xs)
         x2 = x0
         have_x2 = false
+        tol = max(tol, cbrt(eps(float(T)))^2)
         if lp < logcdf(d,x0)
             x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
-            for _ in 1:maxiter
-                abs(x-x0) < max(abs(x),abs(x0)) * tol && return x
-                if have_x2 && isfinite(x) && isfinite(x2) &&
-                        abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+            for _ in 1:max_iter
+                abs(x-x0) <= max(abs(x),abs(x0)) * tol && return x
+                if have_x2 && abs(x-x2) <= max(abs(x),abs(x2)) * cbrt(eps(float(T)))^2
+                    @warn "invlogcdf_newton: 2-cycle detected, falling back to bisection" lp=lp maxlog=1
                     return quantile_bisect(d, exp(lp), minmax(x, x0)...)
                 end
                 x2 = x0
@@ -124,10 +129,10 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
             end
         else
             x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
-            for _ in 1:maxiter
-                abs(x-x0) < max(abs(x),abs(x0))*tol && return x
-                if have_x2 && isfinite(x) && isfinite(x2) &&
-                        abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+            for _ in 1:max_iter
+                abs(x-x0) <= max(abs(x),abs(x0))*tol && return x
+                if have_x2 && abs(x-x2) <= max(abs(x),abs(x2)) * cbrt(eps(float(T)))^2
+                    @warn "invlogcdf_newton: 2-cycle detected, falling back to bisection" lp=lp maxlog=1
                     return quantile_bisect(d, exp(lp), minmax(x, x0)...)
                 end
                 x2 = x0
@@ -136,7 +141,8 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
                 x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
             end
         end
-        return x
+        @warn "invlogcdf_newton: maximum iterations reached, falling back to bisection" lp=lp maxlog=1
+        return quantile_bisect(d, exp(lp), minmax(x, x0)...)
     elseif lp == -Inf
         return T(minimum(d))
     elseif lp == 0
@@ -146,18 +152,19 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
     end
 end
 
-function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12, maxiter::Int=10_000)
+function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12, max_iter::Int=150)
     T = typeof(lp - logpdf(d,xs))
     if -Inf < lp < 0
         x0 = T(xs)
         x2 = x0
         have_x2 = false
+        tol = max(tol, cbrt(eps(float(T)))^2)
         if lp < logccdf(d,x0)
             x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
-            for _ in 1:maxiter
-                abs(x-x0) < max(abs(x),abs(x0)) * tol && return x
-                if have_x2 && isfinite(x) && isfinite(x2) &&
-                        abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+            for _ in 1:max_iter
+                abs(x-x0) <= max(abs(x),abs(x0)) * tol && return x
+                if have_x2 && abs(x-x2) <= max(abs(x),abs(x2)) * cbrt(eps(float(T)))^2
+                    @warn "invlogccdf_newton: 2-cycle detected, falling back to bisection" lp=lp maxlog=1
                     return quantile_bisect(d, -expm1(lp), minmax(x, x0)...)
                 end
                 x2 = x0
@@ -167,10 +174,10 @@ function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Re
             end
         else
             x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
-            for _ in 1:maxiter
-                abs(x-x0) < max(abs(x),abs(x0)) * tol && return x
-                if have_x2 && isfinite(x) && isfinite(x2) &&
-                        abs(x - x2) <= max(abs(x), abs(x2)) * cbrt(eps(float(T)))^2
+            for _ in 1:max_iter
+                abs(x-x0) <= max(abs(x),abs(x0)) * tol && return x
+                if have_x2 && abs(x-x2) <= max(abs(x),abs(x2)) * cbrt(eps(float(T)))^2
+                    @warn "invlogccdf_newton: 2-cycle detected, falling back to bisection" lp=lp maxlog=1
                     return quantile_bisect(d, -expm1(lp), minmax(x, x0)...)
                 end
                 x2 = x0
@@ -179,7 +186,8 @@ function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Re
                 x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
             end
         end
-        return x
+        @warn "invlogccdf_newton: maximum iterations reached, falling back to bisection" lp=lp maxlog=1
+        return quantile_bisect(d, -expm1(lp), minmax(x, x0)...)
     elseif lp == -Inf
         return T(maximum(d))
     elseif lp == 0
