@@ -24,11 +24,13 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [weakdeps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
+SparseConnectivityTracer = "9f842d2f-2579-4b1d-911e-f412cf18a3f5"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [extensions]
 DistributionsChainRulesCoreExt = "ChainRulesCore"
 DistributionsDensityInterfaceExt = "DensityInterface"
+DistributionsSparseConnectivityTracerExt = "SparseConnectivityTracer"
 DistributionsTestExt = "Test"
 
 [compat]
@@ -52,6 +54,7 @@ QuadGK = "2"
 Random = "<0.0.1, 1"
 Roots = "2"
 SparseArrays = "<0.0.1, 1"
+SparseConnectivityTracer = "1"
 SpecialFunctions = "1.2, 2"
 StableRNGs = "1"
 StaticArrays = "1"
@@ -75,9 +78,10 @@ JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+SparseConnectivityTracer = "9f842d2f-2579-4b1d-911e-f412cf18a3f5"
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "StableRNGs", "Calculus", "ChainRulesCore", "ChainRulesTestUtils", "DensityInterface", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "Optim", "SparseArrays", "StaticArrays", "Test", "OffsetArrays"]
+test = ["Aqua", "StableRNGs", "Calculus", "ChainRulesCore", "ChainRulesTestUtils", "DensityInterface", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "Optim", "SparseArrays", "SparseConnectivityTracer", "StaticArrays", "Test", "OffsetArrays"]
