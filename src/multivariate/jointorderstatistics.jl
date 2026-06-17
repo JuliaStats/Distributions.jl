@@ -166,3 +166,196 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
     end
     return x
 end
+
+# Moments
+
+## Fallbacks
+
+mean(d::JointOrderStatistics{<:ContinuousUnivariateDistribution}) = _moment(d, 1)
+function var(d::JointOrderStatistics{<:ContinuousUnivariateDistribution})
+    return _moment(d, 2, mean(d))
+end
+
+function _moment(
+    d::JointOrderStatistics{<:ContinuousUnivariateDistribution},
+    p::Int,
+    μ::Union{Real,AbstractVector{<:Real}}=0;
+    rtol=sqrt(eps(promote_type(partype(d), eltype(μ)))),
+)
+    # assumes if p == 1, then μ=0 and if p>1, then μ==mean(d)
+    T = float(typeof(one(Base.promote_type(partype(d), eltype(μ)))))
+    n = d.n
+    ranks = d.ranks
+
+    μdist = mean(d.dist)
+    mp = similar(d.ranks, T)
+    logC = @. -logbeta(ranks, T(n - ranks + 1))
+    function integrand!(y, x)
+        if x < μdist
+            # for some distributions (e.g. Normal) this improves numerical stability
+            logF = logcdf(d.dist, x)
+            log1mF = log1mexp(logF)
+        else
+            log1mF = logccdf(d.dist, x)
+            logF = log1mexp(log1mF)
+        end
+        logf = logpdf(d.dist, x)
+        @. y = (x - μ)^p * exp(logC + logf + (ranks - 1) * logF + (n - ranks) * log1mF)
+        return y
+    end
+    α = eps(T) / 2
+    lower = quantile(OrderStatistic(d.dist, n, first(ranks)), α)
+    upper = quantile(OrderStatistic(d.dist, n, last(ranks)), 1 - α)
+    quadgk!(integrand!, mp, lower, upper; rtol=rtol)
+    return mp
+end
+
+## Uniform
+
+function mean(d::JointOrderStatistics{<:Uniform})
+    return d.ranks .* scale(d.dist) ./ (d.n + 1) .+ minimum(d.dist)
+end
+function var(d::JointOrderStatistics{<:Uniform})
+    n = d.n
+    ranks = d.ranks
+    return @. (scale(d.dist)^2 * ranks * (n + 1 - ranks)) / (n + 1)^2 / (n + 2)
+end
+function cov(d::JointOrderStatistics{<:Uniform})
+    n = d.n
+    ranks = d.ranks
+    c = (scale(d.dist) / (n + 1))^2 / (n + 2)
+    return broadcast(ranks, ranks') do rᵢ, rⱼ
+        rmin, rmax = minmax(rᵢ, rⱼ)
+        return rmin * (n + 1 - rmax) * c
+    end
+end
+
+## Exponential
+
+function mean(d::JointOrderStatistics{<:Exponential})
+    # Arnold, eq 4.6.6
+    θ = scale(d.dist)
+    T = float(typeof(one(θ)))
+    m = similar(d.ranks, T)
+    ks = d.n .- d.ranks
+    _harmonicnum!(m, ks)
+    Hn = _harmonicnum_from(first(m), first(ks), d.n)
+    @. m = θ * (Hn - m)
+    return m
+end
+function var(d::JointOrderStatistics{<:Exponential})
+    # Arnold, eq 4.6.7
+    θ = scale(d.dist)
+    T = float(typeof(oneunit(θ)^2))
+    v = similar(d.ranks, T)
+    ks = (d.n + 1) .- d.ranks
+    _polygamma!(v, 1, ks)
+    ϕn = _polygamma_from(1, first(v), first(ks), d.n + 1)
+    @. v = θ^2 * (v - ϕn)
+    return v
+end
+function cov(d::JointOrderStatistics{<:Exponential})
+    # Arnold, eq 4.6.8
+    v = var(d)
+    S = broadcast(d.ranks, d.ranks', v, v') do rᵢ, rⱼ, vᵢ, vⱼ
+        rᵢ < rⱼ ? vᵢ : vⱼ
+    end
+    return S
+end
+
+## Logistic
+
+function mean(d::JointOrderStatistics{<:Logistic})
+    # Arnold, eq 4.8.6
+    T = typeof(oneunit(partype(d.dist)))
+    m = H1 = similar(d.ranks, T)
+    _harmonicnum!(H1, d.n .- d.ranks)
+    if d.ranks == 1:(d.n)
+        H2 = view(H1, reverse(eachindex(H1)))
+    else
+        H2 = similar(H1)
+        _harmonicnum!(H2, d.ranks .- 1)
+    end
+    m .= scale(d.dist) .* (H2 .- H1) .+ mean(d.dist)
+    return m
+end
+function var(d::JointOrderStatistics{<:Logistic})
+    # Arnold, eq 4.8.7
+    T = typeof(oneunit(partype(d.dist))^2)
+    v = ϕ1 = similar(d.ranks, T)
+    _polygamma!(ϕ1, 1, d.ranks)
+    if d.ranks == 1:(d.n)
+        ϕ2 = view(ϕ1, reverse(eachindex(ϕ1)))
+    else
+        ϕ2 = similar(ϕ1)
+        _polygamma!(H2, 1, d.n + 1 - d.ranks)
+    end
+    v .= scale(d.dist)^2 .* (ϕ1 .+ ϕ2)
+    return v
+end
+
+## Normal
+
+function mean(d::JointOrderStatistics{<:Normal})
+    n = d.n
+    n > 5 && return _moment(d, 1)
+    return mean.(OrderStatistic.(d, d.n, d.ranks; check_args=false))
+end
+
+## AffineDistribution
+
+function mean(d::JointOrderStatistics{<:AffineDistribution})
+    σ = scale(d.dist)
+    r = σ ≥ 0 ? d.ranks : d.n + 1 .- d.ranks
+    dρ = JointOrderStatistics(d.dist.ρ, d.n, r; check_args=false)
+    return mean(dρ) .* σ .+ d.dist.μ
+end
+function var(d::JointOrderStatistics{<:AffineDistribution})
+    σ = scale(d.dist)
+    r = σ ≥ 0 ? d.ranks : d.n + 1 .- d.ranks
+    dρ = JointOrderStatistics(d.dist.ρ, d.n, r; check_args=false)
+    return var(dρ) * σ^2
+end
+function cov(d::JointOrderStatistics{<:AffineDistribution})
+    σ = scale(d.dist)
+    r = σ ≥ 0 ? d.ranks : d.n + 1 .- d.ranks
+    dρ = JointOrderStatistics(d.dist.ρ, d.n, r; check_args=false)
+    return cov(dρ) * σ^2
+end
+
+## Common utilities
+
+# assume ns are sorted in increasing or decreasing order
+function _harmonicnum!(Hns, ns::AbstractVector{<:Int})
+    Hk = zero(eltype(Hns))
+    k = 0
+    iter = if last(ns) ≥ first(ns)
+        zip(eachindex(Hns), ns)
+    else
+        Iterators.reverse(zip(eachindex(Hns), ns))
+    end
+    for (i, n) in iter
+        Hns[i] = Hk = _harmonicnum_from(Hk, k, n)
+        k = n
+    end
+    return Hns
+end
+
+# assume ns are sorted in increasing or decreasing order
+function _polygamma!(ϕns, m::Int, ns::AbstractVector{<:Int})
+    if last(ns) ≥ first(ns)
+        i = lastindex(ϕns)
+        k = last(ns)
+        iter = Iterators.reverse(zip(eachindex(ϕns), ns))
+    else
+        i = firstindex(ϕns)
+        k = first(ns)
+        iter = zip(eachindex(ϕns), ns)
+    end
+    ϕns[i] = ϕk = polygamma(m, k)
+    for (i, n) in Iterators.drop(iter, 1)
+        ϕns[i] = ϕk = _polygamma_from(m, ϕk, k, n)
+        k = n
+    end
+    return ϕns
+end
