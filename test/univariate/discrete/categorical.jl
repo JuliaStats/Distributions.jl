@@ -137,4 +137,21 @@ end
     @test count(==(1e8), priorities[iat]) >= 13
 end
 
+@testset "AbstractVector" begin
+    # issue #1084
+    P = abs.(randn(5,4,2))
+    p = view(P,:,1,1)
+    p ./= sum(p)
+    d = @inferred(Categorical(p))
+    @test d isa Categorical{Float64, typeof(p)}
+    @test d.p === p
+
+    # #1832
+    x = rand(3,5)
+    x ./= sum(x; dims=1)
+    c = Categorical.(eachcol(x))
+    @test c isa Vector{<:Categorical}
+    @test all(ci.p isa SubArray for ci in c)
+end
+
 end

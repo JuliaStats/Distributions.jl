@@ -14,7 +14,8 @@ rng = MersenneTwister(123)
 
 d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
 
-@test !(d ≈ DiscreteNonParametric([40., 80, 120, -60], [.4, .3, .1, .2], check_args=false))
+# In the outer constructor, the support is always sorted, regardless of whether `check_args = false` or `check_args = true`
+@test d ≈ DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2], check_args=false)
 @test d ≈ DiscreteNonParametric([-60., 40., 80, 120], [.2, .4, .3, .1], check_args=false)
 
 # Invalid probability
@@ -22,6 +23,25 @@ d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
 
 # Invalid probability, but no arg check
 DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], check_args=false)
+
+# Invalid support
+@test_throws DomainError DiscreteNonParametric{Float64,Float64,Vector{Float64},Vector{Float64}}([40., 80, 120, -60], [.4, .3, .1, .2])
+@test_throws DomainError DiscreteNonParametric([-60., 40., 40., 120], [.2, .4, .3, .1])
+@test_throws DomainError DiscreteNonParametric{Float64,Float64,Vector{Float64},Vector{Float64}}([-60., 40., 40., 120], [.2, .4, .3, .1])
+
+# Invalid support but no arg check
+DiscreteNonParametric{Float64,Float64,Vector{Float64},Vector{Float64}}([40., 80, 120, -60], [.4, .3, .1, .2], check_args=false)
+DiscreteNonParametric([-60., 40., 40., 120], [.2, .4, .3, .1], check_args=false)
+DiscreteNonParametric{Float64,Float64,Vector{Float64},Vector{Float64}}([-60., 40., 40., 120], [.2, .4, .3, .1], check_args=false)
+
+# Mismatch between support and probabilities
+@test_throws ArgumentError DiscreteNonParametric([-60., 40., 40., 120], [.2, .4, .3])
+@test_throws ArgumentError DiscreteNonParametric{Float64,Float64,Vector{Float64},Vector{Float64}}([-60., 40., 40., 120], [.2, .4, .3])
+
+# Mismatch between support and probabilities but no arg check
+@test_throws BoundsError DiscreteNonParametric([-60., 40., 40., 120], [.2, .4, .3], check_args=false) # sorting errors
+DiscreteNonParametric(1:4, [.2, .4, .3], check_args=false) # no sorting, hence no `BoundsError`
+DiscreteNonParametric{Float64,Float64,Vector{Float64},Vector{Float64}}([-60., 40., 40., 120], [.2, .4, .3], check_args=false)
 
 test_range(d)
 vs = Distributions.get_evalsamples(d, 0.00001)
@@ -213,4 +233,25 @@ end
     # Different types
     @test DiscreteNonParametric(1:2, [0.5, 0.5]) == DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
     @test DiscreteNonParametric(1:2, [0.5, 0.5]) ≈ DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
+end
+
+@testset "AbstractVector (issue #1084)" begin
+    P = abs.(randn(5,4,2))
+    p = view(P,:,1,1)
+    p ./= sum(p)
+    
+    d = @inferred(DiscreteNonParametric(Base.OneTo(5), p))
+    @test d isa DiscreteNonParametric
+    @test d.p === p
+    d = @inferred(DiscreteNonParametric(1:5, p))
+    @test d isa DiscreteNonParametric
+    @test d.p === p
+    d = @inferred(DiscreteNonParametric(1:1:5, p))
+    @test d isa DiscreteNonParametric
+    @test d.p !== p
+    @test d.p == p
+    d = @inferred(DiscreteNonParametric([1, 2, 3, 4, 5], p))
+    @test d isa DiscreteNonParametric
+    @test d.p !== p
+    @test d.p == p
 end
