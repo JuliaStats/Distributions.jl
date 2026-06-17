@@ -87,8 +87,13 @@ extensions may specialize this to `false` for number-like types whose comparison
 boolean context — for example sparsity-detection tracers, whose primal-free comparisons (`σ ≥ 0`)
 return a tracer rather than a `Bool`. When any checked argument is not checkable, `@check_args` skips
 the checks so distribution constructors can still be traced.
+
+A relational check over several parameters (e.g. `a < b`) names them with a tuple/named tuple such
+as `(; a, b)`; recurse into it so the check is skipped whenever *any* contained value is not
+checkable (e.g. a tracer).
 =#
 _arg_checkable(@nospecialize(_)) = true
+_arg_checkable(x::Union{Tuple,NamedTuple}) = all(_arg_checkable, x)
 
 """
     check_args(f, check::Bool)
