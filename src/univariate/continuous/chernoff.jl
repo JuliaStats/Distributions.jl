@@ -149,15 +149,9 @@ module ChernoffComputations
     _pdf(x::Real) = g(x)*g(-x)*0.5
     _cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1]
     _cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(_pdf, x, Inf)[1]
-end
 
-pdf(d::Chernoff, x::Real) = ChernoffComputations._pdf(x)
-logpdf(d::Chernoff, x::Real) = log(ChernoffComputations.g(x))+log(ChernoffComputations.g(-x))+log(0.5)
-cdf(d::Chernoff, x::Real) = ChernoffComputations._cdf(x)
-
-function quantile(d::Chernoff, tau::Real)
     # some commonly used quantiles were precomputed
-    precomputedquants=[
+    const precomputedquants=[
         0.0 -Inf;
         0.01 -1.171534341573129;
         0.025 -0.9981810946684274;
@@ -178,46 +172,10 @@ function quantile(d::Chernoff, tau::Real)
         0.99 1.17153434157313;
         1.0 Inf
         ]
-    (0.0 <= tau && tau <= 1.0) || throw(DomainError(tau, "illegal value of tau"))
-    present = searchsortedfirst(precomputedquants[:, 1], tau)
-    if present <= size(precomputedquants, 1)
-        if tau == precomputedquants[present, 1]
-            return precomputedquants[present, 2]
-        end
-    end
 
-    # one good approximation of the quantiles can be computed using Normal(0.0, stdapprox) with stdapprox = 0.52
-    stdapprox = 0.52
-    dnorm = Normal(0.0, 1.0)
-    if tau < 0.001
-        return -newton(x -> tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, 1.0 - tau)*stdapprox)
-
-    end
-    if tau > 0.999
-        return newton(x -> 1.0 - tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)
-    end
-    return newton(x -> ChernoffComputations._cdf(x) - tau, ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)   # should consider replacing x-> construct for speed
-end
-
-minimum(d::Chernoff) = -Inf
-maximum(d::Chernoff) = Inf
-insupport(d::Chernoff, x::Real) = isnan(x) ? false : true
-
-mean(d::Chernoff) = 0.0
-var(d::Chernoff) = 0.26355964132470455
-modes(d::Chernoff) = [0.0]
-mode(d::Chernoff) = 0.0
-skewness(d::Chernoff) = 0.0
-kurtosis(d::Chernoff) = -0.16172525511461888
-kurtosis(d::Chernoff, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0)
-entropy(d::Chernoff) = -0.7515605300273104
-
-### Random number generation
-rand(d::Chernoff) = rand(default_rng(), d)
-function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random number generator --- slow in the tails
-    # constants needed for the Ziggurat algorithm
-    A = 0.03248227216266608
-    x = [
+    # constants needed for the Ziggurat random sampling algorithm
+    const randA = 0.03248227216266608
+    const randx = [
         1.4765521793744492
         1.3583996502410562
         1.2788224934376338
@@ -251,7 +209,7 @@ function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random n
         0.2358977457249061
         1.0218214689661219e-7
        ]
-    y=[
+    const randy=[
         0.02016386420423385
         0.042162593823411566
         0.06607475557706186
@@ -285,22 +243,63 @@ function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random n
         1.3789927085182485
         1.516689116183566
         ]
+end
+
+pdf(d::Chernoff, x::Real) = ChernoffComputations._pdf(x)
+logpdf(d::Chernoff, x::Real) = log(ChernoffComputations.g(x))+log(ChernoffComputations.g(-x))+log(0.5)
+cdf(d::Chernoff, x::Real) = ChernoffComputations._cdf(x)
+
+function quantile(d::Chernoff, tau::Real)
+    precomputedquants = ChernoffComputations.precomputedquants
+    (0 <= tau && tau <= 1) || throw(DomainError(tau, "illegal value of tau"))
+    present = searchsortedfirst(precomputedquants[:, 1], tau)
+    if present <= size(precomputedquants, 1)
+        if tau == precomputedquants[present, 1]
+            return precomputedquants[present, 2]
+        end
+    end
+
+    # one good approximation of the quantiles can be computed using Normal(0.0, stdapprox) with stdapprox = 0.52
+    stdapprox = 0.52
+    dnorm = Normal(0.0, 1.0)
+    return quantile_newton(d, tau, quantile(dnorm, tau)*stdapprox)
+end
+
+minimum(d::Chernoff) = -Inf
+maximum(d::Chernoff) = Inf
+insupport(d::Chernoff, x::Real) = isnan(x) ? false : true
+
+mean(d::Chernoff) = 0.0
+var(d::Chernoff) = 0.26355964132470455
+modes(d::Chernoff) = [0.0]
+mode(d::Chernoff) = 0.0
+skewness(d::Chernoff) = 0.0
+kurtosis(d::Chernoff) = -0.16172525511461888
+kurtosis(d::Chernoff, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0)
+entropy(d::Chernoff) = -0.7515605300273104
+
+### Random number generation
+
+function rand(rng::AbstractRNG, d::Chernoff)
+    A = ChernoffComputations.randA
+    x = ChernoffComputations.randx
+    y = ChernoffComputations.randy
     n = length(x)
     i = rand(rng, 0:n-1)
-    r = (2.0*rand(rng)-1) * ((i>0) ? x[i] : A/y[1])
+    r = (2*rand(rng)-1) * ((i>0) ? x[i] : A/y[1])
     rabs = abs(r)
     if rabs < x[i+1]
         return r
     end
     s = (i>0) ? (y[i]+rand(rng)*(y[i+1]-y[i])) : rand(rng)*y[1]
-    if s < 2.0*ChernoffComputations._pdf(rabs)
+    if s < 2*ChernoffComputations._pdf(rabs)
         return r
     end
     if i > 0
         return rand(rng, d)
     end
     F0 = ChernoffComputations._cdf(A/y[1])
-    tau = 2.0*rand(rng)-1 # ~ U(-1,1)
+    tau = 2*rand(rng)-1 # ~ U(-1,1)
     tauabs = abs(tau)
     return quantile(d, tauabs + (1-tauabs)*F0) * sign(tau)
 end

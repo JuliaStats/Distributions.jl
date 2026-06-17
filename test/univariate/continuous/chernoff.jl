@@ -1,5 +1,16 @@
 @testset "Chernoff tests" begin
     d = Chernoff()
+    @test extrema(d) == (-Inf, Inf)
+    @test mean(d) == 0
+    @test var(d) ≈ 0.26355964132470455
+    @test modes(d) == [0.0]
+    @test mode(d) == 0
+    @test skewness(d) == 0
+    @test kurtosis(d) ≈ -0.16172525511461888
+    @test kurtosis(d, true) ≈ kurtosis(d) 
+    @test kurtosis(d, false) ≈ kurtosis(d) + 3
+    @test entropy(d) ≈ -0.7515605300273104
+    @test rand(d) isa Float64
 
     cdftest = [
         0.005 0.5037916689930134;
@@ -148,11 +159,18 @@
         2.000 0.0001212
     ]
 
+    quantiletest = [0.0 -Inf; 0.05 -0.8450811888163325; 0.1 -0.664235196540868; 0.15 -0.5398553654712455; 0.2 -0.439827666120028; 0.25 -0.35330803528117866; 0.3 -0.27515128478220097; 0.35 -0.20241833430160983; 0.4 -0.13319637683484448; 0.45 -0.06609664086333447; 0.5 0.0; 0.55 0.06609664081686001; 0.6 0.1331963767858364; 0.65 0.20241833424985095; 0.7 0.2751512847290145; 0.75 0.3533080352204289; 0.8 0.4398276660488657; 0.85 0.5398553653947077; 0.9 0.6642351964332935; 0.95 0.845081188635776; 1.0 Inf]
+
     for i=1:size(cdftest, 1)
         @test isapprox(cdf(d, cdftest[i, 1]), cdftest[i, 2]) 
     end
     
     for i=1:size(pdftest, 1)
         @test isapprox(pdf(d, pdftest[i, 1]), pdftest[i, 2] ; atol = 1e-6)
+        @test isapprox(logpdf(d, pdftest[i, 1]), log(pdftest[i, 2]) ; atol = 1e-4)
+    end
+
+    for i=1:size(quantiletest, 1)
+        @test isapprox(quantile(d, quantiletest[i,1]), quantiletest[i, 2])
     end
 end
