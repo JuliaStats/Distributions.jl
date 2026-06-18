@@ -3,7 +3,7 @@ using Distributions
 using ForwardDiff
 
 @testset "Arcsine" begin
-    @test_throws ArgumentError Arcsine(5, 3)
+    @test_throws DomainError Arcsine(5, 3)
     d = Arcsine(3, 5)
     d2 = Arcsine(3.5f0, 5)
     @test partype(d) == Float64

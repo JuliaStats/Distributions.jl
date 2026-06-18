@@ -44,7 +44,7 @@ struct FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
             FisherNoncentralHypergeometric,
             (ns, ns >= zero(ns)),
             (nf, nf >= zero(nf)),
-            zero(n) < n < ns + nf,
+            ((; n, ns, nf), zero(n) < n < ns + nf, "n must satisfy 0 < n < ns + nf"),
             (ω, ω > zero(ω)),
         )
         new{T}(ns, nf, n, ω)
@@ -235,7 +235,7 @@ struct WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
             WalleniusNoncentralHypergeometric,
             (ns, ns >= zero(ns)),
             (nf, nf >= zero(nf)),
-            zero(n) < n < ns + nf,
+            ((; n, ns, nf), zero(n) < n < ns + nf, "n must satisfy 0 < n < ns + nf"),
             (ω, ω > zero(ω)),
         )
         new{T}(ns, nf, n, ω)
