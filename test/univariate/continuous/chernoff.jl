@@ -155,4 +155,15 @@
     for i=1:size(pdftest, 1)
         @test isapprox(pdf(d, pdftest[i, 1]), pdftest[i, 2] ; atol = 1e-6)
     end
+
+    # issue #1999
+    @testset "truncated quantile for non-precomputed probability (#1999)" begin
+        td = truncated(Chernoff(); lower=0.1)
+        p = 0.75
+        x = quantile(td, p)
+
+        @test isfinite(x)
+        @test x >= 0.1
+        @test isapprox(cdf(td, x), p; atol=1e-10)
+    end
 end
