@@ -10,7 +10,7 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx
 
     # In some special cases, e.g. #1501, rx == lx`
     # If the distribution is degenerate the check below can fail, hence we skip it
-    if rx - lx <= tol * max(abs(lx), abs(rx))
+    if lx == rx || rx - lx <= tol * max(abs(lx), abs(rx))
         # Returns `lx` of the same type as `(lx + rx) / 2`
         # For specific types such as `Float64` it is more performant than `oftype((lx + rx) / 2, lx)`
         return middle(lx, rx)
