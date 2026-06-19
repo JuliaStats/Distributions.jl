@@ -30,7 +30,7 @@ struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Uniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
-    @check_args Uniform (a < b)
+    @check_args Uniform ((; a, b), a < b, "a must be less than b")
     return Uniform{T}(a, b)
 end
 
