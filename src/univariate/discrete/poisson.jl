@@ -135,6 +135,7 @@ fit_mle(::Type{<:Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
 
 ## samplers
 
+# PoissonADSampler is biased for μ < 10
 const poissonsampler_threshold = 10
 
 function sampler(d::Poisson)
