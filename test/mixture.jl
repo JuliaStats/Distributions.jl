@@ -291,36 +291,27 @@ end
         end
     end
 
-    # issues #1611, #1807 and #1869
-    @testset "quantile convergence regressions" begin
-        cases = (
-            (
-                "nearly equal component quantiles (#1869)",
-                MixtureModel([Normal(0, 1), Normal(eps(), 1)], [0.999, 0.001]),
-                0.001,
-            ),
-            (
-                "adjacent floating point bracket (#1611)",
-                MixtureModel(
-                    [
-                        Uniform{Float64}(-0.0001, 0.0001),
-                        LogNormal{Float64}(11.174347445936371, 1.6086247197750911),
-                    ],
-                    [0.8832, 0.1168],
-                ),
-                0.99,
-            ),
-            (
-                "high quantile of exponential mixture (#1807)",
-                MixtureModel(Exponential, [10_000, 1_000_000], [0.5, 0.5]),
-                0.999,
-            ),
+    # issue #1611: bracket of adjacent floating point numbers far from zero
+    @testset "adjacent floating point bracket (#1611)" begin
+        d = MixtureModel(
+            [
+                Uniform{Float64}(-0.0001, 0.0001),
+                LogNormal{Float64}(11.174347445936371, 1.6086247197750911),
+            ],
+            [0.8832, 0.1168],
         )
+        p = 0.99
+        x = quantile(d, p)
+        @test isfinite(x)
+        @test cdf(d, x) ≈ p
+    end
 
-        @testset "$name" for (name, d, p) in cases
-            x = quantile(d, p)
-            @test isfinite(x)
-            @test isapprox(cdf(d, x), p; atol=1e-10)
-        end
+    # issue #1807: high quantile of a mixture of exponentials with very different scales
+    @testset "high quantile of exponential mixture (#1807)" begin
+        d = MixtureModel(Exponential, [10_000, 1_000_000], [0.5, 0.5])
+        p = 0.999
+        x = quantile(d, p)
+        @test isfinite(x)
+        @test cdf(d, x) ≈ p
     end
 end

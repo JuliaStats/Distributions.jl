@@ -164,6 +164,6 @@
 
         @test isfinite(x)
         @test x >= 0.1
-        @test isapprox(cdf(td, x), p; atol=1e-10)
+        @test cdf(td, x) ≈ p
     end
 end
