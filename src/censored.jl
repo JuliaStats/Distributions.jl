@@ -108,9 +108,7 @@ function params(d::Censored)
     return (d0params..., d.lower, d.upper)
 end
 
-function partype(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T}
-    return promote_type(partype(d.uncensored), T)
-end
+partype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(partype(D), T)
 
 Base.eltype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(T, eltype(D))
 

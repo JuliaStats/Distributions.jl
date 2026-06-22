@@ -14,6 +14,7 @@ struct KSDist <: ContinuousUnivariateDistribution
 end
 
 @distr_support KSDist 1 / (2 * d.n) 1.0
+partype(::Type{KSDist}) = Int
 
 
 #### Evaluation

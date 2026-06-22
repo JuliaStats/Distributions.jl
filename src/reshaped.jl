@@ -26,7 +26,7 @@ end
 Base.size(d::ReshapedDistribution) = d.dims
 Base.eltype(::Type{ReshapedDistribution{<:Any,<:ValueSupport,D}}) where {D} = eltype(D)
 
-partype(d::ReshapedDistribution) = partype(d.dist)
+partype(::Type{<:ReshapedDistribution{<:Any,<:ValueSupport,D}}) where {D} = partype(D)
 params(d::ReshapedDistribution) = (d.dist, d.dims)
 
 function insupport(d::ReshapedDistribution{N}, x::AbstractArray{<:Real,N}) where {N}

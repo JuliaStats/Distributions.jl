@@ -54,7 +54,7 @@ scale(d::Gamma) = d.θ
 rate(d::Gamma) = 1 / d.θ
 
 params(d::Gamma) = (d.α, d.θ)
-partype(::Gamma{T}) where {T} = T
+partype(::Type{<:Gamma{T}}) where {T} = T
 
 #### Statistics
 

@@ -98,7 +98,7 @@ var(d::MatrixNormal) = reshape(diag(cov(d)), size(d))
 
 params(d::MatrixNormal) = (d.M, d.U, d.V)
 
-@inline partype(d::MatrixNormal{T}) where {T<:Real} = T
+partype(::Type{<:MatrixNormal{T}}) where {T<:Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation

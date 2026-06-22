@@ -15,6 +15,7 @@ end
 @distr_support Kolmogorov 0.0 Inf
 
 params(d::Kolmogorov) = ()
+partype(::Type{Kolmogorov}) = Union{}
 
 
 #### Statistics

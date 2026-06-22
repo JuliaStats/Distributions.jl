@@ -60,7 +60,7 @@ succprob(d::Binomial) = d.p
 failprob(d::Binomial{T}) where {T} = one(T) - d.p
 
 params(d::Binomial) = (d.n, d.p)
-@inline partype(::Binomial{T}) where {T<:Real} = T
+partype(::Type{<:Binomial{T}}) where {T<:Real} = T
 
 
 #### Properties

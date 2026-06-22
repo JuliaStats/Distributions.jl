@@ -53,7 +53,7 @@ succprob(d::Bernoulli) = d.p
 failprob(d::Bernoulli) = 1 - d.p
 
 params(d::Bernoulli) = (d.p,)
-partype(::Bernoulli{T}) where {T} = T
+partype(::Type{<:Bernoulli{T}}) where {T} = T
 
 
 #### Properties

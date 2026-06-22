@@ -104,7 +104,7 @@ size(d::Wishart) = size(d.S)
 
 rank(d::Wishart) = d.rank
 params(d::Wishart) = (d.df, d.S)
-@inline partype(d::Wishart{T}) where {T<:Real} = T
+partype(::Type{<:Wishart{T}}) where {T<:Real} = T
 
 mean(d::Wishart) = d.df * Matrix(d.S)
 

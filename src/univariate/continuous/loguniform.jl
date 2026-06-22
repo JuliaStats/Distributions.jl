@@ -31,7 +31,7 @@ Base.maximum(d::LogUniform) = d.b
 
 #### Parameters
 params(d::LogUniform) = (d.a, d.b)
-partype(::LogUniform{T}) where {T<:Real} = T
+partype(::Type{<:LogUniform{T}}) where {T<:Real} = T
 
 #### Statistics
 

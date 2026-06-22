@@ -53,7 +53,7 @@ shape(d::Erlang) = d.α
 scale(d::Erlang) = d.θ
 rate(d::Erlang) = inv(d.θ)
 params(d::Erlang) = (d.α, d.θ)
-@inline partype(d::Erlang{T}) where {T<:Real} = T
+partype(::Type{<:Erlang{T}}) where {T<:Real} = T
 
 #### Statistics
 

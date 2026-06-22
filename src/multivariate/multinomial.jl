@@ -47,7 +47,7 @@ probs(d::Multinomial) = d.p
 ntrials(d::Multinomial) = d.n
 
 params(d::Multinomial) = (d.n, d.p)
-@inline partype(d::Multinomial{T}) where {T<:Real} = T
+partype(::Type{<:Multinomial{T}}) where {T<:Real} = T
 
 ### Conversions
 convert(::Type{Multinomial{T, TV}}, d::Multinomial) where {T<:Real, TV<:AbstractVector{T}} = Multinomial(d.n, TV(d.p))

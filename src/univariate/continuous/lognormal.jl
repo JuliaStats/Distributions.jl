@@ -51,7 +51,7 @@ Base.convert(::Type{LogNormal{T}}, d::LogNormal{T}) where {T<:Real} = d
 #### Parameters
 
 params(d::LogNormal) = (d.μ, d.σ)
-partype(::LogNormal{T}) where {T} = T
+partype(::Type{<:LogNormal{T}}) where {T} = T
 
 #### Statistics
 
@@ -62,7 +62,6 @@ stdlogx(d::LogNormal) = d.σ
 mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + σ^2/2))
 median(d::LogNormal) = exp(d.μ)
 mode(d::LogNormal) = ((μ, σ) = params(d); exp(μ - σ^2))
-partype(::LogNormal{T}) where {T<:Real} = T
 
 function var(d::LogNormal)
     (μ, σ) = params(d)

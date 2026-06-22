@@ -44,7 +44,7 @@ Base.convert(::Type{Chi{T}}, d::Chi{T}) where {T<:Real} = d
 
 dof(d::Chi) = d.ν
 params(d::Chi) = (d.ν,)
-@inline partype(d::Chi{T}) where {T<:Real} = T
+partype(::Type{<:Chi{T}}) where {T<:Real} = T
 
 
 #### Statistics
