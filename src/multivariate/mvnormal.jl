@@ -510,3 +510,56 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractVect
     end
     MvNormal(mu, ScalMat(m, va / (m * sw)))
 end
+
+## Differentiation
+
+function ChainRulesCore.frule((_, Δd)::Tuple{Any,Any}, ::typeof(mvnormal_c0), d::MvNormal)
+    y = mvnormal_c0(d)
+    Δd = ChainRulesCore.unthunk(Δd)
+    Δy = -dot(Δd.Σ, invcov(d)) / 2
+    return y, Δy
+end
+
+function ChainRulesCore.rrule(::typeof(mvnormal_c0), d::MvNormal)
+    y = mvnormal_c0(d)
+    function mvnormal_c0_pullback(dy)
+        dy = ChainRulesCore.unthunk(dy)
+        ∂Σ = (dy / (-2)) * invcov(d)
+        ∂d = ChainRulesCore.Tangent{typeof(d)}(Σ = ∂Σ)
+        return ChainRulesCore.NoTangent(), ∂d
+    end
+    return y, mvnormal_c0_pullback
+end
+
+function ChainRulesCore.frule(dargs::Tuple{Any,Any,Any}, ::typeof(sqmahal), d::MvNormal, x::AbstractVector)
+    y = sqmahal(d, x)    
+    (_, Δd, Δx) = dargs
+    Δd = ChainRulesCore.unthunk(Δd)
+    Δx = ChainRulesCore.unthunk(Δx)
+    Σinv = inv(_cov(d))
+    # TODO optimize
+    dΣ = -dot(Σinv * Δd.Σ * Σinv, x * x' - d.μ * x' - x * d.μ' + d.μ * d.μ')
+    dx = 2 * dot(Σinv * (x - d.μ), Δx)
+    dμ = 2 * dot(Σinv * (d.μ - x), Δd.μ)
+    Δy = dΣ + dx + dμ
+    return (y, Δy)
+end
+
+function ChainRulesCore.rrule(::typeof(sqmahal), d::MvNormal, x::AbstractVector)
+    y = sqmahal(d, x)
+    Σ = _cov(d)
+    cx = x - d.μ
+    z = Σ \ cx
+    function sqmahal_pullback(_dy)
+        dy = ChainRulesCore.unthunk(_dy)
+        ∂x = 2 * dy * z
+        ∂d = ChainRulesCore.@thunk(begin
+            ∂μ = -∂x
+            ∂J = dy * cx * cx'
+            ∂Σ = - (Σ \ ∂J) / Σ
+            ChainRulesCore.Tangent{typeof(d)}(μ = ∂μ, Σ = ∂Σ)
+        end)
+        return (ChainRulesCore.NoTangent(), ∂d, ∂x)
+    end
+    return y, sqmahal_pullback
+end
