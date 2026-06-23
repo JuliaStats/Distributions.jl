@@ -134,6 +134,7 @@ export
     MatrixTDist,
     MixtureModel,
     Multinomial,
+    MvHypergeometric,
     MultivariateNormal,
     MvLogNormal,
     MvNormal,

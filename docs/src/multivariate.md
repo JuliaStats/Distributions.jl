@@ -59,6 +59,7 @@ MvNormalCanon
 MvLogitNormal
 MvLogNormal
 Dirichlet
+MvHypergeometric
 ```
 
 ## Addition Methods
