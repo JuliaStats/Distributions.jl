@@ -64,4 +64,9 @@ using Test
         @test mgf(d, t) == exp(t * val)
         @test cf(d, t) == cis(t * val)
     end
+
+    # bare `Dirac` falls back to the generic `Real` default
+    @test @inferred(partype(Dirac{Float32})) === Float32
+    @test @inferred(partype(Dirac(1.0f0))) === Float32
+    @test @inferred(partype(Dirac)) === Real
 end

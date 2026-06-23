@@ -291,3 +291,8 @@ end
         end
     end
 end
+
+@testset "partype" begin
+    # bare `MixtureModel` (a UnionAll) falls back to the generic `Real` default
+    @test @inferred(partype(MixtureModel)) === Real
+end

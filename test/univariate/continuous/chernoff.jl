@@ -155,4 +155,7 @@
     for i=1:size(pdftest, 1)
         @test isapprox(pdf(d, pdftest[i, 1]), pdftest[i, 2] ; atol = 1e-6)
     end
+
+    # no parameters: `partype` is the empty promotion `Union{}`
+    @test @inferred(partype(Chernoff())) === Union{}
 end
