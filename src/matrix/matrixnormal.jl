@@ -82,6 +82,8 @@ end
 
 size(d::MatrixNormal) = size(d.M)
 
+Base.axes(d::MatrixNormal) = axes(d.M)
+
 rank(d::MatrixNormal) = minimum( size(d) )
 
 insupport(d::MatrixNormal, X::AbstractMatrix) = isreal(X) && size(X) == size(d)

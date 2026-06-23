@@ -80,8 +80,8 @@ abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
 insupport(d::AbstractMvNormal, x::AbstractVector) =
     length(d) == length(x) && all(isfinite, x)
 
-minimum(d::AbstractMvNormal) = fill(eltype(d)(-Inf), length(d))
-maximum(d::AbstractMvNormal) = fill(eltype(d)(Inf), length(d))
+minimum(d::AbstractMvNormal) = fill(eltype(d)(-Inf), axes(d))
+maximum(d::AbstractMvNormal) = fill(eltype(d)(Inf), axes(d))
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
@@ -211,7 +211,7 @@ end
 
 Construct a multivariate normal distribution with zero mean and covariance matrix `Σ`.
 """
-MvNormal(Σ::AbstractMatrix{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
+MvNormal(Σ::AbstractMatrix{<:Real}) = MvNormal(Zeros{eltype(Σ)}(axes(Σ, 1)), Σ)
 
 # deprecated constructors with standard deviations
 Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) MvNormal(μ, LinearAlgebra.Diagonal(map(abs2, σ)))
@@ -247,6 +247,7 @@ Base.show(io::IO, d::MvNormal) =
 ### Basic statistics
 
 length(d::MvNormal) = length(d.μ)
+Base.axes(d::MvNormal) = axes(d.μ)
 mean(d::MvNormal) = d.μ
 params(d::MvNormal) = (d.μ, d.Σ)
 @inline partype(d::MvNormal{T}) where {T<:Real} = T
