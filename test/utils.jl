@@ -50,6 +50,26 @@ r = RealInterval(1.5, 4.0)
 # `eltype(Real) === Real`, so the fallback is `Real` (and `zero`/`one` work on it)
 @test partype(Distribution) === Real
 
+# abstract types: the parameters are only upper bounds, so `partype` falls back to the
+# generic default `Real`, mirroring `eltype(Vector) === Any` in Base
+@test partype(Normal) === Real
+@test partype(Gamma) === Real
+@test partype(MvNormal) === Real
+@test partype(Dirac) === Real
+@test partype(DiscreteNonParametric) === Real
+@test partype(Truncated) === Real
+@test partype(Distributions.Censored) === Real
+@test partype(Product) === Real
+@test partype(MixtureModel) === Real
+@test partype(UnivariateDistribution) === Real
+@test partype(ContinuousUnivariateDistribution) === Real
+
+# the motivating use: `partype(eltype(container))` works whether or not the container is
+# concretely typed
+@test partype(eltype([Normal(0.0f0, 1.0f0)])) === Float32   # concrete eltype
+@test partype(eltype(Normal[Normal(0.0, 1.0)])) === Real    # abstract eltype -> fallback
+@test partype(eltype(Distribution[Normal(0.0, 1.0)])) === Real
+
 A = rand(1:10, 5, 5)
 B = rand(Float32, 4)
 C = 1//2
