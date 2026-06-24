@@ -69,3 +69,37 @@ end
         @test isfinite(pdf(trunc, x))
     end
 end
+
+@testset "Truncated normal MGF" begin
+    two = big(2)
+    sqrt2 = sqrt(two)
+    invsqrt2 = inv(sqrt2)
+    inv2sqrt2 = inv(two * sqrt2)
+    twoerfsqrt2 = two * erf(sqrt2)
+
+    for T in (Float32, Float64, BigFloat)
+        d = truncated(Normal{T}(zero(T), one(T)), -2, 2)
+        @test @inferred(mgf(d, 0)) == 1
+        @test @inferred(mgf(d, 1)) ≈ @bigly sqrt(ℯ) * (erf(invsqrt2) + erf(3 * invsqrt2)) / twoerfsqrt2
+        @test @inferred(mgf(d, 2.5)) ≈ @bigly exp(25//8) * (erf(9 * inv2sqrt2) - erf(inv2sqrt2)) / twoerfsqrt2
+    end
+
+    d = truncated(Normal(3, 10), 7, 8)
+    @test mgf(d, 0) == 1
+    @test mgf(d, 1) == 0
+
+    d = truncated(Normal(27, 3); lower=0)
+    @test mgf(d, 0) == 1
+    @test mgf(d, 1) ≈ @bigly 2 * exp(63//2) / (1 + erf(9 * invsqrt2))
+    @test mgf(d, 2.5) ≈ @bigly 2 * exp(765//8) / (1 + erf(9 * invsqrt2))
+
+    d = truncated(Normal(-5, 1); upper=-10)
+    @test mgf(d, 0) == 1
+    @test mgf(d, 1) ≈ @bigly erfc(3 * sqrt2) / (exp(9//2) * erfc(5 * invsqrt2))
+
+    @test isnan(mgf(truncated(Normal(); upper=NaN), 0))
+
+    @test mgf(truncated(Normal(), -Inf, Inf), 1) == mgf(Normal(), 1)
+
+    @test mgf(truncated(Normal(), 2, 2), 1) == exp(2)
+end
