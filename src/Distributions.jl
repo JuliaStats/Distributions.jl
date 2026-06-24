@@ -66,6 +66,7 @@ export
     MultivariateMixture,
 
     # distribution types
+    Alpha,
     Arcsine,
     Bernoulli,
     BernoulliLogit,
