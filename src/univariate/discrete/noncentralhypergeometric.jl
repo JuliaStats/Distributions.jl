@@ -9,23 +9,23 @@ abstract type NoncentralHypergeometric{T<:Real} <: DiscreteUnivariateDistributio
 
 # Functions
 
-function quantile(d::NoncentralHypergeometric{T}, q::Real) where T<:Real
-    if !(zero(q) <= q <= one(q))
-        T(NaN)
-    else
-        range = support(d)
-        if q > 1/2
-            q = 1 - q
-            range = reverse(range)
-        end
+function quantile(d::NoncentralHypergeometric, q::Real)
+    _check_quantile_arg(q)
 
-        qsum, i = zero(T), 0
-        while qsum < q
-            i += 1
-            qsum += pdf(d, range[i])
-        end
-        range[i]
+    range = support(d)
+    if q > 1/2
+        q = 1 - q
+        range = reverse(range)
     end
+
+    # Support must not be empty
+    r, state = iterate(range)
+    qsum = pdf(d, r)
+    while qsum < q && (r_state = iterate(range, state)) !== nothing
+        r, state = r_state
+        qsum += pdf(d, r)
+    end
+    return r
 end
 
 params(d::NoncentralHypergeometric) = (d.ns, d.nf, d.n, d.ω)

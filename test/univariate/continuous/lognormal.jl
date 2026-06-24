@@ -55,10 +55,10 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test iszero(cquantile(LogNormal(0.25, 0), 1))
 
     @test iszero(invlogcdf(LogNormal(), -Inf))
-    @test isnan_type(Float64, invlogcdf(LogNormal(), NaN))
+    @test_throws DomainError invlogcdf(LogNormal(), NaN)
 
     @test invlogccdf(LogNormal(), -Inf) === Inf
-    @test isnan_type(Float64, invlogccdf(LogNormal(), NaN))
+    @test_throws DomainError invlogccdf(LogNormal(), NaN)
 
     # test for #996 being fixed
     let d = LogNormal(0, 1), x = exp(1), ∂x = exp(2)
@@ -264,22 +264,22 @@ end
     @test @inferred(quantile(LogNormal(1.0, 0.0), 0.0f0)) === 0.0
     @test @inferred(quantile(LogNormal(1.0, 0.0f0), 1.0)) === Inf
     @test @inferred(quantile(LogNormal(1.0f0, 0.0), 0.5)) ===  exp(1)
-    @test isnan_type(Float64, @inferred(quantile(LogNormal(1.0f0, 0.0), NaN)))
+    @test_throws DomainError @inferred(quantile(LogNormal(1.0f0, 0.0), NaN))
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 0.0f0)) === 0.0f0
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 1.0f0)) === Inf32
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 0.5f0)) === exp(1.0f0)
-    @test isnan_type(Float32, @inferred(quantile(LogNormal(1.0f0, 0.0f0), NaN32)))
+    @test_throws DomainError @inferred(quantile(LogNormal(1.0f0, 0.0f0), NaN32))
     @test @inferred(quantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
 
     # cquantile
     @test @inferred(cquantile(LogNormal(1.0, 0.0), 0.0f0)) === Inf
     @test @inferred(cquantile(LogNormal(1.0, 0.0f0), 1.0)) === 0.0
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0), 0.5)) === exp(1)
-    @test isnan_type(Float64, @inferred(cquantile(LogNormal(1.0f0, 0.0), NaN)))
+    @test_throws DomainError @inferred(cquantile(LogNormal(1.0f0, 0.0), NaN))
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0f0), 0.0f0)) === Inf32
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0f0), 1.0f0)) === 0.0f0
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0f0), 0.5f0)) === exp(1.0f0)
-    @test isnan_type(Float32, @inferred(cquantile(LogNormal(1.0f0, 0.0f0), NaN32)))
+    @test_throws DomainError @inferred(cquantile(LogNormal(1.0f0, 0.0f0), NaN32))
     @test @inferred(cquantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
 
     # gradlogpdf
