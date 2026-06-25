@@ -158,4 +158,15 @@
 
     # no parameters: `partype` is the empty promotion `Union{}`
     @test @inferred(partype(Chernoff())) === Union{}
+
+    # issue #1999
+    @testset "truncated quantile for non-precomputed probability (#1999)" begin
+        td = truncated(Chernoff(); lower=0.1)
+        p = 0.75
+        x = quantile(td, p)
+
+        @test isfinite(x)
+        @test x >= 0.1
+        @test cdf(td, x) ≈ p
+    end
 end
