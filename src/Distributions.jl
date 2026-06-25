@@ -4,6 +4,7 @@ using StatsBase, PDMats, StatsFuns, Statistics
 using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
 import QuadGK: quadgk
+using Roots: find_zero, ITP, Newton
 import Base: size, length, convert, show, getindex, rand, vec, inv
 import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
