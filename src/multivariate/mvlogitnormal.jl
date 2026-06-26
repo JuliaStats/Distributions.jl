@@ -29,6 +29,8 @@ end
 MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
+distrname(d::MvLogitNormal) = string("MvLogitNormal{", distrname(d.normal), "}")
+
 function Base.show(io::IO, d::MvLogitNormal; indent::String="  ")
     print(io, distrname(d))
     println(io, "(")
