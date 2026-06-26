@@ -419,8 +419,14 @@ for which `logccdf(d, x) ≤ lp`.
 invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
 # gradlogpdf
+"""
+    gradlogpdf(d::ContinuousUnivariateDistribution, x::Real)
 
-gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(gradlogpdf, (d, x)))
+The derivative of `z -> logpdf(d, z)` evaluated at `x`.
+
+See also: [`logpdf`](@ref), [`pdf`](@ref).
+"""
+gradlogpdf(d::ContinuousUnivariateDistribution, x::Real)
 
 
 function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)

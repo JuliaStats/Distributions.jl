@@ -189,14 +189,7 @@ function quantile(d::Chernoff, tau::Real)
     # one good approximation of the quantiles can be computed using Normal(0.0, stdapprox) with stdapprox = 0.52
     stdapprox = 0.52
     dnorm = Normal(0.0, 1.0)
-    if tau < 0.001
-        return -newton(x -> tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, 1.0 - tau)*stdapprox)
-
-    end
-    if tau > 0.999
-        return newton(x -> 1.0 - tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)
-    end
-    return newton(x -> ChernoffComputations._cdf(x) - tau, ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)   # should consider replacing x-> construct for speed
+    return quantile_newton(d, tau, quantile(dnorm, tau)*stdapprox)
 end
 
 minimum(d::Chernoff) = -Inf

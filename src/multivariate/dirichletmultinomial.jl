@@ -39,8 +39,8 @@ struct DirichletMultinomial{T <: Real,V <: AbstractVector{T}} <: DiscreteMultiva
 
     function DirichletMultinomial{T}(n::Integer, α::V) where {T <: Real, V <: AbstractVector{T}}
         α0 = sum(abs, α)
-        sum(α) == α0 || throw(ArgumentError("alpha must be a positive vector."))
-        n > 0 || throw(ArgumentError("n must be a positive integer."))
+        sum(α) == α0 || throw(DomainError(α, "DirichletMultinomial: alpha must be a positive vector."))
+        n > 0 || throw(DomainError(n, "DirichletMultinomial: n must be a positive integer."))
         new{T,V}(Int(n), α, α0)
     end
 end

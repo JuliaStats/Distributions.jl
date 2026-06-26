@@ -86,7 +86,8 @@ function verify_and_test(d::UnivariateDistribution, dct::AbstractDict, n_tsample
                            Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous, Float64},
-                           Distributions.Truncated{Distributions.Rician{Float64},Distributions.Continuous, Float64}])
+                           Distributions.Truncated{Distributions.Rician{Float64},Distributions.Continuous, Float64},
+                           Distributions.Truncated{Distributions.Hypergeometric,Distributions.Discrete, Float64}])
             @test isapprox(logpdf(d, Dual(float(x))), lp, atol=sqrt(eps()))
         end
         # NOTE: this test is disabled as StatsFuns.jl doesn't have generic support for cdf()
@@ -173,7 +174,7 @@ at = [0.0, 1.0, 0.0, 1.0]
 
     @testset "errors" begin
         @test_throws ErrorException truncated(Normal(), 1, 0)
-        @test_throws ArgumentError truncated(Uniform(), 1, 2)
+        @test_throws DomainError truncated(Uniform(), 1, 2)
         @test_throws ErrorException truncated(Exponential(), 3, 1)
     end
 
