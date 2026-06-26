@@ -426,7 +426,9 @@ function test_special(::Type{DT}; rng::Union{AbstractRNG,Nothing} = nothing) whe
     end
     @testset "Non-allocating sampling" begin
         # #2012: we can sample without allocations
-        M, U, V = _rand_params(MatrixNormal, Float64, 5, 5)
+        M = randn(5, 5)
+        U = (X = 2 .* rand(5, 5) .- 1; X * X')
+        V = (Y = 2 .* rand(5, 5) .- 1; Y * Y')
         noallocD = MatrixNormal(M, cholesky!(Symmetric(U, :L)), cholesky!(Symmetric(V, :U)))
         output = Matrix{Float64}(undef, size(noallocD))
         allocs = ((d, out) -> @allocated(rand!(d, out)))(noallocD, output)
