@@ -26,18 +26,6 @@ struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNo
 end
 ```
 
-We also define aliases for common specializations of this parametric type:
-
-```julia
-const FullNormalCanon = MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},    Vector{Float64}}
-const DiagNormalCanon = MvNormalCanon{Float64, PDiagMat{Float64,Vector{Float64}}, Vector{Float64}}
-const IsoNormalCanon  = MvNormalCanon{Float64, ScalMat{Float64},                  Vector{Float64}}
-
-const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},    Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{Float64, PDiagMat{Float64,Vector{Float64}}, Zeros{Float64,1,Axes}}
-const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64, ScalMat{Float64},                  Zeros{Float64,1,Axes}}
-```
-
 **Note:** `MvNormalCanon` share the same set of methods as `MvNormal`.
 """
 struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
@@ -46,13 +34,13 @@ struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNo
     J::P    # precision matrix, i.e. inv(Σ)
 end
 
-const FullNormalCanon = MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},Vector{Float64}}
-const DiagNormalCanon = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
-const IsoNormalCanon  = MvNormalCanon{Float64,ScalMat{Float64},Vector{Float64}}
+const FullNormalCanon{T} = MvNormalCanon{T,<:PDMat{T},<:AbstractVector{T}}
+const DiagNormalCanon{T} = MvNormalCanon{T,<:PDiagMat{T},<:AbstractVector{T}}
+const IsoNormalCanon{T}  = MvNormalCanon{T,<:ScalMat{T},<:AbstractVector{T}}
 
-const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Zeros{Float64,1,Axes}}
-const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64,ScalMat{Float64},Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormalCanon{T} = MvNormalCanon{T,<:PDMat{T},<:Zeros{T,1}}
+const ZeroMeanDiagNormalCanon{T} = MvNormalCanon{T,<:PDiagMat{T},<:Zeros{T,1}}
+const ZeroMeanIsoNormalCanon{T}  = MvNormalCanon{T,<:ScalMat{T},<:Zeros{T,1}}
 
 
 ### Constructors
