@@ -49,9 +49,9 @@ end
 
 function MatrixTDist(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::AbstractPDMat{T}) where T <: Real
     n, p = size(M)
-    0 < ν < Inf || throw(ArgumentError("degrees of freedom must be positive and finite."))
-    n == size(Σ, 1) || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
-    p == size(Ω, 1) || throw(ArgumentError("Number of columns of M must equal dim of Ω."))
+    0 < ν < Inf || throw(DomainError(ν, "MatrixTDist: degrees of freedom must be positive and finite."))
+    n == size(Σ, 1) || throw(DimensionMismatch("MatrixTDist: number of rows of M must equal dim of Σ."))
+    p == size(Ω, 1) || throw(DimensionMismatch("MatrixTDist: number of columns of M must equal dim of Ω."))
     logc0 = matrixtdist_logc0(Σ, Ω, ν)
     R = Base.promote_eltype(T, logc0)
     prom_M = convert(AbstractArray{R}, M)

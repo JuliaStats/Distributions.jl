@@ -32,6 +32,7 @@ const tests = [
     "multivariate/mvlognormal",
     "types", # extra file compared to /src
     "utils",
+    "sparseconnectivitytracer", # extra file compared to /src
     "samplers",
     "univariate/discrete/categorical",
     "univariates",

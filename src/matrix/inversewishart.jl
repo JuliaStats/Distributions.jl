@@ -30,7 +30,7 @@ end
 
 function InverseWishart(df::T, Ψ::AbstractPDMat{T}) where T<:Real
     p = size(Ψ, 1)
-    df > p - 1 || throw(ArgumentError("df should be greater than dim - 1."))
+    df > p - 1 || throw(DomainError(df, "InverseWishart: df should be greater than dim - 1."))
     logc0 = invwishart_logc0(df, Ψ)
     R = Base.promote_eltype(T, logc0)
     prom_Ψ = convert(AbstractArray{R}, Ψ)

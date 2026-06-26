@@ -4,6 +4,16 @@ test_cgf(Poisson(1   ), (1f0,2f0,10.0,50.0))
 test_cgf(Poisson(10  ), (1f0,2f0,10.0,50.0))
 test_cgf(Poisson(1e-3), (1f0,2f0,10.0,50.0))
 
+# Regression: PoissonADSampler is biased for low values of μ
+# because the Ahrens-Dieter algorithm is only designed for μ ≥ 10;
+# Threshold now requires μ ≥ 10 for AD; μ < 10 uses PoissonCountSampler.
+@testset "Poisson sampler bias for μ < 10" begin
+    n = 100_000_000
+    μ = 6.0
+    tol = 5 * sqrt(μ / n)
+    @test sum(rand(Poisson(μ)) for _ in 1:n) / n ≈ μ atol = tol
+end
+
 @testset "Poisson suffstats and OffsetArrays" begin
     a = rand(Poisson(), 11)
     wa = 1.0:11.0

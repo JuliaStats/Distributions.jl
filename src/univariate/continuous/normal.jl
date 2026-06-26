@@ -210,7 +210,7 @@ struct NormalKnownSigma <: IncompleteDistribution
     σ::Float64
 
     function NormalKnownSigma(σ::Float64)
-        σ > 0 || throw(ArgumentError("σ must be a positive value."))
+        σ > 0 || throw(DomainError(σ, "NormalKnownSigma: σ must be a positive value."))
         new(σ)
     end
 end
