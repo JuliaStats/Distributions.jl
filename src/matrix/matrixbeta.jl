@@ -36,7 +36,7 @@ end
 #  -----------------------------------------------------------------------------
 
 function MatrixBeta(p::Int, n1::Real, n2::Real)
-    p > 0 || throw(ArgumentError("dim must be positive: got $(p)."))
+    p > 0 || throw(DomainError(p, "MatrixBeta: dim must be positive."))
     logc0 = matrixbeta_logc0(p, n1, n2)
     T = Base.promote_eltype(n1, n2, logc0)
     Ip = ScalMat(p, one(T))
@@ -121,7 +121,7 @@ end
 
 function rand(rng::AbstractRNG, d::MatrixBeta)
     A = Matrix{float(partype(d))}(undef, size(d))
-    @inbounds rand!(rng, d, A)
+    rand!(rng, d, A)
     return A
 end
 

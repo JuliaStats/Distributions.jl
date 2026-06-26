@@ -209,7 +209,13 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
             w = Float64(s.n-y+1)
 
             if A > (s.xM*log(f1/x1) + ((s.n-s.Mi)+0.5)*log(z/w) + (y-s.Mi)*log(w*s.r/(x1*s.q)) +
-                    lstirling_asym(f1) + lstirling_asym(z) + lstirling_asym(x1) + lstirling_asym(w))
+                    # In the 1988 paper, all error terms are added, which is incorrect:
+                    # the third and fourth terms should be subtracted. This can be verified
+                    # by examining the derivation of equation (1): notice that the first two
+                    # terms arise from the approximation of the numerator, while the last two terms
+                    # arise from the denominator. A direct numerical test would require precision
+                    # beyond what is currently practical
+                    lstirling_asym(f1) + lstirling_asym(z) - lstirling_asym(x1) - lstirling_asym(w))
                 # Goto 1
                 continue
             end

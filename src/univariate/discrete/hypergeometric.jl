@@ -29,7 +29,7 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
             Hypergeometric,
             (ns, ns >= zero(ns)),
             (nf, nf >= zero(nf)),
-            zero(n) <= n <= ns + nf,
+            ((; n, ns, nf), zero(n) <= n <= ns + nf, "n must satisfy 0 ≤ n ≤ ns + nf"),
         )
         new(ns, nf, n)
     end
@@ -84,11 +84,4 @@ entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))
 
 ## sampling
 
-# TODO: remove RFunctions dependency. Implement:
-#   V. Kachitvichyanukul & B. Schmeiser
-#   "Computer generation of hypergeometric random variates"
-#   Journal of Statistical Computation and Simulation, 22(2):127-145
-#   doi:10.1080/00949658508810839
-@rand_rdist(Hypergeometric)
-rand(d::Hypergeometric) =
-    convert(Int, StatsFuns.RFunctions.hyperrand(d.ns, d.nf, d.n))
+sampler(dist::Hypergeometric) = HypergeometricSampler(dist)

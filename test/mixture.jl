@@ -282,4 +282,28 @@ end
             end
         end
     end
+
+    # issue #1611: bracket of adjacent floating point numbers far from zero
+    @testset "adjacent floating point bracket (#1611)" begin
+        d = MixtureModel(
+            [
+                Uniform{Float64}(-0.0001, 0.0001),
+                LogNormal{Float64}(11.174347445936371, 1.6086247197750911),
+            ],
+            [0.8832, 0.1168],
+        )
+        p = 0.99
+        x = quantile(d, p)
+        @test isfinite(x)
+        @test cdf(d, x) ≈ p
+    end
+
+    # issue #1807: high quantile of a mixture of exponentials with very different scales
+    @testset "high quantile of exponential mixture (#1807)" begin
+        d = MixtureModel(Exponential, [10_000, 1_000_000], [0.5, 0.5])
+        p = 0.999
+        x = quantile(d, p)
+        @test isfinite(x)
+        @test cdf(d, x) ≈ p
+    end
 end

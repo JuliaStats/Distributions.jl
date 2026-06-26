@@ -122,11 +122,11 @@ logkernel(d::LKJ, R::AbstractMatrix) = (d.η - 1) * logdet(R)
 
 function rand(rng::AbstractRNG, d::LKJ)
     R = Matrix{float(partype(d))}(undef, size(d))
-    @inbounds rand!(rng, d, R)
+    rand!(rng, d, R)
     return R
 end
 
-@inbounds function rand!(rng::AbstractRNG, d::LKJ, R::AbstractMatrix{<:Real})
+function rand!(rng::AbstractRNG, d::LKJ, R::AbstractMatrix{<:Real})
     @boundscheck size(R) == size(d)
 
     # Currently requires one-based indexing

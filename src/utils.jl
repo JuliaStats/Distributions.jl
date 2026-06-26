@@ -9,7 +9,7 @@ end
         D,
         @setup(statements...),
         (arg₁, cond₁, message₁),
-        (cond₂, message₂),
+        (arg₂, cond₂),
         ...,
     )
 
@@ -21,14 +21,19 @@ the following Julia code:
 Distributions.check_args(check_args) do
     \$(statements...)
     cond₁ || throw(DomainError(arg₁, \$(string(D, ": ", message₁))))
-    cond₂ || throw(ArgumentError(\$(string(D, ": ", message₂))))
+    cond₂ || throw(DomainError(arg₂, \$(string(D, ": the condition ", cond₂, " is not satisfied."))))
     ...
 end
 ```
 
-The `@setup` argument can be elided if no setup code is needed. Moreover, error messages
-can be omitted. In this case the message `"the condition \$(cond) is not satisfied."` is
-used.
+Every check must provide the offending value(s) `argᵢ` so the resulting `DomainError`
+carries the parameter that violated the domain on `err.val`. For relational checks
+involving multiple parameters (e.g. `a < b`), pass a named tuple such as `(; a, b)` as
+the value so downstream catchers can read the individual parameters by name.
+
+The `@setup` argument can be elided if no setup code is needed. The third message
+element can also be elided; in that case the message `"the condition \$(cond) is not
+satisfied."` is used.
 """
 macro check_args(D, setup_or_check, checks...)
     # Extract setup statements
@@ -39,33 +44,27 @@ macro check_args(D, setup_or_check, checks...)
         checks = (setup_or_check, checks...)
     end
 
-    # Generate expressions for each condition
+    # Generate expressions for each condition, collecting the explicitly-named arguments so they can
+    # be forwarded to `check_args` (used to decide whether the checks can be evaluated at all).
+    args_exprs = Any[]
     conds_exprs = map(checks) do check
         if Meta.isexpr(check, :tuple, 3)
             # argument, condition, and message specified
             arg = check.args[1]
+            push!(args_exprs, esc(arg))
             cond = check.args[2]
             message = string(D, ": ", check.args[3])
             return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
         elseif Meta.isexpr(check, :tuple, 2)
-            cond_or_message = check.args[2]
-            if cond_or_message isa String
-                # only condition and message specified
-                cond = check.args[1]
-                message = string(D, ": ", cond_or_message)
-                return :(($(esc(cond))) || throw(ArgumentError($message)))
-            else
-                # only argument and condition specified
-                arg = check.args[1]
-                cond = cond_or_message
-                message = string(D, ": the condition ", cond, " is not satisfied.")
-                return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
-            end
-        else
-            # only condition specified
-            cond = check
+            # argument and condition specified; auto-generate message
+            arg = check.args[1]
+            push!(args_exprs, esc(arg))
+            cond = check.args[2]
             message = string(D, ": the condition ", cond, " is not satisfied.")
-            return :(($(esc(cond))) || throw(ArgumentError($message)))
+            return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
+        else
+            error("`@check_args` requires each check to include an offending value; " *
+                  "use `(arg, cond)` or `(arg, cond, message)`. Got: `", check, "`.")
         end
     end
 
@@ -73,10 +72,28 @@ macro check_args(D, setup_or_check, checks...)
         Distributions.check_args($(esc(:check_args))) do
             $(__source__)
             $(setup_stmts...)
-            $(conds_exprs...)
+            if all(Distributions._arg_checkable, ($(args_exprs...),))
+                $(conds_exprs...)
+            end
         end
     end
 end
+
+#=
+    _arg_checkable(x)::Bool
+
+Whether a constructor argument `x` supports `@check_args` validation. Defaults to `true`. Package
+extensions may specialize this to `false` for number-like types whose comparisons cannot be used in
+boolean context — for example sparsity-detection tracers, whose primal-free comparisons (`σ ≥ 0`)
+return a tracer rather than a `Bool`. When any checked argument is not checkable, `@check_args` skips
+the checks so distribution constructors can still be traced.
+
+A relational check over several parameters (e.g. `a < b`) names them with a tuple/named tuple such
+as `(; a, b)`; recurse into it so the check is skipped whenever *any* contained value is not
+checkable (e.g. a tracer).
+=#
+_arg_checkable(@nospecialize(_)) = true
+_arg_checkable(x::Union{Tuple,NamedTuple}) = all(_arg_checkable, x)
 
 """
     check_args(f, check::Bool)

@@ -7,10 +7,11 @@ location `ξ`, scale `ω`, and shape `α`, it has the probability density functi
 
 ```math
 f(x; \\xi, \\omega, \\alpha) =
-\\frac{2}{\\omega \\sqrt{2 \\pi}} \\exp{\\bigg(-\\frac{(x-\\xi)^2}{2\\omega^2}\\bigg)}
-\\int_{-\\infty}^{\\alpha\\left(\\frac{x-\\xi}{\\omega}\\right)}
-\\frac{1}{\\sqrt{2 \\pi}}  \\exp{\\bigg(-\\frac{t^2}{2}\\bigg)} \\, \\mathrm{d}t
+\\frac{2}{\\omega \\sqrt{2 \\pi}} \\exp{(-z^2/2)}
+\\int_{-\\infty}^{\\alpha z}
+\\frac{1}{\\sqrt{2 \\pi}} \\exp{(-t^2/2)} \\, \\mathrm{d}t
 ```
+where ``z = (x-\\xi)/\\omega``.
 
 External links
 

@@ -12,14 +12,14 @@ abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 
 It has two type parameters that define the kind of samples that can be drawn therefrom.
 
-```@doc
+```@docs
 Distributions.Sampleable
 Base.rand(::Distributions.Sampleable)
 ```
 
 ### VariateForm
 
-```@doc
+```@docs
 Distributions.VariateForm
 ```
 

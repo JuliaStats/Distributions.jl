@@ -4,6 +4,7 @@ using StatsBase, PDMats, StatsFuns, Statistics
 using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
 import QuadGK: quadgk
+using Roots: find_zero, ITP, Newton
 import Base: size, length, convert, show, getindex, rand, vec, inv
 import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
@@ -123,6 +124,7 @@ export
     LKJCholesky,
     LocationScale,
     Logistic,
+    LogLogistic,
     LogNormal,
     LogUniform,
     MvLogitNormal,
@@ -354,7 +356,7 @@ Supported distributions:
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, JohnsonSU, Kolmogorov, KSDist, KSOneSided, Kumaraswamy,
     Laplace, Levy, Lindley, LKJ, LKJCholesky,
-    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
+    Logistic, LogLogistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
