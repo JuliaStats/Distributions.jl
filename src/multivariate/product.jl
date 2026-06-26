@@ -26,14 +26,6 @@ struct Product{
     end
 end
 
-function Product(v::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractVector{T}}
-    Base.depwarn(
-        "`Product(v)` is deprecated, please use `product_distribution(v)`",
-        :Product,
-    )
-    return Product{S, T, V}(v)
-end
-
 length(d::Product) = length(d.v)
 function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
                                                     T<:UnivariateDistribution{S}}

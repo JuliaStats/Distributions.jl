@@ -122,7 +122,6 @@ export
     Lindley,
     LKJ,
     LKJCholesky,
-    LocationScale,
     Logistic,
     LogLogistic,
     LogNormal,
@@ -154,7 +153,6 @@ export
     Pareto,
     PGeneralizedGaussian,
     SkewedExponentialPower,
-    Product, # deprecated
     Poisson,
     PoissonBinomial,
     QQPair,
@@ -169,7 +167,6 @@ export
     TDist,
     TriangularDist,
     Triweight,
-    Truncated,
     Uniform,
     UnivariateGMM,
     VonMises,

@@ -105,10 +105,6 @@ end
 const LeftTruncated{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Truncated{D,S,T,T,Nothing}
 const RightTruncated{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Truncated{D,S,T,Nothing,T}
 
-### Constructors of `Truncated` are deprecated - users should call `truncated`
-@deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncated(d, l, u)
-@deprecate Truncated(d::UnivariateDistribution, l::T, u::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real} Truncated(d, l, u, log(lcdf), lcdf, ucdf, tp, logtp)
-
 function truncated(d::Truncated, l::T, u::T) where {T<:Real}
     return truncated(
         d.untruncated,
