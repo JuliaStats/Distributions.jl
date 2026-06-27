@@ -1,3 +1,5 @@
+using Combinatorics
+
 """
 The [Multinomial distribution](http://en.wikipedia.org/wiki/Multinomial_distribution)
 generalizes the *binomial distribution*. Consider n independent draws from a Categorical
@@ -19,6 +21,7 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
                     # over 1:k
 ```
 """
+
 struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
     n::Int
     p::TV
@@ -160,6 +163,53 @@ function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
         s += xlogy(xi, p_i)
     end
     return s
+end
+
+"""
+    cdf(d::Multinomial, x::AbstractVector{<:Real})
+
+Compute the cumulative distribution function (CDF) of the Multinomial distribution `d` evaluated at `x`. 
+
+This calculates the probability of observing counts less than or equal to the corresponding 
+values in `x` for all categories simultaneously.
+"""
+function cdf(d::Multinomial, x::AbstractVector{<:Real})
+    n = d.n
+    k = length(d.p)
+    
+    any(x .< 0) && return 0.0
+    
+    sum(x) < n && return 0.0
+
+    pool = Int[]
+    for i in 1:k
+        max_capacity = min(floor(Int, x[i]), n)
+        append!(pool, fill(i, max_capacity))
+    end
+
+    total_prob = 0.0
+    
+    y = zeros(Int, k)
+
+    for combo in multiset_combinations(pool, n)
+        fill!(y, 0)
+        for category in combo
+            y[category] += 1
+        end
+    
+        total_prob += pdf(d, y)
+    end
+    
+    return total_prob
+end
+
+"""
+    logcdf(d::Multinomial, x::AbstractVector{<:Real})
+
+Compute the log of the cumulative distribution function of the Multinomial distribution `d` evaluated at `x`.
+"""
+function logcdf(d::Multinomial, x::AbstractVector{<:Real})
+    return log(cdf(d, x))
 end
 
 # Sampling
