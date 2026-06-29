@@ -15,6 +15,8 @@ params(d)     # Get the parameters, i.e. (ν,)
 dof(d)        # Get the degrees of freedom, i.e. ν
 ```
 
+To create a TDist with a different location and scale, see `LocationScale`.
+
 External links
 
 [Student's T distribution on Wikipedia](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
