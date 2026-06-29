@@ -164,6 +164,13 @@ end
         end
     end
 
+    @testset "unary negation" begin
+        # `-d` stays well-typed even when `partype(d) === Union{}` (e.g. `Kolmogorov`)
+        @test @inferred(partype(-Normal(1.0f0, 2.0f0))) === Float32
+        @test @inferred(partype(-Kolmogorov())) === Int
+        @test -Kolmogorov() isa Distributions.AffineDistribution{Int}
+    end
+
     @test_logs Distributions.AffineDistribution(1.0, 1, Normal())
 
     @test_deprecated ls_norm = LocationScale(1.0, 1, Normal())

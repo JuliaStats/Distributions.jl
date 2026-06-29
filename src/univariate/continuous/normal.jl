@@ -55,7 +55,7 @@ Base.convert(::Type{Normal{T}}, d::Normal{T}) where {T<:Real} = d
 #### Parameters
 
 params(d::Normal) = (d.μ, d.σ)
-@inline partype(d::Normal{T}) where {T<:Real} = T
+partype(::Type{<:Normal{T}}) where {T<:Real} = T
 
 location(d::Normal) = d.μ
 scale(d::Normal) = d.σ

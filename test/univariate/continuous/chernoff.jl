@@ -156,6 +156,9 @@
         @test isapprox(pdf(d, pdftest[i, 1]), pdftest[i, 2] ; atol = 1e-6)
     end
 
+    # no parameters: `partype` is the empty promotion `Union{}`
+    @test @inferred(partype(Chernoff())) === Union{}
+
     # issue #1999
     @testset "truncated quantile for non-precomputed probability (#1999)" begin
         td = truncated(Chernoff(); lower=0.1)

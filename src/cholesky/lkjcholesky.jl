@@ -121,7 +121,7 @@ end
 
 StatsBase.params(d::LKJCholesky) = (d.d, d.η, d.uplo)
 
-@inline partype(::LKJCholesky{T}) where {T <: Real} = T
+partype(::Type{<:LKJCholesky{T}}) where {T <: Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation

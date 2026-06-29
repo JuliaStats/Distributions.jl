@@ -40,7 +40,7 @@ canonform(d::Normal) = convert(NormalCanon, d)
 #### Parameters
 
 params(d::NormalCanon) = (d.η, d.λ)
-@inline partype(d::NormalCanon{T}) where {T<:Real} = T
+partype(::Type{<:NormalCanon{T}}) where {T<:Real} = T
 
 #### Statistics
 

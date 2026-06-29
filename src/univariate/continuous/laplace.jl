@@ -55,7 +55,7 @@ Base.convert(::Type{Laplace{T}}, d::Laplace{T}) where {T<:Real} = d
 location(d::Laplace) = d.μ
 scale(d::Laplace) = d.θ
 params(d::Laplace) = (d.μ, d.θ)
-@inline partype(d::Laplace{T}) where {T<:Real} = T
+partype(::Type{<:Laplace{T}}) where {T<:Real} = T
 
 
 #### Statistics

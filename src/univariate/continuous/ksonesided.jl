@@ -12,6 +12,7 @@ struct KSOneSided <: ContinuousUnivariateDistribution
 end
 
 @distr_support KSOneSided 0.0 1.0
+partype(::Type{KSOneSided}) = Int
 
 
 #### Evaluation

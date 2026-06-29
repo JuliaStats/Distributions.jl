@@ -27,7 +27,7 @@ Base.convert(::Type{NoncentralT{T}}, d::NoncentralT{T}) where {T<:Real} = d
 ### Parameters
 
 params(d::NoncentralT) = (d.ν, d.λ)
-partype(::NoncentralT{T}) where {T} = T
+partype(::Type{<:NoncentralT{T}}) where {T} = T
 
 
 ### Statistics

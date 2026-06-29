@@ -49,7 +49,7 @@ scale(d::Exponential) = d.θ
 rate(d::Exponential) = inv(d.θ)
 
 params(d::Exponential) = (d.θ,)
-partype(::Exponential{T}) where {T<:Real} = T
+partype(::Type{<:Exponential{T}}) where {T<:Real} = T
 
 #### Statistics
 

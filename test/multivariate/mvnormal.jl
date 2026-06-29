@@ -131,6 +131,10 @@ end
 
     @test isa(logpdf(d32, X32), Float32)
     @test logpdf(d32, X32) ≈ logpdf(d, X)
+
+    # bare `MvNormal` (a UnionAll) falls back to the generic `Real` default
+    @test @inferred(partype(MvNormal(rand(Float32, 5), Matrix{Float32}(I, 5, 5)))) === Float32
+    @test @inferred(partype(MvNormal)) === Real
 end
 
 ##### Random sampling from MvNormalCanon with sparse precision matrix

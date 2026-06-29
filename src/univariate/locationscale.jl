@@ -103,7 +103,7 @@ Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution{T}) where {T<:
 location(d::AffineDistribution) = d.μ
 scale(d::AffineDistribution) = d.σ
 params(d::AffineDistribution) = (d.μ,d.σ,d.ρ)
-partype(d::AffineDistribution{T}) where {T} = promote_type(partype(d.ρ), T)
+partype(::Type{<:AffineDistribution{T,S,D}}) where {T,S,D} = promote_type(partype(D), T)
 
 #### Statistics
 
@@ -175,5 +175,5 @@ Base.:+(x::Real, d::UnivariateDistribution) = d + x
 Base.:*(x::Real, d::UnivariateDistribution) = AffineDistribution(zero(x), x, d)
 Base.:*(d::UnivariateDistribution, x::Real) = x * d
 Base.:-(d::UnivariateDistribution, x::Real) = d + -x
-Base.:-(d::UnivariateDistribution) = -one(partype(d)) * d
+Base.:-(d::UnivariateDistribution) = -one(promote_type(Int, partype(d))) * d
 Base.:/(d::UnivariateDistribution, x::Real) = inv(x) * d

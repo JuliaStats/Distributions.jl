@@ -30,7 +30,7 @@ Base.convert(::Type{NoncentralBeta{T}}, d::NoncentralBeta{T}) where {T<:Real} = 
 ### Parameters
 
 params(d::NoncentralBeta) = (d.α, d.β, d.λ)
-partype(::NoncentralBeta{T}) where {T} = T
+partype(::Type{<:NoncentralBeta{T}}) where {T} = T
 
 
 ### Evaluation & Sampling

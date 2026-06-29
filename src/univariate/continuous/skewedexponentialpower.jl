@@ -56,7 +56,7 @@ end
 Base.convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{T}) where {T<:Real} = d
 
 ### Parameters
-@inline partype(::SkewedExponentialPower{T}) where {T<:Real} = T
+partype(::Type{<:SkewedExponentialPower{T}}) where {T<:Real} = T
 
 params(d::SkewedExponentialPower) = (d.μ, d.σ, d.p, d.α)
 location(d::SkewedExponentialPower) = d.μ

@@ -57,7 +57,7 @@ length(d::MvLogitNormal) = length(d.normal) + 1
 Base.eltype(::Type{<:MvLogitNormal{D}}) where {D} = eltype(D)
 Base.eltype(d::MvLogitNormal) = eltype(d.normal)
 params(d::MvLogitNormal) = params(d.normal)
-@inline partype(d::MvLogitNormal) = partype(d.normal)
+partype(::Type{<:MvLogitNormal{D}}) where {D} = partype(D)
 
 location(d::MvLogitNormal) = mean(d.normal)
 minimum(d::MvLogitNormal) = fill(zero(eltype(d)), length(d))

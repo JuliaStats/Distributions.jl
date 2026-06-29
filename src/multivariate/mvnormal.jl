@@ -237,7 +237,7 @@ Base.show(io::IO, d::MvNormal) =
 length(d::MvNormal) = length(d.μ)
 mean(d::MvNormal) = d.μ
 params(d::MvNormal) = (d.μ, d.Σ)
-@inline partype(d::MvNormal{T}) where {T<:Real} = T
+partype(::Type{<:MvNormal{T}}) where {T<:Real} = T
 
 var(d::MvNormal) = diag(d.Σ)
 cov(d::MvNormal) = d.Σ

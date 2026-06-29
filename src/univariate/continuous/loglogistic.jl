@@ -43,7 +43,7 @@ convert(::Type{LogLogistic{T}}, d::LogLogistic) where {T<:Real} = LogLogistic{T}
 
 #### Parameters
 params(d::LogLogistic) = (d.α, d.β)
-partype(::LogLogistic{T}) where {T} = T
+partype(::Type{<:LogLogistic{T}}) where {T} = T
 
 #### Statistics 
 

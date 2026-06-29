@@ -45,7 +45,7 @@ Base.convert(::Type{SkewNormal{T}}, d::SkewNormal{T}) where {T<:Real} = d
 
 #### Parameters
 params(d::SkewNormal) = (d.ξ, d.ω, d.α)
-@inline partype(d::SkewNormal{T}) where {T<:Real} = T
+partype(::Type{<:SkewNormal{T}}) where {T<:Real} = T
 
 #### Statistics
 delta(d::SkewNormal) = d.α / √(1 + d.α^2)

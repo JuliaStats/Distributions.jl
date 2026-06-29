@@ -48,7 +48,7 @@ Base.convert(::Type{Geometric{T}}, d::Geometric{T}) where {T<:Real} = d
 succprob(d::Geometric) = d.p
 failprob(d::Geometric) = 1 - d.p
 params(d::Geometric) = (d.p,)
-partype(::Geometric{T}) where {T<:Real} = T
+partype(::Type{<:Geometric{T}}) where {T<:Real} = T
 
 
 ### Statistics
