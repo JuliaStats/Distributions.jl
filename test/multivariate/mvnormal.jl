@@ -82,9 +82,9 @@ end
     C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
     J = inv(C)
     h = J \ mu
-    @test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
-    @test typeof(MvNormal(mu, Array{Float32}(C))) == typeof(MvNormal(mu, PDMat(C)))
-    @test typeof(@test_deprecated(MvNormal(mu, 2.0f0))) == typeof(@test_deprecated(MvNormal(mu, 2.0)))
+    @test MvNormal(mu, PDMat(Array{Float32}(C))) isa MvNormal{Float64, PDMat{Float32, Matrix{Float32}}, Vector{Float64}}
+    @test MvNormal(mu, Array{Float32}(C)) isa MvNormal{Float64, PDMat{Float32, Matrix{Float32}}, Vector{Float64}}
+    @test @test_deprecated(MvNormal(mu, 2.0f0)) isa MvNormal{Float64, ScalMat{Float32}, Vector{Float64}}
 
     @test typeof(MvNormalCanon(h, PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(h, PDMat(J)))
     @test typeof(MvNormalCanon(h, Array{Float32}(J))) == typeof(MvNormalCanon(h, PDMat(J)))
@@ -102,9 +102,9 @@ end
     @test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
     @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 
-    @test MvNormal(mu, I) === @test_deprecated(MvNormal(mu, 1))
+    @test MvNormal(mu, I) === @test_deprecated(MvNormal(mu, 1.0))
     @test MvNormal(mu, 9 * I) === @test_deprecated(MvNormal(mu, 3))
-    @test MvNormal(mu, 0.25f0 * I) === @test_deprecated(MvNormal(mu, 0.5))
+    @test MvNormal(mu, 0.25f0 * I) === @test_deprecated(MvNormal(mu, 0.5f0))
 
     @test MvNormal(mu, I) === MvNormal(mu, Diagonal(Ones(length(mu))))
     @test MvNormal(mu, 9 * I) === MvNormal(mu, Diagonal(Fill(9, length(mu))))
