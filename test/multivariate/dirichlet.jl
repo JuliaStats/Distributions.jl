@@ -160,3 +160,14 @@ end
         end
     end
 end
+
+@testset "zero sample variance. Issue 602" begin
+    X = [
+        0.1 0.1
+        0.5 0.3
+        0.4 0.6
+    ]
+    @test all(isfinite, Distributions.dirichlet_mle_init(X))
+    ft = fit_mle(Dirichlet, X)
+    @test ft.alpha ≈ [4.818417154882677, 17.25974156242572, 21.70076086163771]
+end
