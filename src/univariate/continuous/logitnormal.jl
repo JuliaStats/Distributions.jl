@@ -14,9 +14,9 @@ If ``X \\sim \\operatorname{Normal}(\\mu, \\sigma)`` then
 The probability density function is
 
 ```math
-f(x; \\mu, \\sigma) = \\frac{1}{x \\sqrt{2 \\pi \\sigma^2}}
+f(x; \\mu, \\sigma) =  \\frac{1}{x (1-x)} \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
 \\exp \\left( - \\frac{(\\text{logit}(x) - \\mu)^2}{2 \\sigma^2} \\right),
-\\quad x > 0
+\\quad 0 < x < 1
 ```
 
 where the logit-Function is
