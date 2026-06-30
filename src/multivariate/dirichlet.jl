@@ -224,33 +224,38 @@ end
 
 ## Initialization
 
-function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
+# initialization based on mean and log-mean
+# Ref https://tminka.github.io/papers/dirichlet/minka-dirichlet.pdf
+function _dirichlet_mle_init2(μ::Vector{Float64}, logμ::Vector{Float64})
     K = length(μ)
 
-    α0 = 0.
-    for k = 1:K
-        μk = μ[k]
-        γk = γ[k]
-        ak = (μk - γk) / (γk - μk * μk)
-        α0 += ak
-    end
-    α0 /= K
+    # Minka eq 42
+    α₀ = (K - 1) / 2 / sum(μₖ * (log(μₖ) - logμₖ) for (μₖ, logμₖ) in zip(μ, logμ))
 
-    lmul!(α0, μ)
+    # Run five iterations of a fixed point equation for good starting values
+    # Note! Minka doesn't suggest the number of iterations
+    for i = 1:5
+        for k = 1:K
+            # Minka eq 9
+            μ[k] = invdigamma(digamma(α₀) + logμ[k])
+        end
+        α₀ = sum(μ)
+    end
+
+    return μ
 end
 
 function dirichlet_mle_init(P::AbstractMatrix{Float64})
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = vec(sum(P, dims=2))       # E[p]
-    γ = vec(sum(abs2, P, dims=2)) # E[p^2]
+    μ = vec(sum(P, dims=2))         # E[p]
+    logμ = vec(sum(log, P, dims=2)) # E[log(p)]
 
-    c = 1.0 / n
-    μ .*= c
-    γ .*= c
+    μ ./= n
+    logμ ./= n
 
-    _dirichlet_mle_init2(μ, γ)
+    return _dirichlet_mle_init2(μ, logμ)
 end
 
 function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
