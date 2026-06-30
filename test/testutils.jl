@@ -540,7 +540,7 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         end
     end
 
-    if !isa(d, StudentizedRange)
+    if !isa(d, StudentizedRange) && !(isa(d, Tweedie) && d.p == 1)
         # check: pdf should be the derivative of cdf
         for i = 2:(nv-1)
             if p[i] > 1.0e-6

@@ -209,6 +209,12 @@ TruncatedNormal(27, 3, 0, Inf)
 TruncatedNormal(-5, 1, -Inf, -10)
 TruncatedNormal(1.8, 1.2, -Inf, 0)
 
+Tweedie(2.0, 1.5, 1)
+Tweedie(2.0, 1.5, 1.01)
+Tweedie(2.0, 1.5, 1.5)
+Tweedie(2.0, 1.5, 1.99)
+Tweedie(2.0, 1.5, 2.0)
+
 Uniform()
 Uniform(0.0, 2.0)
 Uniform(3.0, 17.0)
