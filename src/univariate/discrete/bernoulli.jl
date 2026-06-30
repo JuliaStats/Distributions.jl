@@ -64,16 +64,15 @@ skewness(d::Bernoulli) = (p0 = failprob(d); p1 = succprob(d); (p0 - p1) / sqrt(p
 kurtosis(d::Bernoulli) = 1 / var(d) - 6
 
 
-mode(d::Bernoulli) = ifelse(succprob(d) > 1/2, 1, 0)
+mode(d::Bernoulli) = succprob(d) > 1/2
 
 function modes(d::Bernoulli)
     p = succprob(d)
-    p < 1/2 ? [0] :
-    p > 1/2 ? [1] : [0, 1]
+    p < 1/2 ? [false] :
+    p > 1/2 ? [true] : [false, true]
 end
 
-median(d::Bernoulli) = ifelse(succprob(d) <= 1/2, 0, 1)
-
+median(d::Bernoulli) = succprob(d) > 1/2
 function entropy(d::Bernoulli)
     p0 = failprob(d)
     p1 = succprob(d)
@@ -96,11 +95,11 @@ ccdf(d::Bernoulli, x::Bool) = x ? zero(d.p) : succprob(d)
 ccdf(d::Bernoulli, x::Int) = x < 0 ? one(d.p) :
                              x < 1 ? succprob(d) : zero(d.p)
 
-function quantile(d::Bernoulli{T}, p::Real) where T<:Real
-    0 <= p <= 1 ? (p <= failprob(d) ? zero(T) : one(T)) : T(NaN)
+function quantile(d::Bernoulli, p::Real)
+    0 <= p <= 1 ? p > failprob(d) : throw(DomainError(p, "p must be in [0, 1] for quantile"))
 end
-function cquantile(d::Bernoulli{T}, p::Real) where T<:Real
-    0 <= p <= 1 ? (p >= succprob(d) ? zero(T) : one(T)) : T(NaN)
+function cquantile(d::Bernoulli, p::Real)
+    0 <= p <= 1 ? p < succprob(d) : throw(DomainError(p, "p must be in [0, 1] for quantile"))
 end
 
 mgf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(t)
