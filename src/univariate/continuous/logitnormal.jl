@@ -14,9 +14,9 @@ If ``X \\sim \\operatorname{Normal}(\\mu, \\sigma)`` then
 The probability density function is
 
 ```math
-f(x; \\mu, \\sigma) = \\frac{1}{x \\sqrt{2 \\pi \\sigma^2}}
+f(x; \\mu, \\sigma) =  \\frac{1}{x (1-x)} \\cdot \\frac{1}{ \\sqrt{2 \\pi \\sigma^2}}
 \\exp \\left( - \\frac{(\\text{logit}(x) - \\mu)^2}{2 \\sigma^2} \\right),
-\\quad x > 0
+\\quad 0 < x < 1
 ```
 
 where the logit-Function is
@@ -58,7 +58,7 @@ struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
     LogitNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogitNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
+function LogitNormal(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
     @check_args LogitNormal (σ, σ >= zero(σ))
     return LogitNormal{T}(μ, σ)
 end
@@ -75,7 +75,7 @@ LogitNormal(μ::Real=0.0) = LogitNormal(μ, one(μ); check_args=false)
 
 #### Conversions
 convert(::Type{LogitNormal{T}}, μ::S, σ::S) where
-  {T <: Real, S <: Real} = LogitNormal(T(μ), T(σ))
+{T<:Real,S<:Real} = LogitNormal(T(μ), T(σ))
 function Base.convert(::Type{LogitNormal{T}}, d::LogitNormal) where {T<:Real}
     LogitNormal{T}(T(d.μ), T(d.σ))
 end
