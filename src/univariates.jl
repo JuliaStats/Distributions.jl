@@ -154,7 +154,9 @@ end
 
 Generate a scalar sample from `d`. The general fallback is `quantile(d, rand())`.
 """
-rand(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
+function rand(rng::AbstractRNG, d::UnivariateDistribution)
+    return quantile(d, rand(rng, float(partype(d))))
+end
 
 ## statistics
 

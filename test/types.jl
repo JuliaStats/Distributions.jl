@@ -34,8 +34,8 @@ using ForwardDiff: Dual
                 Distributions.mvtdist(one(T), Matrix{T}(I, 2, 2)),
             )
             for dist in dists
-                @test eltype(typeof(dist)) === T
-                @test eltype(rand(dist)) === eltype(dist)
+                @test @test_deprecated(eltype(typeof(dist))) === T
+                @test eltype(rand(dist)) === @test_deprecated(eltype(dist))
             end
         end
     end

@@ -112,8 +112,6 @@ function partype(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {
     return promote_type(partype(d.uncensored), T)
 end
 
-Base.eltype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(T, eltype(D))
-
 #### Range and Support
 
 isupperbounded(d::LeftCensored) = isupperbounded(d.uncensored)

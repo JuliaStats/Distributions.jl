@@ -100,7 +100,7 @@ end
 
         d = Censored(Normal(0.0, 1.0), -1, 2)
         @test d isa Censored
-        @test eltype(d) === Float64
+        @test @test_deprecated(eltype(d)) === Float64
         @test params(d) === (params(Normal(0.0, 1.0))..., -1, 2)
         @test partype(d) === Float64
         @test @inferred extrema(d) == (-1, 2)
@@ -115,7 +115,7 @@ end
 
         d = Censored(Cauchy(0, 1), nothing, 2)
         @test d isa Censored
-        @test eltype(d) === Base.promote_type(eltype(Cauchy(0, 1)), Int)
+        @test @test_deprecated(eltype(d)) === Base.promote_type(@test_deprecated(eltype(Cauchy(0, 1))), Int)
         @test params(d) === (params(Cauchy(0, 1))..., nothing, 2)
         @test partype(d) === Float64
         @test extrema(d) == (-Inf, 2.0)
@@ -129,7 +129,7 @@ end
 
         d = Censored(Gamma(1, 2), 2, nothing)
         @test d isa Censored
-        @test eltype(d) === Base.promote_type(eltype(Gamma(1, 2)), Int)
+        @test @test_deprecated(eltype(d)) === Base.promote_type(@test_deprecated(eltype(Gamma(1, 2))), Int)
         @test params(d) === (params(Gamma(1, 2))..., 2, nothing)
         @test partype(d) === Float64
         @test extrema(d) == (2.0, Inf)

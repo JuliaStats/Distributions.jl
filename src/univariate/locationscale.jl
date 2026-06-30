@@ -51,8 +51,6 @@ end
 
 function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
     @check_args AffineDistribution (σ, !iszero(σ))
-    # μ and σ act on both random numbers and parameter-like quantities like mean
-    # hence do not promote: but take care in eltype and partype
     return AffineDistribution{T}(μ, σ, ρ)
 end
 
@@ -71,8 +69,6 @@ end
 
 const ContinuousAffineDistribution{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
 const DiscreteAffineDistribution{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,Discrete,D}
-
-Base.eltype(::Type{<:AffineDistribution{T,S,D}}) where {T,S,D} = promote_type(eltype(D), T)
 
 minimum(d::AffineDistribution) =
     d.σ > 0 ? d.μ + d.σ * minimum(d.ρ) : d.μ + d.σ * maximum(d.ρ)
