@@ -245,6 +245,20 @@ plotdensity((0, 30), GeneralizedExtremeValue, (0, 1, 1)) # hide
 ```
 
 ```@docs
+GeneralizedHyperbolic
+```
+```@example plotdensity
+plotdensity((-8, 8), GeneralizedHyperbolic, (3, 2, 1, -1, 1/2)) # hide
+```
+
+```@docs
+GeneralizedInverseGaussian
+```
+```@example plotdensity
+plotdensity((0, 20), GeneralizedInverseGaussian, (3, 8, -1/2)) # hide
+```
+
+```@docs
 GeneralizedPareto
 ```
 ```@example plotdensity
