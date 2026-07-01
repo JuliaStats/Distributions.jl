@@ -67,8 +67,8 @@ function Base.show(io::IO, d::ProductNamedTupleDistribution)
     return show_multline(io, d, collect(pairs(d.dists)))
 end
 
-function distrname(::ProductNamedTupleDistribution{K}) where {K}
-    return "ProductNamedTupleDistribution{$K}"
+function print_distrname(io::IO, ::ProductNamedTupleDistribution{K}) where {K}
+    return print(io, "ProductNamedTupleDistribution{", K, "}")
 end
 
 """
