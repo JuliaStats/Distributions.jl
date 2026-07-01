@@ -7,7 +7,7 @@
 #   this function to provide a name that is easier to read,
 #   especially when the type is parametric.
 #
-distrname(d::Distribution) = string(typeof(d))
+@generated distrname(d::Distribution) = string(d)
 
 show(io::IO, d::Distribution) = show(io, d, fieldnames(typeof(d)))
 
