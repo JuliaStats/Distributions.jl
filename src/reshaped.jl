@@ -103,7 +103,7 @@ end
 Return a [`Distribution`](@ref) of `reshape(X, dims)` where `X` is a random variable with
 distribution `d`.
 
-The default implementation returns a [`ReshapedDistribution`](@ref). However, it can return
+The default implementation returns a `ReshapedDistribution`. However, it can return
 more optimized distributions for specific types of distributions and numbers of dimensions.
 Therefore it is recommended to use `reshape` instead of the constructor of
 `ReshapedDistribution`.
