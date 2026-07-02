@@ -63,10 +63,32 @@ m_0(d::SkewNormal) = mean_z(d) - (skewness(d) * std_z(d))/2 - (sign(d.α)/2) * e
 mode(d::SkewNormal) = d.ξ + d.ω * m_0(d)  
 
 #### Evaluation
-pdf(d::SkewNormal, x::Real) = (2/d.ω) * normpdf((x-d.ξ)/d.ω) * normcdf(d.α * (x-d.ξ)/d.ω)
-logpdf(d::SkewNormal, x::Real) = log(2) - log(d.ω) + normlogpdf((x-d.ξ) / d.ω) + normlogcdf(d.α * (x-d.ξ) / d.ω)
-#cdf requires Owen's T function.
-#cdf/quantile etc 
+function pdf(d::SkewNormal, x::Real)
+    (; ξ, ω, α) = d
+    z = (x - ξ) / ω
+    return 2 * normpdf(z) * normcdf(α * z) / ω
+end
+function logpdf(d::SkewNormal, x::Real)
+    (; ξ, ω, α) = d
+    z = (x - ξ) / ω
+    return logtwo - log(ω) + normlogpdf(z) + normlogcdf(α * z)
+end
+function cdf(d::SkewNormal, x::Real)
+    (; ξ, ω, α) = d
+    z = (x - ξ) / ω
+    return normcdf(z) - 2 * StatsFuns.owens_t(z, α)
+end
+function ccdf(d::SkewNormal, x::Real)
+    (; ξ, ω, α) = d
+    z = (x - ξ) / ω
+    return normccdf(z) + 2 * StatsFuns.owens_t(z, α)
+end
+# `logcdf`/`logccdf` fall back to `log(cdf)`/`log(ccdf)`.
+# Newton iteration from the mode; `invlogcdf`/`invlogccdf` then use the generic
+# `quantile(d, exp(lp))` fallback. The full `@quantile_newton` is not used because its
+# log-space `invlogcdf_newton` fails to converge from the approximate mode `m_0`.
+quantile(d::SkewNormal, p::Real) = quantile_newton(d, p)
+cquantile(d::SkewNormal, p::Real) = cquantile_newton(d, p)
 
 mgf(d::SkewNormal, t::Real) = 2 * exp(d.ξ * t + (d.ω^2 * t^2)/2 ) * normcdf(d.ω * delta(d) * t)
 
