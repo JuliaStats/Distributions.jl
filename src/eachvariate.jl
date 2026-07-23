@@ -11,12 +11,9 @@ function EachVariate{V}(x::AbstractArray{<:Real,M}) where {V,M}
     return EachVariate{V,typeof(x),typeof(ax),T,M-V}(x, ax)
 end
 
-Base.IteratorSize(::Type{EachVariate{V,P,A,T,N}}) where {V,P,A,T,N} = Base.HasShape{N}()
-
 Base.axes(x::EachVariate) = x.axes
 
 Base.size(x::EachVariate) = map(length, x.axes)
-Base.size(x::EachVariate, d::Int) = 1 <= ndims(x) ? length(axes(x)[d]) : 1
 
 # We don't need `setindex!` (currently), therefore only `getindex` is implemented
 Base.@propagate_inbounds function Base.getindex(
