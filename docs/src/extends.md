@@ -23,7 +23,7 @@ function rand(rng::AbstractRNG, s::Spl)
 end
 ```
 
-The package already implements a vectorized version of `rand!` and `rand` that repeatedly calls the scalar version to generate multiple samples; as wells as a one arg version that uses the default random number generator.
+The package already implements a vectorized version of `rand!` and `rand` that repeatedly calls the scalar version to generate multiple samples; as well as a one arg version that uses the default random number generator.
 
 ### Multivariate Sampler
 
@@ -80,7 +80,7 @@ Remember that each *column* of A is a sample.
 
 ### Matrix-variate Sampler
 
-To implement a multivariate sampler, one can define a subtype of `Sampleable{Multivariate,S}`, and provide both `size` and `_rand!` methods, as
+To implement a matrix-variate sampler, one can define a subtype of `Sampleable{Matrixvariate,S}`, and provide both `size` and `_rand!` methods, as
 
 ```julia
 Base.size(s::Spl) = ... # the size of each matrix sample
@@ -102,7 +102,7 @@ sampler(d::Distribution)
 
 ### Univariate Distribution
 
-A univariate distribution type should be defined as a subtype of `DiscreteUnivarateDistribution` or `ContinuousUnivariateDistribution`.
+A univariate distribution type should be defined as a subtype of `DiscreteUnivariateDistribution` or `ContinuousUnivariateDistribution`.
 
 The following methods need to be implemented for each univariate distribution type:
 
@@ -132,7 +132,7 @@ You may refer to the source file `src/univariates.jl` to see details about how g
 
 ## Create a Multivariate Distribution
 
-A multivariate distribution type should be defined as a subtype of `DiscreteMultivarateDistribution` or `ContinuousMultivariateDistribution`.
+A multivariate distribution type should be defined as a subtype of `DiscreteMultivariateDistribution` or `ContinuousMultivariateDistribution`.
 
 The following methods need to be implemented for each multivariate distribution type:
 
