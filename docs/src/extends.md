@@ -102,7 +102,7 @@ sampler(d::Distribution)
 
 ### Univariate Distribution
 
-A univariate distribution type should be defined as a subtype of `DiscreteUnivarateDistribution` or `ContinuousUnivariateDistribution`.
+A univariate distribution type should be defined as a subtype of [`DiscreteUnivariateDistribution`](@ref) or [`ContinuousUnivariateDistribution`](@ref).
 
 The following methods need to be implemented for each univariate distribution type:
 
