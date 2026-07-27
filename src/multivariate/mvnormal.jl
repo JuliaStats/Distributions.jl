@@ -54,18 +54,6 @@ of any subtype of `AbstractPDMat`. Particularly, one can use `PDMat` for full co
 in the form of ``\\sigma^2 \\mathbf{I}``. (See the Julia package
 [PDMats](https://github.com/JuliaStats/PDMats.jl/) for details).
 
-We also define a set of aliases for the types using different combinations of mean vectors and covariance:
-
-```julia
-const IsoNormal  = MvNormal{Float64, ScalMat{Float64},                  Vector{Float64}}
-const DiagNormal = MvNormal{Float64, PDiagMat{Float64,Vector{Float64}}, Vector{Float64}}
-const FullNormal = MvNormal{Float64, PDMat{Float64,Matrix{Float64}},    Vector{Float64}}
-
-const ZeroMeanIsoNormal{Axes}  = MvNormal{Float64, ScalMat{Float64},                  Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormal{Axes} = MvNormal{Float64, PDiagMat{Float64,Vector{Float64}}, Zeros{Float64,1,Axes}}
-const ZeroMeanFullNormal{Axes} = MvNormal{Float64, PDMat{Float64,Matrix{Float64}},    Zeros{Float64,1,Axes}}
-```
-
 Multivariate normal distributions support affine transformations:
 ```julia
 d = MvNormal(μ, Σ)
@@ -169,13 +157,13 @@ end
 
 const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 
-const IsoNormal  = MvNormal{Float64,ScalMat{Float64},Vector{Float64}}
-const DiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
-const FullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Vector{Float64}}
+const IsoNormal{T}  = MvNormal{T,<:ScalMat{T},<:AbstractVector{T}}
+const DiagNormal{T} = MvNormal{T,<:PDiagMat{T},<:AbstractVector{T}}
+const FullNormal{T} = MvNormal{T,<:PDMat{T},<:AbstractVector{T}}
 
-const ZeroMeanIsoNormal{Axes}  = MvNormal{Float64,ScalMat{Float64},Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormal{Axes} = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Zeros{Float64,1,Axes}}
-const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Zeros{Float64,1,Axes}}
+const ZeroMeanIsoNormal{T}  = MvNormal{T,<:ScalMat{T},<:Zeros{T,1}}
+const ZeroMeanDiagNormal{T} = MvNormal{T,<:PDiagMat{T},<:Zeros{T,1}}
+const ZeroMeanFullNormal{T} = MvNormal{T,<:PDMat{T},<:Zeros{T,1}}
 
 ### Construction
 function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
