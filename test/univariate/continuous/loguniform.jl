@@ -21,9 +21,9 @@ import Random
     end
 
     d = LogUniform(1,10)
-    @test eltype(d) === Float64
+    @test @test_deprecated(eltype(d)) === Float64
     @test 1 <= rand(rng, d) <= 10
-    @test rand(rng, d) isa eltype(d)
+    @test rand(rng, d) isa @test_deprecated(eltype(d))
     @test @inferred(quantile(d, 0))   ≈ 1
     @test quantile(d, 0.5) ≈ sqrt(10) # geomean
     @test quantile(d, 1)   ≈ 10

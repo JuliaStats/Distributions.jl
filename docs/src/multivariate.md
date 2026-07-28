@@ -18,7 +18,6 @@ The methods listed below are implemented for each multivariate distribution, whi
 ```@docs
 length(::MultivariateDistribution)
 size(::MultivariateDistribution)
-eltype(::Type{MultivariateDistribution})
 mean(::MultivariateDistribution)
 var(::MultivariateDistribution)
 std(::MultivariateDistribution)
@@ -42,8 +41,8 @@ loglikelihood(::MultivariateDistribution, ::AbstractVector{<:Real})
 ### Sampling
 
 ```@docs
-rand(rng::AbstractRNG, ::MultivariateDistribution)
-rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
+Base.rand(rng::AbstractRNG, ::MultivariateDistribution)
+Random.rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractVector{<:Real})
 ```
 
 **Note:** In addition to these common methods, each multivariate distribution has its special methods, as introduced below.

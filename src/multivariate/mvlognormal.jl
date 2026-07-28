@@ -176,8 +176,6 @@ MvLogNormal(μ::AbstractVector,s::Real) = MvLogNormal(MvNormal(μ,s))
 MvLogNormal(σ::AbstractVector) = MvLogNormal(MvNormal(σ))
 MvLogNormal(d::Int,s::Real) = MvLogNormal(MvNormal(d,s))
 
-Base.eltype(::Type{<:MvLogNormal{T}}) where {T} = T
-
 ### Conversion
 function convert(::Type{MvLogNormal{T}}, d::MvLogNormal) where T<:Real
     MvLogNormal(convert(MvNormal{T}, d.normal))
@@ -232,10 +230,25 @@ var(d::MvLogNormal) = diag(cov(d))
 entropy(d::MvLogNormal) = length(d)*(1+log2π)/2 + logdetcov(d.normal)/2 + sum(mean(d.normal))
 
 #See https://en.wikipedia.org/wiki/Log-normal_distribution
-function _rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractVecOrMat{<:Real})
-    _rand!(rng, d.normal, x)
+function rand(rng::AbstractRNG, d::MvLogNormal)
+    x = rand(rng, d.normal)
     map!(exp, x, x)
     return x
+end
+function rand(rng::AbstractRNG, d::MvLogNormal, n::Int)
+    xs = rand(rng, d.normal, n)
+    map!(exp, xs, xs)
+    return xs
+end
+
+for N in (1, 2)
+    @eval begin
+        Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractArray{<:Real,$N})
+            rand!(rng, d.normal, x)
+            map!(exp, x, x)
+            return x
+        end
+    end
 end
 
 _logpdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d, x) ? (_logpdf(d.normal, log.(x)) - sum(log.(x))) : -Inf

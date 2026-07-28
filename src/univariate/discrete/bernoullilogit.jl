@@ -24,8 +24,6 @@ BernoulliLogit() = BernoulliLogit(0.0)
 
 @distr_support BernoulliLogit false true
 
-Base.eltype(::Type{<:BernoulliLogit}) = Bool
-
 #### Conversions
 Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit) where {T<:Real} = BernoulliLogit{T}(T(d.logitp))
 Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit{T}) where {T<:Real} = d

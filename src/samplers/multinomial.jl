@@ -1,3 +1,6 @@
+function multinom_rand(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real})
+    return multinom_rand!(rng, n, p, Vector{Int}(undef, length(p)))
+end
 function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
                          x::AbstractVector{<:Real})
     k = length(p)
@@ -49,8 +52,13 @@ function MultinomialSampler(n::Int, prob::Vector{<:Real})
     return MultinomialSampler(n, prob, AliasTable(prob))
 end
 
-function _rand!(rng::AbstractRNG, s::MultinomialSampler,
+function rand(rng::AbstractRNG, s::MultinomialSampler)
+    x = Vector{Int}(undef, length(s.prob))
+    return rand!(rng, s, x)
+end
+@inline function rand!(rng::AbstractRNG, s::MultinomialSampler,
                 x::AbstractVector{<:Real})
+    @boundscheck length(s) == length(x)
     n = s.n
     k = length(s)
     if n^2 > k

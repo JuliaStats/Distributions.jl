@@ -114,4 +114,12 @@ using Test
             end
         end
     end
+
+    # issues 1252 and 1783
+    @testset "rand consistency" begin
+        for T in (Float32, Float64, BigFloat)
+            @test @inferred(rand(Uniform(T(0), T(1)))) isa T
+            @test @inferred(rand(Uniform(T(0), T(1)), 5)) isa Vector{T}
+        end
+    end
 end

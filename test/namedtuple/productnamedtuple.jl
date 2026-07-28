@@ -68,7 +68,7 @@ using Test
                 (x=product_distribution((x=Normal(), y=Gamma())),),
             ]
                 d = ProductNamedTupleDistribution(nt)
-                @test eltype(d) === eltype(rand(d))
+                @test @test_deprecated(eltype(d)) === eltype(rand(d))
             end
         end
 
@@ -168,7 +168,7 @@ using Test
             d = ProductNamedTupleDistribution(nt)
             rng = MersenneTwister(973)
             x1 = @inferred rand(rng, d)
-            @test eltype(x1) === eltype(d)
+            @test eltype(x1) === @test_deprecated(eltype(d))
             rng = MersenneTwister(973)
             x2 = (
                 x=rand(rng, nt.x), y=rand(rng, nt.y), z=rand(rng, nt.z), w=rand(rng, nt.w)

@@ -40,8 +40,6 @@ Bernoulli() = Bernoulli{Float64}(0.5)
 
 @distr_support Bernoulli false true
 
-Base.eltype(::Type{<:Bernoulli}) = Bool
-
 #### Conversions
 convert(::Type{Bernoulli{T}}, p::Real) where {T<:Real} = Bernoulli(T(p))
 Base.convert(::Type{Bernoulli{T}}, d::Bernoulli) where {T<:Real} = Bernoulli{T}(T(d.p))

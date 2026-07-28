@@ -25,7 +25,8 @@ var(::MatrixDistribution)
 cov(::MatrixDistribution)
 pdf(d::MatrixDistribution, x::AbstractMatrix{<:Real})
 logpdf(d::MatrixDistribution, x::AbstractMatrix{<:Real})
-Distributions._rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
+Base.rand(::AbstractRNG, ::MatrixDistribution)
+Random.rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix{<:Real})
 ```
 
 ## Distributions
