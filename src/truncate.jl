@@ -261,6 +261,7 @@ include(joinpath("truncated", "exponential.jl"))
 include(joinpath("truncated", "uniform.jl"))
 include(joinpath("truncated", "loguniform.jl"))
 include(joinpath("truncated", "discrete_uniform.jl"))
+include(joinpath("truncated", "lognormal.jl"))
 
 #### Utilities
 

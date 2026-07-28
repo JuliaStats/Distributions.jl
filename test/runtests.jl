@@ -20,6 +20,7 @@ const tests = [
     "truncated/exponential",
     "truncated/uniform",
     "truncated/discrete_uniform",
+    "truncated/lognormal",
     "censored",
     "univariate/continuous/normal",
     "univariate/continuous/normalcanon",
