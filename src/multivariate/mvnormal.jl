@@ -166,14 +166,9 @@ const ZeroMeanDiagNormal{T} = MvNormal{T,<:PDiagMat{T},<:Zeros{T,1}}
 const ZeroMeanFullNormal{T} = MvNormal{T,<:PDMat{T},<:Zeros{T,1}}
 
 ### Construction
-function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
-    size(Σ, 1) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
-    MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
-end
-
 function MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractPDMat{<:Real})
-    R = Base.promote_eltype(μ, Σ)
-    MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
+    size(Σ, 1) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
+    return MvNormal{Base.promote_eltype(μ, Σ),typeof(Σ),typeof(μ)}(μ, Σ)
 end
 
 # constructor with general covariance matrix
@@ -185,8 +180,11 @@ Construct a multivariate normal distribution with mean `μ` and covariance matri
 MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(Σ.diag))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = MvNormal(μ, PDiagMat(Σ.data.diag))
-MvNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
-    MvNormal(μ, ScalMat(length(μ), Σ.λ))
+function MvNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real})
+    # Promote `Bool` (`I`) to avoid surprising covariance element types
+    λ = Σ isa UniformScaling{Bool} ? promote_type(eltype(μ), Bool)(Σ.λ) : Σ.λ
+    return MvNormal(μ, ScalMat(length(μ), λ))
+end
 function MvNormal(
     μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real,<:FillArrays.AbstractFill{<:Real,1}}
 )
