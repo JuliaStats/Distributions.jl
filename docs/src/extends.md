@@ -65,7 +65,7 @@ Remember that each *column* of A is a sample.
 
 ### Matrix-variate Sampler
 
-To implement a multivariate sampler, one can define a subtype of `Sampleable{Multivariate,S}`, and provide `size`, `rand`, and `rand!` methods, as
+To implement a matrix-variate sampler, one can define a subtype of `Sampleable{Matrixvariate,S}`, and provide `size`, `rand`, and `rand!` methods, as
 
 ```julia
 Base.size(s::Spl) = ... # the size of each matrix sample
@@ -92,7 +92,7 @@ sampler(d::Distribution)
 
 ### Univariate Distribution
 
-A univariate distribution type should be defined as a subtype of `DiscreteUnivarateDistribution` or `ContinuousUnivariateDistribution`.
+A univariate distribution type should be defined as a subtype of `DiscreteUnivariateDistribution` or `ContinuousUnivariateDistribution`.
 
 The following methods need to be implemented for each univariate distribution type:
 
@@ -122,7 +122,7 @@ You may refer to the source file `src/univariates.jl` to see details about how g
 
 ## Create a Multivariate Distribution
 
-A multivariate distribution type should be defined as a subtype of `DiscreteMultivarateDistribution` or `ContinuousMultivariateDistribution`.
+A multivariate distribution type should be defined as a subtype of `DiscreteMultivariateDistribution` or `ContinuousMultivariateDistribution`.
 
 The following methods need to be implemented for each multivariate distribution type:
 
