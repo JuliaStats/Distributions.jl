@@ -167,7 +167,9 @@ end
         0.5 0.3
         0.4 0.6
     ]
-    @test all(isfinite, Distributions.dirichlet_mle_init(X))
+    μ = vec(mean(X, dims=2))
+    logμ = vec(mean(log, X, dims=2))
+    @test all(isfinite, Distributions._dirichlet_mle_init(μ, logμ))
     ft = fit_mle(Dirichlet, X)
     @test ft.alpha ≈ [4.818417154882677, 17.25974156242572, 21.70076086163771]
 
