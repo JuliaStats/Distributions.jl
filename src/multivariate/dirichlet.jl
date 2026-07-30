@@ -224,63 +224,49 @@ end
 
 ## Initialization
 
-# initialization based on mean and log-mean
+# Compute a starting value for the Newton iterations in `fit_dirichlet!` based on
+# the sample mean `μ = E[p]` and the sample log-mean `logμ = E[log(p)]`.
 # Ref https://tminka.github.io/papers/dirichlet/minka-dirichlet.pdf
-function _dirichlet_mle_init2(μ::Vector{Float64}, logμ::Vector{Float64})
+function _dirichlet_mle_init(μ::Vector{Float64}, logμ::Vector{Float64})
     K = length(μ)
 
-    # Minka eq 42
-    α₀ = (K - 1) / 2 / sum(μₖ * (log(μₖ) - logμₖ) for (μₖ, logμₖ) in zip(μ, logμ))
+    # Initialize the precision α₀ with the moment estimate in Minka eq 42. In contrast
+    # to the estimates in Minka eq 21 and 23, it remains finite when some components
+    # of the sample have zero variance (see issue #602). By Jensen's inequality, the
+    # denominator is non-negative, and it is zero only if all samples are identical,
+    # in which case the MLE doesn't exist.
+    s = sum(μₖ * (log(μₖ) - logμₖ) for (μₖ, logμₖ) in zip(μ, logμ))
+    s > 0 || throw(ArgumentError(
+        "the samples are all identical so the MLE of the Dirichlet distribution doesn't exist"))
+    α₀ = (K - 1) / 2 / s
 
-    # Run five iterations of a fixed point equation for good starting values
-    # Note! Minka doesn't suggest the number of iterations
-    for i = 1:5
-        for k = 1:K
-            # Minka eq 9
-            μ[k] = invdigamma(digamma(α₀) + logμ[k])
+    # Refine with a few iterations of the fixed point iteration in Minka eq 9. The
+    # result is no longer a moment estimate but a starting value for the Newton
+    # iterations in `fit_dirichlet!`. Minka doesn't suggest a specific number of
+    # iterations but five appear to be sufficient to reach the region where the
+    # Newton iterations converge quadratically. The vector μ isn't needed anymore
+    # so we reuse it for the refined values.
+    α = μ
+    for _ in 1:5
+        for k in 1:K
+            α[k] = invdigamma(digamma(α₀) + logμ[k])
         end
-        α₀ = sum(μ)
+        α₀ = sum(α)
     end
 
-    return μ
+    return α
 end
 
 function dirichlet_mle_init(P::AbstractMatrix{Float64})
-    K = size(P, 1)
-    n = size(P, 2)
-
-    μ = vec(sum(P, dims=2))         # E[p]
-    logμ = vec(sum(log, P, dims=2)) # E[log(p)]
-
-    μ ./= n
-    logμ ./= n
-
-    return _dirichlet_mle_init2(μ, logμ)
+    μ = vec(mean(P, dims=2))                     # E[p]
+    logμ = mean_logp(suffstats(Dirichlet, P))    # E[log(p)]
+    return _dirichlet_mle_init(μ, logμ)
 end
 
 function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
-    K = size(P, 1)
-    n = size(P, 2)
-
-    μ = zeros(K)  # E[p]
-    γ = zeros(K)  # E[p^2]
-    tw = 0.0
-
-    for i in 1:n
-        wi = w[i]
-        tw += wi
-        for k in 1:K
-            pk = P[k, i]
-            μ[k] += pk * wi
-            γ[k] += pk * pk * wi
-        end
-    end
-
-    c = 1.0 / tw
-    μ .*= c
-    γ .*= c
-
-    _dirichlet_mle_init2(μ, γ)
+    μ = P * vec(w) ./ sum(w)                     # E[p]
+    logμ = mean_logp(suffstats(Dirichlet, P, w)) # E[log(p)]
+    return _dirichlet_mle_init(μ, logμ)
 end
 
 ## Newton-Ralphson algorithm
@@ -363,8 +349,8 @@ function fit_mle(::Type{T}, P::AbstractMatrix{Float64};
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12,
     debug::Bool=false) where {T<:Dirichlet}
 
-    α = isempty(init) ? dirichlet_mle_init(P) : init
     elogp = mean_logp(suffstats(T, P))
+    α = isempty(init) ? _dirichlet_mle_init(vec(mean(P, dims=2)), elogp) : init
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol, debug=debug)
 end
 
@@ -376,7 +362,7 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
     n = size(P, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
-    α = isempty(init) ? dirichlet_mle_init(P, w) : init
     elogp = mean_logp(suffstats(Dirichlet, P, w))
+    α = isempty(init) ? _dirichlet_mle_init(P * vec(w) ./ sum(w), elogp) : init
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol, debug=debug)
 end
