@@ -118,8 +118,8 @@ rng = MersenneTwister(123)
         r = fit(Dirichlet{Float32}, x)
         @test r.alpha ≈ d.alpha atol=0.25
 
-        # r = fit_mle(Dirichlet, x, fill(2.0, n))
-        # @test r.alpha ≈ d.alpha atol=0.25
+        r = fit_mle(Dirichlet, x, fill(2.0, n))
+        @test r.alpha ≈ d.alpha atol=0.25
     end
 end
 
@@ -170,4 +170,12 @@ end
     @test all(isfinite, Distributions.dirichlet_mle_init(X))
     ft = fit_mle(Dirichlet, X)
     @test ft.alpha ≈ [4.818417154882677, 17.25974156242572, 21.70076086163771]
+
+    # Uniform weights should give the same estimate as the unweighted fit
+    ftw = fit_mle(Dirichlet, X, fill(2.0, size(X, 2)))
+    @test ftw.alpha ≈ ft.alpha
+
+    # The MLE doesn't exist when all samples are identical
+    @test_throws ArgumentError fit_mle(Dirichlet, X[:, [1, 1]])
+    @test_throws ArgumentError fit_mle(Dirichlet, X[:, 1:1])
 end
