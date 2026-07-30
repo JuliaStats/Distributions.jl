@@ -257,18 +257,6 @@ function _dirichlet_mle_init(μ::Vector{Float64}, logμ::Vector{Float64})
     return α
 end
 
-function dirichlet_mle_init(P::AbstractMatrix{Float64})
-    μ = vec(mean(P, dims=2))                     # E[p]
-    logμ = mean_logp(suffstats(Dirichlet, P))    # E[log(p)]
-    return _dirichlet_mle_init(μ, logμ)
-end
-
-function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
-    μ = P * vec(w) ./ sum(w)                     # E[p]
-    logμ = mean_logp(suffstats(Dirichlet, P, w)) # E[log(p)]
-    return _dirichlet_mle_init(μ, logμ)
-end
-
 ## Newton-Ralphson algorithm
 
 function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
