@@ -9,6 +9,7 @@ using Distributions
 using LinearAlgebra, Random, Test
 using SparseArrays
 using FillArrays
+using StableRNGs
 
 ###### General Testing
 
@@ -301,4 +302,32 @@ end
     # (bug fixed by https://github.com/JuliaStats/Distributions.jl/pull/1429)
     x = rand(d)
     @test logpdf(d, x) ≈ logpdf(Normal(), x[1]) + logpdf(Normal(), x[2])
+end
+
+@testset "MvNormal: Sampling into an AbstractMatrix (#2086)" begin
+    d = MvNormal([1.0, 2.0, 3.0], [4.0 -2.0 -1.0; -2.0 5.0 -1.0; -1.0 -1.0 6.0])
+
+    x = Matrix{Float64}(undef, 3, 10)
+    rand!(StableRNG(1234), d, x)
+
+    # a view of the whole matrix takes the same code path as the matrix itself, so the
+    # samples are identical and not merely approximately equal
+    y = Matrix{Float64}(undef, 3, 10)
+    rand!(StableRNG(1234), d, view(y, :, :))
+    @test y == x
+
+    # sampling into the columns one at a time draws the same normals, and hence agrees up to
+    # the rounding of the multiplication with the Cholesky factor
+    z = Matrix{Float64}(undef, 3, 10)
+    rng = StableRNG(1234)
+    for i in axes(z, 2)
+        rand!(rng, d, view(z, :, i))
+    end
+    @test z ≈ x
+
+    # only the columns of the view are modified
+    w = zeros(3, 10)
+    rand!(StableRNG(1234), d, view(w, :, 1:4))
+    @test w[:, 1:4] ≈ x[:, 1:4]
+    @test all(iszero, w[:, 5:10])
 end

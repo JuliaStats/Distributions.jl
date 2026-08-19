@@ -256,18 +256,8 @@ gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
-function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
+function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVecOrMat)
     unwhiten!(d.Σ, randn!(rng, x))
-    x .+= d.μ
-    return x
-end
-
-# Workaround: randn! only works for Array, but not generally for AbstractArray
-function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
-    for i in eachindex(x)
-        x[i] = randn(rng, eltype(x))
-    end
-    unwhiten!(d.Σ, x)
     x .+= d.μ
     return x
 end
