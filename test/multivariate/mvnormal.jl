@@ -304,30 +304,45 @@ end
     @test logpdf(d, x) ≈ logpdf(Normal(), x[1]) + logpdf(Normal(), x[2])
 end
 
-@testset "MvNormal: Sampling into an AbstractMatrix (#2086)" begin
-    d = MvNormal([1.0, 2.0, 3.0], [4.0 -2.0 -1.0; -2.0 5.0 -1.0; -1.0 -1.0 6.0])
+@testset "MvNormal: Sampling into an AbstractVecOrMat (#2086)" begin
+    μ = [1.0, 2.0, 3.0]
+    C = [4.0 -2.0 -1.0; -2.0 5.0 -1.0; -1.0 -1.0 6.0]
 
-    x = Matrix{Float64}(undef, 3, 10)
-    rand!(StableRNG(1234), d, x)
+    Σs = (PDMat(C), PDiagMat([1.2, 3.4, 2.6]), ScalMat(3, 2.0))
+    @testset "$(nameof(typeof(Σ)))" for Σ in Σs
+        d = MvNormal(μ, Σ)
+        x = rand!(StableRNG(1234), d, Matrix{Float64}(undef, 3, 6))
 
-    # a view of the whole matrix takes the same code path as the matrix itself, so the
-    # samples are identical and not merely approximately equal
-    y = Matrix{Float64}(undef, 3, 10)
-    rand!(StableRNG(1234), d, view(y, :, :))
-    @test y == x
+        # A view of a whole matrix takes the same single `randn!` and `unwhiten!` call as
+        # the matrix, so the samples are exactly equal. Only RNGs without a bulk `randn!`
+        # method give exact equality: the ones in `Random` are defined for
+        # `MersenneTwister`/`Xoshiro` and `Array{Float64}`, which a view is not.
+        y = Matrix{Float64}(undef, 3, 6)
+        rand!(StableRNG(1234), d, view(y, :, :))
+        @test y == x
 
-    # sampling into the columns one at a time draws the same normals, and hence agrees up to
-    # the rounding of the multiplication with the Cholesky factor
-    z = Matrix{Float64}(undef, 3, 10)
-    rng = StableRNG(1234)
-    for i in axes(z, 2)
-        rand!(rng, d, view(z, :, i))
+        # A view of some columns is filled like a matrix of the same size, and no other
+        # column is touched.
+        y = zeros(3, 6)
+        rand!(StableRNG(1234), d, view(y, :, 3:4))
+        @test y[:, 3:4] ≈ rand!(StableRNG(1234), d, Matrix{Float64}(undef, 3, 2))
+        @test all(iszero, y[:, [1, 2, 5, 6]])
+
+        # The same for a view that is not strided, for which `unwhiten!` cannot use BLAS.
+        y = zeros(3, 6)
+        rand!(StableRNG(1234), d, view(y, :, [1, 3, 5]))
+        @test y[:, [1, 3, 5]] ≈ rand!(StableRNG(1234), d, Matrix{Float64}(undef, 3, 3))
+        @test all(iszero, y[:, [2, 4, 6]])
+
+        # Vectors do not need a separate method: `randn!` is generic.
+        y = zeros(3, 2)
+        rand!(StableRNG(1234), d, view(y, :, 1))
+        @test y[:, 1] ≈ rand!(StableRNG(1234), d, Vector{Float64}(undef, 3))
+        @test all(iszero, y[:, 2])
+
+        # A view without columns draws nothing.
+        y = zeros(3, 6)
+        rand!(StableRNG(1234), d, view(y, :, 1:0))
+        @test all(iszero, y)
     end
-    @test z ≈ x
-
-    # only the columns of the view are modified
-    w = zeros(3, 10)
-    rand!(StableRNG(1234), d, view(w, :, 1:4))
-    @test w[:, 1:4] ≈ x[:, 1:4]
-    @test all(iszero, w[:, 5:10])
 end
