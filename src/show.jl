@@ -7,7 +7,7 @@
 #   this function to provide a name that is easier to read,
 #   especially when the type is parametric.
 #
-distrname(d::Distribution) = string(typeof(d))
+print_distrname(io::IO, d::Distribution) = print(io, typeof(d))
 
 show(io::IO, d::Distribution) = show(io, d, fieldnames(typeof(d)))
 
@@ -52,7 +52,7 @@ function _use_multline_show(d::Distribution)
 end
 
 function show_oneline(io::IO, d::Distribution, namevals)
-    print(io, distrname(d))
+    print_distrname(io, d)
     np = length(namevals)
     print(io, '(')
     for (i, nv) in enumerate(namevals)
@@ -68,7 +68,7 @@ function show_oneline(io::IO, d::Distribution, namevals)
 end
 
 function show_multline(io::IO, d::Distribution, namevals; newline=true)
-    print(io, distrname(d))
+    print_distrname(io, d)
     println(io, "(")
     for (p, pv) in namevals
         print(io, p)
