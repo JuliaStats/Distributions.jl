@@ -57,7 +57,7 @@ Base.convert(::Type{BetaPrime{T}}, d::BetaPrime{T}) where {T<:Real} = d
 #### Parameters
 
 params(d::BetaPrime) = (d.α, d.β)
-@inline partype(d::BetaPrime{T}) where {T<:Real} = T
+partype(::Type{<:BetaPrime{T}}) where {T<:Real} = T
 
 #### Statistics
 

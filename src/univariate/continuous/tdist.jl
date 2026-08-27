@@ -43,7 +43,7 @@ Base.convert(::Type{TDist{T}}, d::TDist{T}) where {T<:Real} = d
 
 dof(d::TDist) = d.ν
 params(d::TDist) = (d.ν,)
-@inline partype(d::TDist{T}) where {T<:Real} = T
+partype(::Type{<:TDist{T}}) where {T<:Real} = T
 
 
 #### Statistics

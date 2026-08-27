@@ -141,7 +141,7 @@ canonform(d::MvNormal{T,C,Zeros{T}}) where {C, T<:Real} = MvNormalCanon(inv(d.Σ
 length(d::MvNormalCanon) = length(d.μ)
 mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
 params(d::MvNormalCanon) = (d.μ, d.h, d.J)
-@inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
+partype(::Type{<:MvNormalCanon{T}}) where {T<:Real} = T
 Base.eltype(::Type{<:MvNormalCanon{T}}) where {T} = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))

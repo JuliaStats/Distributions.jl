@@ -55,7 +55,7 @@ Base.convert(::Type{Arcsine{T}}, d::Arcsine{T}) where {T<:Real} = d
 location(d::Arcsine) = d.a
 scale(d::Arcsine) = d.b - d.a
 params(d::Arcsine) = (d.a, d.b)
-partype(::Arcsine{T}) where {T} = T
+partype(::Type{<:Arcsine{T}}) where {T} = T
 
 
 ### Statistics

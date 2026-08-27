@@ -47,7 +47,7 @@ Base.convert(::Type{VonMises{T}}, d::VonMises{T}) where {T<:Real} = d
 #### Parameters
 
 params(d::VonMises) = (d.μ, d.κ)
-partype(::VonMises{T}) where {T<:Real} = T
+partype(::Type{<:VonMises{T}}) where {T<:Real} = T
 
 
 #### Statistics

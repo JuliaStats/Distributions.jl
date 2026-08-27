@@ -12,7 +12,7 @@ using Test, Random
         @test convert(BernoulliLogit{Float16}, d) === BernoulliLogit(Float16(logitp))
         @test eltype(typeof(d)) === Bool
         @test params(d) == (logitp,)
-        @test partype(d) === typeof(logitp)
+        @test @inferred(partype(d)) === typeof(logitp)
     end
 end
 

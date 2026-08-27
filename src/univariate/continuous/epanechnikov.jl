@@ -32,7 +32,7 @@ Base.convert(::Type{Epanechnikov{T}}, d::Epanechnikov{T}) where {T<:Real} = d
 location(d::Epanechnikov) = d.μ
 scale(d::Epanechnikov) = d.σ
 params(d::Epanechnikov) = (d.μ, d.σ)
-@inline partype(d::Epanechnikov{T}) where {T<:Real} = T
+partype(::Type{<:Epanechnikov{T}}) where {T<:Real} = T
 
 ## Properties
 mean(d::Epanechnikov) = d.μ

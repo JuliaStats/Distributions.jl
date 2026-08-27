@@ -21,6 +21,9 @@ using Distributions: Product
     # Check that methods for `Product` are consistent.
     @test length(d_product) == length(ds)
     @test eltype(d_product) === eltype(ds[1])
+    # bare `Product` (a UnionAll) falls back to the generic `Real` default
+    @test @inferred(partype(d_product)) === Float64
+    @test @inferred(partype(Product)) === Real
     @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf.(ds, x))
     @test mean(d_product) == mean.(ds)
     @test std(d_product) == std.(ds)

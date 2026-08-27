@@ -122,11 +122,19 @@ function sqrt!!(x::Vector{<:Real})
     return x
 end
 
-# get a type wide enough to represent all a distributions's parameters
-# (if the distribution is parametric)
-# if the distribution is not parametric, we need this to be a float so that
-# in-place pdf calculations, etc. allocate storage correctly
-@inline partype(::Distribution) = Float64
+"""
+    partype(::Type{Distribution})
+
+The element type of the parameters of a distribution, i.e. a type wide enough to represent
+(the promotion of) all of the distribution's parameters.
+
+!!! note
+    The definition `partype(d) = partype(typeof(d))` is provided for convenience so that
+    instances can be passed instead of types. However the form that accepts a type argument
+    should be defined for new distribution types.
+"""
+partype(d::Distribution) = partype(typeof(d))
+partype(::Type{<:Distribution}) = Real
 
 # because X == X' keeps failing due to floating point nonsense
 function isApproxSymmmetric(a::AbstractMatrix{Float64})

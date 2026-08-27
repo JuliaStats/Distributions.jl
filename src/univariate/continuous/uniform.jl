@@ -48,7 +48,7 @@ Base.convert(::Type{Uniform{T}}, d::Uniform{T}) where {T<:Real} = d
 #### Parameters
 
 params(d::Uniform) = (d.a, d.b)
-partype(::Uniform{T}) where {T<:Real} = T
+partype(::Type{<:Uniform{T}}) where {T<:Real} = T
 
 location(d::Uniform) = d.a
 scale(d::Uniform) = d.b - d.a

@@ -38,7 +38,7 @@ logsuccprob(d::BernoulliLogit) = -log1pexp(-d.logitp)
 logfailprob(d::BernoulliLogit) = -log1pexp(d.logitp)
 
 params(d::BernoulliLogit) = (d.logitp,)
-partype(::BernoulliLogit{T}) where {T} = T
+partype(::Type{<:BernoulliLogit{T}}) where {T} = T
 
 #### Properties
 

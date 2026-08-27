@@ -55,7 +55,7 @@ shape(d::Weibull) = d.α
 scale(d::Weibull) = d.θ
 
 params(d::Weibull) = (d.α, d.θ)
-partype(::Weibull{T}) where {T<:Real} = T
+partype(::Type{<:Weibull{T}}) where {T<:Real} = T
 
 
 #### Statistics

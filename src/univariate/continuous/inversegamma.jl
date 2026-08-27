@@ -57,7 +57,7 @@ scale(d::InverseGamma) = d.θ
 rate(d::InverseGamma) = scale(d.invd)
 
 params(d::InverseGamma) = (shape(d), scale(d))
-partype(::InverseGamma{T}) where {T} = T
+partype(::Type{<:InverseGamma{T}}) where {T} = T
 
 
 #### Parameters

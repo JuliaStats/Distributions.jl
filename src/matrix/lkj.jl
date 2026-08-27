@@ -93,7 +93,7 @@ end
 
 params(d::LKJ) = (d.d, d.η)
 
-@inline partype(d::LKJ{T}) where {T <: Real} = T
+partype(::Type{<:LKJ{T}}) where {T <: Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation

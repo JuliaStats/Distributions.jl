@@ -223,3 +223,21 @@ test_affine_transformations(NormalCanon, randn()^2, randn()^2)
 
     @test_throws DimensionMismatch suffstats(Normal, b, wa)
 end
+
+@testset "partype" begin
+    # defined on the type, with the instance method forwarding for convenience
+    @test @inferred(partype(Normal{Float32})) === Float32
+    @test @inferred(partype(Normal(1.0f0, 2.0f0))) === @inferred(partype(Normal{Float32})) === Float32
+    @test @inferred(partype(Normal(1//1, 2//1))) === Rational{Int}
+
+    # abstract types fall back to the generic `Real` default
+    @test @inferred(partype(Distribution)) === Real
+    @test @inferred(partype(UnivariateDistribution)) === Real
+    @test @inferred(partype(ContinuousUnivariateDistribution)) === Real
+    @test @inferred(partype(Normal)) === Real
+
+    # `partype(eltype(container))` works whether or not the container is concretely typed
+    @test @inferred(partype(eltype([Normal(0.0f0, 1.0f0)]))) === Float32
+    @test @inferred(partype(eltype(Normal[Normal(0.0, 1.0)]))) === Real
+    @test @inferred(partype(eltype(Distribution[Normal(0.0, 1.0)]))) === Real
+end

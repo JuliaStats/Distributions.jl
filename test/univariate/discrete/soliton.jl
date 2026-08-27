@@ -3,6 +3,9 @@ using Distributions
 @testset "Soliton" begin
     K, M, δ, atol = 100, 60, 0.2, 0
     Ω = Soliton(K, M, δ, atol)
+    # the degree distribution uses `Float64` probabilities, so `partype` is `Float64`
+    @test @inferred(partype(Ω)) === Float64
+    @test @inferred(partype(Soliton)) === Float64
     @test pdf(Ω, M) > pdf(Ω, M-1)
     @test pdf(Ω, M) > pdf(Ω, M+1)
     @test cumsum(Base.Fix1(pdf, Ω).(1:K)) ≈ Base.Fix1(cdf, Ω).(1:K)

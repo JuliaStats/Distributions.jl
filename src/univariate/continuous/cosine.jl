@@ -39,7 +39,7 @@ location(d::Cosine) = d.μ
 scale(d::Cosine) = d.σ
 
 params(d::Cosine) = (d.μ, d.σ)
-@inline partype(d::Cosine{T}) where {T<:Real} = T
+partype(::Type{<:Cosine{T}}) where {T<:Real} = T
 
 
 #### Statistics

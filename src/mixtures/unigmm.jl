@@ -31,6 +31,7 @@ rand(rng::AbstractRNG, d::UnivariateGMM) =
     (k = rand(rng, d.prior); d.means[k] + randn(rng) * d.stds[k])
 
 params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
+partype(::Type{<:UnivariateGMM{VT1,VT2,C}}) where {VT1,VT2,C} = promote_type(eltype(VT1), eltype(VT2), partype(C))
 
 struct UnivariateGMMSampler{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: Sampleable{Univariate,Continuous}
     means::VT1

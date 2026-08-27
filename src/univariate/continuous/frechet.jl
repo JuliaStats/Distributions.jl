@@ -52,7 +52,7 @@ Base.convert(::Type{Frechet{T}}, d::Frechet{T}) where {T<:Real} = d
 shape(d::Frechet) = d.α
 scale(d::Frechet) = d.θ
 params(d::Frechet) = (d.α, d.θ)
-partype(::Frechet{T}) where {T} = T
+partype(::Type{<:Frechet{T}}) where {T} = T
 
 
 #### Statistics

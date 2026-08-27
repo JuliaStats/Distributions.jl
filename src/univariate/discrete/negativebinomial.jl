@@ -60,7 +60,7 @@ Base.convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{T}) where {T<:Real
 #### Parameters
 
 params(d::NegativeBinomial) = (d.r, d.p)
-partype(::NegativeBinomial{T}) where {T} = T
+partype(::Type{<:NegativeBinomial{T}}) where {T} = T
 
 succprob(d::NegativeBinomial) = d.p
 failprob(d::NegativeBinomial{T}) where {T} = one(T) - d.p

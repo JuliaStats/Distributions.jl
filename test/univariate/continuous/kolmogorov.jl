@@ -14,3 +14,6 @@ d = Kolmogorov()
 @test round(cdf(d,2.00), digits=6) == .999_329
 @test round(cdf(d,2.50), digits=7) == .999_992_5
 @test round(cdf(d,3.00), digits=8) == .999_999_97
+
+# no parameters: `partype` is the empty promotion `Union{}`
+@test @inferred(partype(Kolmogorov())) === Union{}

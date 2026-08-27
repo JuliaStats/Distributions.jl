@@ -78,7 +78,7 @@ size(d::InverseWishart) = size(d.Ψ)
 rank(d::InverseWishart) = rank(d.Ψ)
 
 params(d::InverseWishart) = (d.df, d.Ψ)
-@inline partype(d::InverseWishart{T}) where {T<:Real} = T
+partype(::Type{<:InverseWishart{T}}) where {T<:Real} = T
 
 function mean(d::InverseWishart)
     df = d.df

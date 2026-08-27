@@ -72,7 +72,7 @@ Base.convert(::Type{PGeneralizedGaussian{T}}, d::PGeneralizedGaussian{T}) where 
 
 
 #### Parameters
-partype(::PGeneralizedGaussian{T}) where {T<:Real} = T
+partype(::Type{<:PGeneralizedGaussian{T}}) where {T<:Real} = T
 
 params(d::PGeneralizedGaussian) = (d.μ, d.α, d.p)
 location(d::PGeneralizedGaussian) = d.μ

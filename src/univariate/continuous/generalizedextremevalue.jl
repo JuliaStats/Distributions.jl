@@ -72,7 +72,7 @@ shape(d::GeneralizedExtremeValue) = d.ξ
 scale(d::GeneralizedExtremeValue) = d.σ
 location(d::GeneralizedExtremeValue) = d.μ
 params(d::GeneralizedExtremeValue) = (d.μ, d.σ, d.ξ)
-@inline partype(d::GeneralizedExtremeValue{T}) where {T<:Real} = T
+partype(::Type{<:GeneralizedExtremeValue{T}}) where {T<:Real} = T
 
 
 #### Statistics

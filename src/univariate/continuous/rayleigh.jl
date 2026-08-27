@@ -48,7 +48,7 @@ Base.convert(::Type{Rayleigh{T}}, d::Rayleigh{T}) where {T<:Real} = d
 
 scale(d::Rayleigh) = d.σ
 params(d::Rayleigh) = (d.σ,)
-partype(::Rayleigh{T}) where {T<:Real} = T
+partype(::Type{<:Rayleigh{T}}) where {T<:Real} = T
 
 
 #### Statistics

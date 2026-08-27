@@ -30,4 +30,10 @@ using Test, Distributions, OffsetArrays
         @test @inferred(rand(Gamma(1/T(2), T(1)))) isa T
         @test @inferred(rand(Gamma(T(2), T(1)))) isa T
     end
+
+    # bare `Gamma` (a UnionAll) falls back to the generic `Real` default
+    @test @inferred(partype(Gamma(1, 2))) === Float64
+    @test @inferred(partype(Gamma(1.1, 2))) === Float64
+    @test @inferred(partype(Gamma{Float64})) === Float64
+    @test @inferred(partype(Gamma)) === Real
 end

@@ -237,3 +237,13 @@ end
     @test @inferred(cdf(dist, 2.82)) === 1.0
     @test @inferred(ccdf(dist, 2.82)) === 0.0
 end
+
+@testset "partype" begin
+    # promotes the untruncated `partype` with the bound types
+    @test @inferred(partype(Truncated{Normal{Float64},Continuous,Float64})) === Float64
+    @test @inferred(partype(truncated(Normal(0.0f0, 1.0f0), 0, 1))) === Float32
+    # `Kolmogorov` has no parameters (`partype` is `Union{}`), so the bounds decide
+    @test @inferred(partype(truncated(Kolmogorov(); lower = 0.0, upper = 1.0))) === Float64
+    # bare `Truncated` (a UnionAll) falls back to the generic `Real` default
+    @test @inferred(partype(Truncated)) === Real
+end

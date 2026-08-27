@@ -124,7 +124,7 @@ function truncated(d::Truncated, l::Real, ::Nothing)
 end
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
-partype(d::Truncated{<:UnivariateDistribution,<:ValueSupport,T}) where {T<:Real} = promote_type(partype(d.untruncated), T)
+partype(::Type{<:Truncated{D,S,T}}) where {D,S,T} = promote_type(partype(D), T)
 
 Base.eltype(::Type{<:Truncated{D}}) where {D<:UnivariateDistribution} = eltype(D)
 Base.eltype(d::Truncated) = eltype(d.untruncated)

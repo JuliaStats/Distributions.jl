@@ -56,7 +56,7 @@ location(d::Logistic) = d.μ
 scale(d::Logistic) = d.θ
 
 params(d::Logistic) = (d.μ, d.θ)
-@inline partype(d::Logistic{T}) where {T<:Real} = T
+partype(::Type{<:Logistic{T}}) where {T<:Real} = T
 
 
 #### Statistics

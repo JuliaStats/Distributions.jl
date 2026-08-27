@@ -82,7 +82,7 @@ params(d::MatrixBeta) = (size(d, 1), d.W1.df, d.W2.df)
 
 mean(d::MatrixBeta) = ((p, n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, p, p))
 
-@inline partype(d::MatrixBeta{T}) where {T <: Real} = T
+partype(::Type{<:MatrixBeta{T}}) where {T <: Real} = T
 
 #  Konno (1988 JJSS) Corollary 3.3.i
 function cov(d::MatrixBeta, i::Integer, j::Integer, k::Integer, l::Integer)

@@ -50,7 +50,7 @@ convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
 
 ncategories(d::Categorical) = support(d).stop
 params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
-partype(::Categorical{T}) where {T<:Real} = T
+partype(::Type{<:Categorical{T}}) where {T<:Real} = T
 
 function Base.isapprox(c1::Categorical, c2::Categorical; kwargs...)
     # support are of type Base.OneTo, so comparing the cardinality of the support
