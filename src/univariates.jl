@@ -388,6 +388,24 @@ For a given `0 ≤ q ≤ 1`, `quantile(d, q)` is the smallest value `x` in the s
 for which `cdf(d, x) ≥ q`.
 
 See also: [`cquantile`](@ref), [`invlogcdf`](@ref), and [`invlogccdf`](@ref).
+
+# Examples
+```jldoctest
+julia> d = Normal()
+Normal{Float64}(μ=0.0, σ=1.0)
+
+julia> first_quartile = quantile(d, 0.25)
+-0.6744897501960818
+
+julia> second_quartile = quantile(d, 0.50)
+0.0
+
+julia> third_quartile = quantile(d, 0.75)
+0.6744897501960818
+
+julia> quantile(d, 0.025), quantile(d, 0.975) # 95%-probability interval 
+(-1.9599639845400592, 1.9599639845400576)
+```
 """
 quantile(d::UnivariateDistribution, p::Real)
 
