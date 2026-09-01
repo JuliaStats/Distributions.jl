@@ -140,6 +140,13 @@ plotdensity((0.001, 0.999), Arcsine, (0, 1)) # hide
 ```
 
 ```@docs
+AsymmetricExponentialPower
+```
+```@example plotdensity
+plotdensity((-6, 8), AsymmetricExponentialPower, (0., 1., 2., 1., 0.7)) # hide
+```
+
+```@docs
 Beta
 ```
 ```@example plotdensity
