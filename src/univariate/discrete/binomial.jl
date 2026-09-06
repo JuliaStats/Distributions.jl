@@ -167,7 +167,7 @@ function rand(rng::AbstractRNG, d::Binomial)
     if r*n <= 10.0
         y = rand(rng, BinomialGeomSampler(n,r))
     else
-        y = rand(rng, BinomialTPESampler(n,r))
+        y = rand(rng, BinomialTRSSampler(n,r))
     end
     p <= 0.5 ? y : n-y
 end

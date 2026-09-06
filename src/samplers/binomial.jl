@@ -228,6 +228,74 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
     (s.comp ? s.n - y : y)::Int
 end
 
+#=
+BTRS algorithm from:
+
+W. Hörmann
+"The generation of binomial random variates"
+Journal of Statistical Computation and Simulation, 46(1-2):101-110
+doi:10.1080/00949659308811496
+=#
+# Valid only for n * min(p, 1-p) >= 10
+struct BinomialTRSSampler{T <: AbstractFloat} <: Sampleable{Univariate,Discrete}
+    n::Int
+    a::T
+    b::T
+    c::T
+    v_r::T
+    r::T
+    α::T
+    m::Int
+end
+
+function BinomialTRSSampler{T}(n::Int, prob::Real) where {T<:AbstractFloat}
+    p = T(prob)
+    q = one(T) - p
+    n * min(p, q) >= 10 || throw(ArgumentError("BinomialTRSSampler requires n * min(p, 1-p) >= 10"))
+    spq = sqrt(T(n) * p * q)
+    b = T(1.15) + T(2.53) * spq
+    a = T(-0.0873) + T(0.0248) * b + T(0.01) * p
+    c = T(n) * p + T(0.5)
+    v_r = T(0.92) - T(4.2) / b
+    α = (T(2.83) + T(5.1) / b) * spq
+    m = floor(Int, (T(n) + one(T)) * p)
+    BinomialTRSSampler{T}(n, a, b, c, v_r, p/q, α, m)
+end
+
+
+BinomialTRSSampler(n::Int, prob::Float64) = BinomialTRSSampler{Float64}(n, prob)
+
+@inline function binom_stirling_tail(::Type{T}, k::Int) where {T<:AbstractFloat}
+    if k < 10
+        tbl = (0.0810614667953272, 0.0413406959554093, 0.0276779256849983,
+               0.0207906721037650, 0.0166446911898211, 0.0138761288230707,
+               0.0118967099458917, 0.0104112652619720, 0.00925546218271273,
+               0.00833056343336287)
+        return T(@inbounds tbl[k + 1])
+    end
+    kp1sq = (T(k) + one(T))^2
+    return (T(1//12) - (T(1//360) - T(1//1260) / kp1sq) / kp1sq) / (T(k) + one(T))
+end
+
+function rand(rng::AbstractRNG, s::BinomialTRSSampler{T}) where {T}
+    (; n, a, b, r, m) = s
+    while true
+        u = rand(rng, T) - T(1/2)
+        v = rand(rng, T)
+        us = T(1/2) - abs(u)
+        kf = (T(2) * a / us + b) * u + s.c
+        (kf < zero(T) || kf > T(n)) && continue
+        k = floor(Int, kf)
+        (us >= T(0.07) && v <= s.v_r) && return k
+        v = log(v * s.α / (a / (us * us) + b))
+        ub = (T(m) + T(1/2)) * log((T(m) + one(T)) / (r * T(n-m+1))) +
+             (T(n) + one(T)) * log(T(n-m+1) / T(n-k+1)) +
+             (T(k) + T(1/2)) * log(r*T(n-k+1) / (T(k) + one(T))) +
+             binom_stirling_tail(T, m) + binom_stirling_tail(T, n-m) -
+             binom_stirling_tail(T, k) - binom_stirling_tail(T, n-k)
+        v <= ub && return k
+    end
+end
 
 # Constructing an alias table by directly computing the probability vector
 #
