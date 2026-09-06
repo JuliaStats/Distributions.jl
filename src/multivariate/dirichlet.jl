@@ -224,58 +224,40 @@ end
 
 ## Initialization
 
-function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
+# Compute a starting value for the Newton iterations in `fit_dirichlet!` based on
+# the sample mean `μ = E[p]` and the mean of the log-samples `elogp = E[log(p)]`.
+# The starting value is written into `μ`.
+# Ref https://tminka.github.io/papers/dirichlet/minka-dirichlet.pdf
+function _dirichlet_mle_init!(μ::Vector{Float64}, elogp::Vector{Float64})
     K = length(μ)
 
-    α0 = 0.
-    for k = 1:K
-        μk = μ[k]
-        γk = γ[k]
-        ak = (μk - γk) / (γk - μk * μk)
-        α0 += ak
-    end
-    α0 /= K
+    # Initialize the precision α₀ with the moment estimate in Minka eq 42. In contrast
+    # to the estimates in Minka eq 21 and 23, it remains finite when some components
+    # of the sample have zero variance (see issue #602). In exact arithmetic, the
+    # denominator is non-negative by Jensen's inequality and zero only if all samples
+    # are identical, in which case the MLE doesn't exist. However, due to roundoff,
+    # the computed denominator can have either sign for (nearly) identical samples,
+    # so the check below cannot detect all such degenerate samples.
+    s = sum(μₖ * (log(μₖ) - elogpₖ) for (μₖ, elogpₖ) in zip(μ, elogp))
+    isfinite(s) && s > 0 || throw(ArgumentError(
+        "the samples are (nearly) identical or contain zeros so a starting value couldn't be computed"))
+    α₀ = (K - 1) / (2 * s)
 
-    lmul!(α0, μ)
-end
-
-function dirichlet_mle_init(P::AbstractMatrix{Float64})
-    K = size(P, 1)
-    n = size(P, 2)
-
-    μ = vec(sum(P, dims=2))       # E[p]
-    γ = vec(sum(abs2, P, dims=2)) # E[p^2]
-
-    c = 1.0 / n
-    μ .*= c
-    γ .*= c
-
-    _dirichlet_mle_init2(μ, γ)
-end
-
-function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
-    K = size(P, 1)
-    n = size(P, 2)
-
-    μ = zeros(K)  # E[p]
-    γ = zeros(K)  # E[p^2]
-    tw = 0.0
-
-    for i in 1:n
-        wi = w[i]
-        tw += wi
+    # Refine with a few iterations of the fixed point iteration in Minka eq 9. The
+    # result is no longer a moment estimate but a starting value for the Newton
+    # iterations in `fit_dirichlet!`. Minka doesn't suggest a specific number of
+    # iterations but five appear to be sufficient to reach the region where the
+    # Newton iterations converge quadratically.
+    α = μ  # the mean isn't needed anymore so we overwrite it with the refined values
+    for _ in 1:5
+        dgα₀ = digamma(α₀)
         for k in 1:K
-            pk = P[k, i]
-            μ[k] += pk * wi
-            γ[k] += pk * pk * wi
+            α[k] = invdigamma(dgα₀ + elogp[k])
         end
+        α₀ = sum(α)
     end
 
-    c = 1.0 / tw
-    μ .*= c
-    γ .*= c
-
-    _dirichlet_mle_init2(μ, γ)
+    return α
 end
 
 ## Newton-Ralphson algorithm
@@ -317,33 +299,38 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
             b += gk * iq[k]
             iqs += iq[k]
 
-            agk = abs(gk)
-            if agk > gnorm
-                gnorm = agk
-            end
+            # In contrast to the branch `abs(gk) > gnorm ? abs(gk) : gnorm`, `max`
+            # propagates NaNs so a NaN gradient fails the convergence check below
+            # instead of being silently ignored
+            gnorm = max(gnorm, abs(gk))
         end
-        b /= (iz + iqs)
-
-        # update α
-
-        for k = 1:K
-            α[k] -= (g[k] - b) * iq[k]
-            if α[k] < 1.0e-12
-                α[k] = 1.0e-12
-            end
-        end
-        α0 = sum(α)
-
-        if debug
-            prev_objv = objv
-            objv = dot(α .- 1.0, elogp) + loggamma(α0) - sum(loggamma, α)
-            @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n",
-                t, objv, objv - prev_objv, gnorm)
-        end
-
-        # determine convergence
-
+        # Determine convergence before updating α so that the returned iterate is the
+        # one that satisfied the convergence criterion. An additional Newton update
+        # from an already converged iterate with very large elements could produce
+        # non-finite values because the denominator of b, which approaches (K - 1)/2
+        # as the elements of α grow, is then dominated by cancellation errors
         converged = gnorm < tol
+
+        if !converged
+            b /= (iz + iqs)
+
+            # update α
+
+            for k = 1:K
+                α[k] -= (g[k] - b) * iq[k]
+                if α[k] < 1.0e-12
+                    α[k] = 1.0e-12
+                end
+            end
+            α0 = sum(α)
+
+            if debug
+                prev_objv = objv
+                objv = dot(α .- 1.0, elogp) + loggamma(α0) - sum(loggamma, α)
+                @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n",
+                    t, objv, objv - prev_objv, gnorm)
+            end
+        end
     end
 
     if !converged
@@ -358,8 +345,8 @@ function fit_mle(::Type{T}, P::AbstractMatrix{Float64};
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12,
     debug::Bool=false) where {T<:Dirichlet}
 
-    α = isempty(init) ? dirichlet_mle_init(P) : init
     elogp = mean_logp(suffstats(T, P))
+    α = isempty(init) ? _dirichlet_mle_init!(vec(mean(P, dims=2)), elogp) : init
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol, debug=debug)
 end
 
@@ -371,7 +358,8 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
     n = size(P, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
-    α = isempty(init) ? dirichlet_mle_init(P, w) : init
-    elogp = mean_logp(suffstats(Dirichlet, P, w))
+    ss = suffstats(Dirichlet, P, w)
+    elogp = mean_logp(ss)
+    α = isempty(init) ? _dirichlet_mle_init!(P * vec(w) ./ ss.tw, elogp) : init
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol, debug=debug)
 end
