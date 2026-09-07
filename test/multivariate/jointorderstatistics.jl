@@ -1,4 +1,6 @@
 using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
+using StatsFuns: logsumexp
+using StatsBase: rle
 
 @testset "JointOrderStatistics" begin
     Random.seed!(123)
@@ -33,7 +35,13 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
     end
 
     @testset for T in [Float32, Float64],
-        dist in [Uniform(T(2), T(10)), Exponential(T(10)), Normal(T(100), T(10))],
+        dist in [
+            Uniform(T(2), T(10)),
+            Exponential(T(10)),
+            Normal(T(100), T(10)),
+            Poisson(T(10)),
+            Categorical(T.(1:20) ./ 210),
+        ],
         n in [16, 40],
         r in [
             1:n,
@@ -71,7 +79,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             @test !insupport(d, fill(NaN, length(x)))
         end
 
-        @testset "pdf/logpdf" begin
+        Distributions.value_support(typeof(dist)) === Continuous && @testset "pdf/logpdf" begin
             x = convert(Vector{T}, sort(rand(dist, length(r))))
             @test @inferred(logpdf(d, x)) isa T
             @test @inferred(pdf(d, x)) isa T
@@ -122,6 +130,79 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 end
             end
         end
+
+        Distributions.value_support(typeof(dist)) === Discrete && @testset "logpdf" begin
+            rvec = collect(r)
+            @testset "basic properties" begin
+                x = sort!(rand(dist, n))[rvec]
+                lp = @inferred logpdf(d, x)
+                @test typeof(lp) === typeof(logpdf(d.dist, first(x)))
+                @test @inferred(pdf(d, x)) ≈ exp(lp)
+
+                if length(r) == 1
+                    @test logpdf(d, x) ≈ logpdf(OrderStatistic(dist, n, r[1]), x[1])
+                elseif length(r) == n && isbounded(dist)
+                    y, y_counts = rle(x)
+                    xsupport = support(dist)
+                    probs = pdf.(Ref(dist), xsupport)
+                    counts = zeros(Int, length(xsupport))
+                    for (y_i, c_i) in zip(y, y_counts)
+                        counts[searchsortedfirst(xsupport, y_i)] = c_i
+                    end
+                    @test logpdf(d, x) ≈ logpdf(Multinomial(n, probs), counts)
+                end
+            end
+
+            isbounded(dist) && @testset "sums to 1 over bounded support" begin
+                x_support = support(dist)
+                n_marginal_support = length(x_support)
+                n_joint_support = binomial(length(r) + n_marginal_support - 1, length(r))
+                if n_joint_support < 10^6
+                    log_probs = Iterators.map(
+                        Iterators.filter(
+                            issorted,
+                            Iterators.product(fill(1:n_marginal_support, length(r))...),
+                        ),
+                    ) do idx
+                        x = [x_support[i] for i in idx]
+                        return logpdf(d, x)
+                    end
+                    @test exp(logsumexp(log_probs)) ≈ 1
+                end
+            end
+
+            @testset "probability in Clopper-Pearson interval" begin
+                nreps = 10
+                ndraws = 100_000
+
+                xs = sort!(rand(dist, n, nreps); dims=1)[rvec, :]
+                lps = logpdf.(Ref(d), eachcol(xs))
+
+                nmatches = sum(
+                    Iterators.map(1:ndraws) do _
+                        x = @views sort!(rand(dist, n))[rvec]
+                        return Ref(x) .== eachcol(xs)
+                    end,
+                )
+
+                α = 0.01 / 32 / nreps
+                ps_lower = map(nmatches) do nmatch
+                    if nmatch == 0
+                        0.0
+                    else
+                        quantile(Beta(nmatch, ndraws - nmatch + 1), α / 2)
+                    end
+                end
+                ps_upper = map(nmatches) do nmatch
+                    if nmatch == ndraws
+                        1.0
+                    else
+                        quantile(Beta(nmatch + 1, ndraws - nmatch), 1 - α / 2)
+                    end
+                end
+                @test all(log.(ps_lower) .< lps .< log.(ps_upper))
+            end
+        end
     end
 
     @testset "rand" begin
@@ -148,7 +229,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
         end
 
         ndraws = 300_000
-        dists = [Uniform(), Exponential()]
+        dists = [Uniform(), Exponential(), DiscreteUniform(1, 10), Binomial(10, 0.3)]
 
         @testset "marginal mean and standard deviation" begin
             n = 20
@@ -168,6 +249,18 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                     # Arnold (2008). A first course in order statistics. eq 4.6.6-7
                     m_exact = [sum(k -> inv(n - k + 1), 1:i) for i in r]
                     v_exact = [sum(k -> inv((n - k + 1)^2), 1:i) for i in r]
+                elseif Distributions.value_support(typeof(dist)) === Discrete
+                    isbounded(dist) || error("Discrete distribution $dist is not bounded")
+                    # analytically compute mean and variance using marginal distributions of order statistics
+                    x_support = support(dist)
+                    probs = stack(
+                        map(r) do r_i
+                            dist_orderstat = OrderStatistic(dist, n, r_i)
+                            return pdf.(Ref(dist_orderstat), x_support)
+                        end,
+                    )
+                    m_exact = probs' * x_support
+                    v_exact = (probs' * x_support .^ 2) .- m_exact .^ 2
                 end
                 # compute asymptotic sample standard deviation
                 mean_std = @. sqrt(v_exact / ndraws)
@@ -207,24 +300,69 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
 
                 m = length(r)
 
-                xcor = cor(x; dims=2)
-                if dist isa Uniform
-                    # Arnold (2008). A first course in order statistics. Eq 2.3.16
-                    s = @. n - r + 1
-                    xcor_exact = Symmetric(sqrt.((r .* collect(s)') ./ (collect(r)' .* s)))
-                elseif dist isa Exponential
-                    # Arnold (2008).  A first course in order statistics. Eq 4.6.8
-                    v = [sum(k -> inv((n - k + 1)^2), 1:i) for i in r]
-                    xcor_exact = Symmetric(sqrt.(v ./ v'))
-                end
-                for ii in 1:m, ji in (ii + 1):m
-                    i = r[ii]
-                    j = r[ji]
-                    ρ = xcor[ii, ji]
-                    ρ_exact = xcor_exact[ii, ji]
-                    # use variance-stabilizing transformation, recommended in §3.6 of
-                    # Van der Vaart, A. W. (2000). Asymptotic statistics (Vol. 3).
-                    @test atanh(ρ) ≈ atanh(ρ_exact) atol = tol
+                if Distributions.value_support(typeof(dist)) === Continuous
+                    xcor = cor(x; dims=2)
+                    if dist isa Uniform
+                        # Arnold (2008). A first course in order statistics. Eq 2.3.16
+                        s = @. n - r + 1
+                        xcor_exact = Symmetric(
+                            sqrt.((r .* collect(s)') ./ (collect(r)' .* s))
+                        )
+                    elseif dist isa Exponential
+                        # Arnold (2008).  A first course in order statistics. Eq 4.6.8
+                        v = [sum(k -> inv((n - k + 1)^2), 1:i) for i in r]
+                        xcor_exact = Symmetric(sqrt.(v ./ v'))
+                    end
+                    for ii in 1:m, ji in (ii + 1):m
+                        i = r[ii]
+                        j = r[ji]
+                        ρ = xcor[ii, ji]
+                        ρ_exact = xcor_exact[ii, ji]
+                        # use variance-stabilizing transformation, recommended in §3.6 of
+                        # Van der Vaart, A. W. (2000). Asymptotic statistics (Vol. 3).
+                        @test atanh(ρ) ≈ atanh(ρ_exact) atol = tol
+                    end
+                elseif isbounded(dist)
+                    # for discrete distributions, asymptotic joint distribution of order statistics is not necessarily
+                    # multivariate normal, so we can't use the above check. Instead, we use the asymptotic distribution
+                    # of the sample covariance matrix.
+                    xcov = cov(x; dims=2)
+                    x_support = support(dist)
+                    probs = stack(
+                        map(r) do r_i
+                            dist_orderstat = OrderStatistic(dist, n, r_i)
+                            return pdf.(Ref(dist_orderstat), x_support)
+                        end,
+                    )
+                    m_exact = probs' * x_support
+                    var_exact = probs' * x_support .^ 2 .- m_exact .^ 2
+                    kurt_marginal = probs' * (x_support .- m_exact') .^ 4
+
+                    xcov_exact = zeros(length(r), length(r))
+                    x4_central_exact = zeros(length(r), length(r))
+                    for ii in 1:m
+                        i = r[ii]
+                        xcov_exact[ii, ii] = var_exact[ii]
+                        x4_central_exact[ii, ii] = kurt_marginal[ii]
+                        for ji in (ii + 1):m
+                            j = r[ji]
+                            dist_pairwise = JointOrderStatistics(dist, n, (i, j))
+                            for (xi, xj) in Iterators.product(x_support, x_support)
+                                xi <= xj || continue
+                                pij = pdf(dist_pairwise, [xi, xj])
+                                zi = xi - m_exact[ii]
+                                zj = xj - m_exact[ji]
+                                xcov_exact[ii, ji] += pij * zi * zj
+                                x4_central_exact[ii, ji] += pij * (zi * zj)^2
+                            end
+                        end
+                    end
+                    xcov_exact = Symmetric(xcov_exact, :U)
+                    x4_central_exact = Symmetric(x4_central_exact, :U)
+                    # asymptotic variance of sample covariance from Theorem 1.2.17 of
+                    # Muirhead (1982), Aspects of Multivariate Statistical Theory
+                    xcov_var_scaled = x4_central_exact .- xcov_exact .^ 2
+                    @test all((abs.(xcov_exact - xcov) ./ sqrt.(xcov_var_scaled)) .< tol)
                 end
             end
         end
