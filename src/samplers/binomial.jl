@@ -265,21 +265,41 @@ function BinomialTRSSampler(n::Int, prob::Float64)
     BinomialTRSSampler(comp, n, a, b, c, v_r, p/q, α, m)
 end
 
-function rand(rng::AbstractRNG, s::BinomialTRSSampler)
-    (; comp, n, a, b, r, m) = s
+struct BinomialTRSBatchSampler <: Sampleable{Univariate,Discrete}
+    s::BinomialTRSSampler
+    ub_m::Float64
+end
+
+function trs_ub_m(s::BinomialTRSSampler)
+    (; n, r, m) = s
+    return (m + 0.5) * log((m + 1) / (r * (n - m + 1))) +
+           (n + 1) * log(n - m + 1.0) +
+           lstirling_asym(m + 1) + lstirling_asym(n - m + 1)
+end
+trs_ub_m(s::BinomialTRSBatchSampler) = s.ub_m
+
+trs_sampler(s::BinomialTRSSampler) = s
+trs_sampler(s::BinomialTRSBatchSampler) = s.s
+
+function BinomialTRSBatchSampler(n::Int, prob::Float64)
+    s = BinomialTRSSampler(n, prob)
+    return BinomialTRSBatchSampler(s, trs_ub_m(s))
+end
+
+function rand(rng::AbstractRNG, s::Union{BinomialTRSSampler,BinomialTRSBatchSampler})
+    t = trs_sampler(s)
+    (; comp, n, a, b, r) = t
     while true
         u = rand(rng) - 0.5
         v = rand(rng)
         us = 0.5 - abs(u)
-        kf = (2 * a / us + b) * u + s.c
+        kf = (2 * a / us + b) * u + t.c
         (kf < 0.0 || kf >= n + 1) && continue
         k = floor(Int, kf)
-        (us >= 0.07 && v <= s.v_r) && return comp ? n - k : k
-        v = log(v * s.α / (a / (us * us) + b))
-        ub = (m + 0.5) * log((m + 1) / (r * (n - m + 1))) +
-             (n + 1) * log((n - m + 1) / (n - k + 1)) +
-             (k + 0.5) * log(r * (n - k + 1) / (k + 1)) +
-             lstirling_asym(m + 1) + lstirling_asym(n - m + 1) -
+        (us >= 0.07 && v <= t.v_r) && return comp ? n - k : k
+        v = log(v * t.α / (a / (us * us) + b))
+        ub = trs_ub_m(s) - (n + 1) * log(n - k + 1) +
+             (k + 0.5) * log(r * (n - k + 1) / (k + 1)) -
              lstirling_asym(k + 1) - lstirling_asym(n - k + 1)
         v <= ub && return comp ? n - k : k
     end

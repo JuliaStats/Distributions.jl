@@ -162,11 +162,18 @@ function sampler(d::Binomial)
     if n * min(p, 1 - p) <= 10
         return BinomialGeomSampler(n, p)
     else
-        return BinomialTRSSampler(n, p)
+        return BinomialTRSBatchSampler(n, p)
     end
 end
 
-rand(rng::AbstractRNG, d::Binomial) = rand(rng, sampler(d))
+function rand(rng::AbstractRNG, d::Binomial)
+    n, p = d.n, d.p
+    if n * min(p, 1 - p) <= 10
+        return rand(rng, BinomialGeomSampler(n, p))
+    else
+        return rand(rng, BinomialTRSSampler(n, p))
+    end
+end
 
 function mgf(d::Binomial, t::Real)
     n, p = params(d)

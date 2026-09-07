@@ -8,6 +8,7 @@ import Distributions:
     BinomialGeomSampler,
     BinomialTPESampler,
     BinomialTRSSampler,
+    BinomialTRSBatchSampler,
     BinomialAliasSampler,
     PoissonADSampler,
     PoissonCountSampler,
@@ -47,6 +48,7 @@ import Distributions:
             (BinomialGeomSampler, [(0, 0.4), (0, 0.6), (5, 0.0), (5, 1.0), (1, 0.2), (1, 0.8), (3, 0.4), (4, 0.6)]),
             (BinomialTPESampler, [(40, 0.5), (100, 0.4), (300, 0.6)]),
             (BinomialTRSSampler, [(20, 0.5), (40, 0.5), (100, 0.4), (300, 0.6), (25, 0.45), (2000, 0.02)]),
+            (BinomialTRSBatchSampler, [(20, 0.5), (40, 0.5), (100, 0.4), (300, 0.6), (25, 0.45), (2000, 0.02)]),
             (BinomialAliasSampler, binomparams) ]
         @testset "pa=$pa" for pa in paramlst
             n, p = pa
