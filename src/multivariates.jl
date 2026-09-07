@@ -99,7 +99,7 @@ function cor(d::MultivariateDistribution)
     C = cov(d)
     n = size(C, 1)
     @assert size(C, 2) == n
-    R = Matrix{eltype(C)}(undef, n, n)
+    R = similar(cov)
 
     for j = 1:n
         for i = 1:j-1

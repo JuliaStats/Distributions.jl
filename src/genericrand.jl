@@ -26,7 +26,9 @@ rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
 
 # default fallback (redefined for univariate distributions)
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate})
-    return rand!(rng, s, Array{eltype(s)}(undef, size(s)))
+    out = similar(Array{eltype(s)}, axes(s))
+    rand!(rng, s, out)
+    return out
 end
 
 # multiple samples
@@ -37,15 +39,17 @@ end
 function rand(
     rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims,
 )
-    sz = size(s)
+    sax = axes(s)
     ax = map(Base.OneTo, dims)
-    out = [Array{eltype(s)}(undef, sz) for _ in Iterators.product(ax...)]
+    out = [similar(Array{eltype(s)}, sax) for _ in Iterators.product(ax...)]
     return rand!(rng, sampler(s), out, false)
 end
 
 # these are workarounds for sampleables that incorrectly base `eltype` on the parameters
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
-    return rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
+    out = similar(Array{float(eltype(s))}, axes(s))
+    rand!(rng, sampler(s), out)
+    return out
 end
 function rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims)
     out = Array{float(eltype(s))}(undef, dims)
@@ -54,9 +58,9 @@ end
 function rand(
     rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims,
 )
-    sz = size(s)
+    sax = axes(s)
     ax = map(Base.OneTo, dims)
-    out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax...)]
+    out = [similar(Array{float(eltype(s))}, sax) for _ in Iterators.product(ax...)]
     return rand!(rng, sampler(s), out, false)
 end
 
