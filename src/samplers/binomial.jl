@@ -235,65 +235,53 @@ W. Hörmann
 "The generation of binomial random variates"
 Journal of Statistical Computation and Simulation, 46(1-2):101-110
 doi:10.1080/00949659308811496
+
+Valid only for n * min(p, 1-p) >= 10
 =#
-# Valid only for n * min(p, 1-p) >= 10
-struct BinomialTRSSampler{T <: AbstractFloat} <: Sampleable{Univariate,Discrete}
+struct BinomialTRSSampler <: Sampleable{Univariate,Discrete}
+    comp::Bool
     n::Int
-    a::T
-    b::T
-    c::T
-    v_r::T
-    r::T
-    α::T
-    m::Int
+    a::Float64
+    b::Float64
+    c::Float64   # n*p + 0.5
+    v_r::Float64
+    r::Float64   # p / q
+    α::Float64
+    m::Int       # floor((n+1)*p)
 end
 
-function BinomialTRSSampler{T}(n::Int, prob::Real) where {T<:AbstractFloat}
-    p = T(prob)
-    q = one(T) - p
-    n * min(p, q) >= 10 || throw(ArgumentError("BinomialTRSSampler requires n * min(p, 1-p) >= 10"))
-    spq = sqrt(T(n) * p * q)
-    b = T(1.15) + T(2.53) * spq
-    a = T(-0.0873) + T(0.0248) * b + T(0.01) * p
-    c = T(n) * p + T(0.5)
-    v_r = T(0.92) - T(4.2) / b
-    α = (T(2.83) + T(5.1) / b) * spq
-    m = floor(Int, (T(n) + one(T)) * p)
-    BinomialTRSSampler{T}(n, a, b, c, v_r, p/q, α, m)
+function BinomialTRSSampler(n::Int, prob::Float64)
+    comp = prob > 0.5
+    p = comp ? 1.0 - prob : prob
+    q = 1.0 - p
+    n * p >= 10 || throw(ArgumentError("BinomialTRSSampler requires n * min(prob, 1-prob) >= 10"))
+    spq = sqrt(n * p * q)
+    b = 1.15 + 2.53 * spq
+    a = -0.0873 + 0.0248 * b + 0.01 * p
+    c = n * p + 0.5
+    v_r = 0.92 - 4.2 / b
+    α = (2.83 + 5.1 / b) * spq
+    m = floor(Int, (n + 1) * p)
+    BinomialTRSSampler(comp, n, a, b, c, v_r, p/q, α, m)
 end
 
-
-BinomialTRSSampler(n::Int, prob::Float64) = BinomialTRSSampler{Float64}(n, prob)
-
-@inline function binom_stirling_tail(::Type{T}, k::Int) where {T<:AbstractFloat}
-    if k < 10
-        tbl = (0.0810614667953272, 0.0413406959554093, 0.0276779256849983,
-               0.0207906721037650, 0.0166446911898211, 0.0138761288230707,
-               0.0118967099458917, 0.0104112652619720, 0.00925546218271273,
-               0.00833056343336287)
-        return T(@inbounds tbl[k + 1])
-    end
-    kp1sq = (T(k) + one(T))^2
-    return (T(1//12) - (T(1//360) - T(1//1260) / kp1sq) / kp1sq) / (T(k) + one(T))
-end
-
-function rand(rng::AbstractRNG, s::BinomialTRSSampler{T}) where {T}
-    (; n, a, b, r, m) = s
+function rand(rng::AbstractRNG, s::BinomialTRSSampler)
+    (; comp, n, a, b, r, m) = s
     while true
-        u = rand(rng, T) - T(1/2)
-        v = rand(rng, T)
-        us = T(1/2) - abs(u)
-        kf = (T(2) * a / us + b) * u + s.c
-        (kf < zero(T) || kf > T(n)) && continue
+        u = rand(rng) - 0.5
+        v = rand(rng)
+        us = 0.5 - abs(u)
+        kf = (2 * a / us + b) * u + s.c
+        (kf < 0.0 || kf >= n + 1) && continue
         k = floor(Int, kf)
-        (us >= T(0.07) && v <= s.v_r) && return k
+        (us >= 0.07 && v <= s.v_r) && return comp ? n - k : k
         v = log(v * s.α / (a / (us * us) + b))
-        ub = (T(m) + T(1/2)) * log((T(m) + one(T)) / (r * T(n-m+1))) +
-             (T(n) + one(T)) * log(T(n-m+1) / T(n-k+1)) +
-             (T(k) + T(1/2)) * log(r*T(n-k+1) / (T(k) + one(T))) +
-             binom_stirling_tail(T, m) + binom_stirling_tail(T, n-m) -
-             binom_stirling_tail(T, k) - binom_stirling_tail(T, n-k)
-        v <= ub && return k
+        ub = (m + 0.5) * log((m + 1) / (r * (n - m + 1))) +
+             (n + 1) * log((n - m + 1) / (n - k + 1)) +
+             (k + 0.5) * log(r * (n - k + 1) / (k + 1)) +
+             lstirling_asym(m + 1) + lstirling_asym(n - m + 1) -
+             lstirling_asym(k + 1) - lstirling_asym(n - k + 1)
+        v <= ub && return comp ? n - k : k
     end
 end
 
@@ -306,33 +294,3 @@ end
 BinomialAliasSampler(n::Int, p::Float64) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
 
 rand(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
-
-
-# Integrated Polyalgorithm sampler that automatically chooses the proper one
-#
-# It is important for type-stability
-#
-mutable struct BinomialPolySampler <: Sampleable{Univariate,Discrete}
-    use_btpe::Bool
-    geom_sampler::BinomialGeomSampler
-    btpe_sampler::BinomialTPESampler
-end
-
-function BinomialPolySampler(n::Int, p::Float64)
-    q = 1.0 - p
-    if n * min(p, q) > 20
-        use_btpe = true
-        geom_sampler = BinomialGeomSampler()
-        btpe_sampler = BinomialTPESampler(n, p)
-    else
-        use_btpe = false
-        geom_sampler = BinomialGeomSampler(n, p)
-        btpe_sampler = BinomialTPESampler()
-    end
-    BinomialPolySampler(use_btpe, geom_sampler, btpe_sampler)
-end
-
-BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
-
-rand(rng::AbstractRNG, s::BinomialPolySampler) =
-    s.use_btpe ? rand(rng, s.btpe_sampler) : rand(rng, s.geom_sampler)
