@@ -137,4 +137,13 @@ end
     @test count(==(1e8), priorities[iat]) >= 13
 end
 
+@testset "quantile with a thin upper tail" begin
+    # https://github.com/JuliaStats/Distributions.jl/issues/2090
+    d = Categorical(map(Base.Fix1(pdf, BetaBinomial(1000, 0.1, 20)), 0:1000))
+    @test quantile(d, 1) == 1001 == ncategories(d)
+    @test quantile(d, 0) == 1
+    @test median(d) == quantile(d, 1//2)
+    test_quantile_invariants(d)
+end
+
 end

@@ -108,13 +108,13 @@ function kurtosis(d::PoissonBinomial{T}) where {T}
 end
 
 entropy(d::PoissonBinomial) = entropy(d.pmf)
-median(d::PoissonBinomial) = median(Categorical(d.pmf)) - 1
 mode(d::PoissonBinomial) = argmax(d.pmf) - 1
 modes(d::PoissonBinomial) = modes(DiscreteNonParametric(support(d), d.pmf))
 
 #### Evaluation
 
-quantile(d::PoissonBinomial, x::Float64) = quantile(Categorical(d.pmf), x) - 1
+quantile(d::PoissonBinomial, p::Real) = integerunitrange_quantile(d, p)
+cquantile(d::PoissonBinomial, p::Real) = integerunitrange_cquantile(d, p)
 
 function mgf(d::PoissonBinomial, t::Real)
     expm1_t = expm1(t)
@@ -130,7 +130,8 @@ function cf(d::PoissonBinomial, t::Real)
     end
 end
 
-pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[Int(k+1)] : zero(eltype(d.pmf))
+pdf(d::PoissonBinomial, k::Integer) = insupport(d, k) ? d.pmf[k + 1] : zero(eltype(d.pmf))
+pdf(d::PoissonBinomial, k::Real) = pdf_int(d, k)
 logpdf(d::PoissonBinomial, k::Real) = log(pdf(d, k))
 
 cdf(d::PoissonBinomial, k::Int) = integerunitrange_cdf(d, k)

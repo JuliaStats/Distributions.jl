@@ -36,6 +36,7 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
     test_support(distr, vs)
     test_evaluation(distr, vs, testquan)
     test_range_evaluation(distr)
+    test_extreme_quantiles(distr)
     test_nonfinite(distr)
 
     test_stats(distr, vs)
@@ -411,6 +412,43 @@ end
 
 
 #### Testing evaluation methods
+
+# the guards exclude extreme values with zero probability, e.g. `maximum(Bernoulli(0))`
+function test_extreme_quantiles(d::DiscreteUnivariateDistribution)
+    if islowerbounded(d) && pdf(d, minimum(d)) > 0
+        @test quantile(d, 0) == minimum(d)
+        @test cquantile(d, 1) == minimum(d)
+    end
+    if isupperbounded(d) && pdf(d, maximum(d)) > 0
+        @test quantile(d, 1) == maximum(d)
+        @test cquantile(d, 0) == maximum(d)
+    end
+end
+
+# `quantile(d, p)` is the smallest `x` in the support with `cdf(d, x) >= p` and
+# `cquantile(d, p)` the smallest `x` with `ccdf(d, x) <= p`, checked with
+# `cdf(d, x - 1) = cdf(d, x) - pdf(d, x)` and `ccdf(d, x - 1) = ccdf(d, x) + pdf(d, x)`
+function test_quantile_invariants(d::DiscreteUnivariateDistribution, ps=0.01:0.01:0.99)
+    test_extreme_quantiles(d)
+    @test issorted(quantile(d, p) for p in ps)
+    @test issorted((cquantile(d, p) for p in ps); rev=true)
+
+    for p in ps
+        k = @inferred quantile(d, p)
+        @test insupport(d, k)
+        @test cdf(d, k) >= p
+        if k != minimum(d)
+            @test cdf(d, k) < p + pdf(d, k)
+        end
+
+        k = @inferred cquantile(d, p)
+        @test insupport(d, k)
+        @test ccdf(d, k) <= p
+        if k != minimum(d)
+            @test ccdf(d, k) + pdf(d, k) > p
+        end
+    end
+end
 
 function test_range_evaluation(d::DiscreteUnivariateDistribution)
     # check the consistency between range-based and ordinary pdf
