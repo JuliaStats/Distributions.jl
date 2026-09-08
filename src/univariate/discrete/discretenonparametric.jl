@@ -162,18 +162,33 @@ function ccdf(d::DiscreteNonParametric, x::Real)
     return s
 end
 
+# as in `cdf` and `ccdf`, the lower tail is summed if `q <= 1/2` and the upper tail otherwise
 function quantile(d::DiscreteNonParametric, q::Real)
-    0 <= q <= 1 || throw(DomainError())
+    0 <= q <= 1 || throw(DomainError(q, "`q` must satisfy `0 <= q <= 1`"))
     x = support(d)
     p = probs(d)
-    k = length(x)
-    i = 1
-    cp = p[1]
-    while cp < q && i < k #Note: is i < k necessary?
-        i += 1
-        cp += p[i]
+    n = length(p)
+
+    if q <= 1//2
+        # smallest `x[i]` with `cdf(d, x[i]) = sum(p[1:i]) >= q`
+        i = 1
+        c = p[1]
+        while c < q && i < n
+            i += 1
+            c += p[i]
+        end
+        return x[i]
+    else
+        # `c == ccdf(d, x[i - 1])`, hence `x[i]` is a solution as soon as `c > 1 - q`
+        r = 1 - q
+        i = n
+        c = p[n]
+        while c <= r && i > 1
+            i -= 1
+            c += p[i]
+        end
+        return x[i]
     end
-    x[i]
 end
 
 minimum(d::DiscreteNonParametric) = first(support(d))

@@ -9,24 +9,8 @@ abstract type NoncentralHypergeometric{T<:Real} <: DiscreteUnivariateDistributio
 
 # Functions
 
-function quantile(d::NoncentralHypergeometric{T}, q::Real) where T<:Real
-    if !(zero(q) <= q <= one(q))
-        T(NaN)
-    else
-        range = support(d)
-        if q > 1/2
-            q = 1 - q
-            range = reverse(range)
-        end
-
-        qsum, i = zero(T), 0
-        while qsum < q
-            i += 1
-            qsum += pdf(d, range[i])
-        end
-        range[i]
-    end
-end
+quantile(d::NoncentralHypergeometric, p::Real) = integerunitrange_quantile(d, p)
+cquantile(d::NoncentralHypergeometric, p::Real) = integerunitrange_cquantile(d, p)
 
 params(d::NoncentralHypergeometric) = (d.ns, d.nf, d.n, d.ω)
 @inline partype(d::NoncentralHypergeometric{T}) where {T<:Real} = T
@@ -83,7 +67,7 @@ testfd(d::FisherNoncentralHypergeometric) = d.ω^3
 #
 # but the rule for terminating the summation has been slightly modified.
 function pdf(d::FisherNoncentralHypergeometric, k::Integer)
-    ω, _ = promote(d.ω, float(k))
+    ω, _ = map(float, promote(d.ω, k))
     l = max(0, d.n - d.nf)
     u = min(d.ns, d.n)
     if !insupport(d, k)
@@ -128,52 +112,65 @@ function pdf(d::FisherNoncentralHypergeometric, k::Integer)
     return fₖ/s
 end
 
+pdf(d::FisherNoncentralHypergeometric, k::Real) = pdf_int(d, k)
 logpdf(d::FisherNoncentralHypergeometric, k::Real) = log(pdf(d, k))
 
-function cdf(d::FisherNoncentralHypergeometric, k::Integer)
-    ω, _ = promote(d.ω, float(k))
-    l = max(0, d.n - d.nf)
-    u = min(d.ns, d.n)
-    if k < l
-        return zero(ω)
-    elseif k >= u
-        return one(ω)
-    end
+# unnormalized weights of `minimum(d):k` and of `(k + 1):maximum(d)`, hence the normalizing
+# constant is `Fₖ + Gₖ`
+#
+# a term that no longer contributes to the tail it belongs to does not contribute to
+# `Fₖ + Gₖ` either, so the two tails determine when the summations can be terminated
+function _fisher_tails(d::FisherNoncentralHypergeometric, k::Integer)
+    ω, _ = map(float, promote(d.ω, k))
+    l, u = extrema(d)
     η = mode(d)
-    s = one(ω)
-    fᵢ = one(ω)
     Fₖ = k >= η ? one(ω) : zero(ω)
+    Gₖ = one(ω) - Fₖ
+
+    fᵢ = one(ω)
     for i in (η + 1):u
         rᵢ = (d.ns - i + 1)*ω/(i*(d.nf - d.n  + i))*(d.n - i + 1)
         fᵢ *= rᵢ
-
-        # break if terms no longer contribute to s
-        sfᵢ = s + fᵢ
-        if sfᵢ == s && i > k
-            break
-        end
-        s = sfᵢ
         if i <= k
             Fₖ += fᵢ
+        else
+            Gₖ + fᵢ == Gₖ && break
+            Gₖ += fᵢ
         end
     end
+
     fᵢ = one(ω)
     for i in (η - 1):-1:l
         rᵢ₊ = (d.ns - i)*ω/((i + 1)*(d.nf - d.n + i + 1))*(d.n - i)
         fᵢ /= rᵢ₊
-
-        # break if terms no longer contribute to s
-        sfᵢ = s + fᵢ
-        if sfᵢ == s && i < k
-            break
-        end
-        s = sfᵢ
-        if i <= k
+        if i > k
+            Gₖ += fᵢ
+        else
+            i < k && Fₖ + fᵢ == Fₖ && break
             Fₖ += fᵢ
         end
     end
 
-    return Fₖ/s
+    return Fₖ, Gₖ
+end
+
+function cdf(d::FisherNoncentralHypergeometric, k::Integer)
+    ω, _ = map(float, promote(d.ω, k))
+    k < minimum(d) && return zero(ω)
+    k >= maximum(d) && return one(ω)
+    Fₖ, Gₖ = _fisher_tails(d, k)
+    return Fₖ/(Fₖ + Gₖ)
+end
+
+# `1 - cdf(d, k)` cancels to 0 in the upper tail
+ccdf(d::FisherNoncentralHypergeometric, k::Real) = ccdf_int(d, k)
+
+function ccdf(d::FisherNoncentralHypergeometric, k::Integer)
+    ω, _ = map(float, promote(d.ω, k))
+    k < minimum(d) && return one(ω)
+    k >= maximum(d) && return zero(ω)
+    Fₖ, Gₖ = _fisher_tails(d, k)
+    return Gₖ/(Fₖ + Gₖ)
 end
 
 function _expectation(f, d::FisherNoncentralHypergeometric)
@@ -267,7 +264,9 @@ entropy(d::WalleniusNoncentralHypergeometric) = 1
 
 testfd(d::WalleniusNoncentralHypergeometric) = d.ω^3
 
-function logpdf(d::WalleniusNoncentralHypergeometric, k::Real)
+logpdf(d::WalleniusNoncentralHypergeometric, k::Real) = logpdf_int(d, k)
+
+function logpdf(d::WalleniusNoncentralHypergeometric, k::Integer)
     if insupport(d, k)
         D = d.ω * (d.ns - k) + (d.nf - d.n + k)
         f(t) = (1 - t^(d.ω / D))^k * (1 - t^(1 / D))^(d.n - k)
