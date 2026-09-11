@@ -35,13 +35,12 @@ end
 if haskey(ENV, "binomial") && ENV["binomial"] != "skip"
     @info "Binomial"
     
-    import Distributions: BinomialAliasSampler, BinomialGeomSampler, BinomialTPESampler, BinomialTRSSampler, BinomialTRSBatchSampler
+    import Distributions: BinomialAliasSampler, BinomialGeomSampler, BinomialTPESampler, BinomialTRSSampler
     
     for ST in [BinomialAliasSampler,
                    BinomialGeomSampler, 
                    BinomialTPESampler, 
-                   BinomialTRSSampler,
-                   BinomialTRSBatchSampler]
+                   BinomialTRSSampler]
         mt = Random.MersenneTwister(33)
         @info string(ST)
         nvals = haskey(ENV, "CI") ? [2] : 2 .^ (1:12)

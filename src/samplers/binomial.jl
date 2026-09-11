@@ -243,18 +243,20 @@ struct BinomialTRSSampler <: Sampleable{Univariate,Discrete}
     n::Int
     a::Float64
     b::Float64
-    c::Float64   # n*p + 0.5
+    c::Float64    # n*p + 0.5
     v_r::Float64
-    r::Float64   # p / q
+    r::Float64    # p / q
     α::Float64
-    m::Int       # floor((n+1)*p)
+    m::Int        # floor((n+1)*p)
+    ub_m::Float64 # k-independent part of ub
 end
 
-function BinomialTRSSampler(n::Int, prob::Float64)
+function trs_params(n::Int, prob::Float64)
     comp = prob > 0.5
     p = comp ? 1.0 - prob : prob
     q = 1.0 - p
-    n * p >= 10 || throw(ArgumentError("BinomialTRSSampler requires n * min(prob, 1-prob) >= 10"))
+    n * p >= 10 ||
+        throw(ArgumentError("BinomialTRSSampler requires n * min(prob, 1-prob) >= 10"))
     spq = sqrt(n * p * q)
     b = 1.15 + 2.53 * spq
     a = -0.0873 + 0.0248 * b + 0.01 * p
@@ -262,48 +264,43 @@ function BinomialTRSSampler(n::Int, prob::Float64)
     v_r = 0.92 - 4.2 / b
     α = (2.83 + 5.1 / b) * spq
     m = floor(Int, (n + 1) * p)
-    BinomialTRSSampler(comp, n, a, b, c, v_r, p/q, α, m)
+    return (; comp, n, a, b, c, v_r, r = p / q, α, m)
 end
 
-struct BinomialTRSBatchSampler <: Sampleable{Univariate,Discrete}
-    s::BinomialTRSSampler
-    ub_m::Float64
-end
-
-function trs_ub_m(s::BinomialTRSSampler)
-    (; n, r, m) = s
+trs_ub_m(ub_m::Float64, _) = ub_m
+function trs_ub_m(::Nothing, params)
+    (; n, r, m) = params
     return (m + 0.5) * log((m + 1) / (r * (n - m + 1))) +
-           (n + 1) * log(n - m + 1.0) +
            lstirling_asym(m + 1) + lstirling_asym(n - m + 1)
 end
-trs_ub_m(s::BinomialTRSBatchSampler) = s.ub_m
 
-trs_sampler(s::BinomialTRSSampler) = s
-trs_sampler(s::BinomialTRSBatchSampler) = s.s
-
-function BinomialTRSBatchSampler(n::Int, prob::Float64)
-    s = BinomialTRSSampler(n, prob)
-    return BinomialTRSBatchSampler(s, trs_ub_m(s))
+function BinomialTRSSampler(n::Int, prob::Float64)
+    params = trs_params(n, prob)
+    return BinomialTRSSampler(params..., trs_ub_m(nothing, params))
 end
 
-function rand(rng::AbstractRNG, s::Union{BinomialTRSSampler,BinomialTRSBatchSampler})
-    t = trs_sampler(s)
-    (; comp, n, a, b, r) = t
+function trs_rand(rng::AbstractRNG, params, ub_m)
+    (; comp, n, a, b, c, v_r, r, α, m) = params
     while true
         u = rand(rng) - 0.5
         v = rand(rng)
         us = 0.5 - abs(u)
-        kf = (2 * a / us + b) * u + t.c
+        kf = (2 * a / us + b) * u + c
         (kf < 0.0 || kf >= n + 1) && continue
         k = floor(Int, kf)
-        (us >= 0.07 && v <= t.v_r) && return comp ? n - k : k
-        v = log(v * t.α / (a / (us * us) + b))
-        ub = trs_ub_m(s) - (n + 1) * log(n - k + 1) +
+        (us >= 0.07 && v <= v_r) && return comp ? n - k : k
+        v = log(v * α / (a / (us * us) + b))
+        ub = trs_ub_m(ub_m, params) + (n + 1) * log((n - m + 1) / (n - k + 1)) +
              (k + 0.5) * log(r * (n - k + 1) / (k + 1)) -
              lstirling_asym(k + 1) - lstirling_asym(n - k + 1)
         v <= ub && return comp ? n - k : k
     end
 end
+
+trs_rand(rng::AbstractRNG, n::Int, prob::Float64) =
+    trs_rand(rng, trs_params(n, prob), nothing)
+
+rand(rng::AbstractRNG, s::BinomialTRSSampler) = trs_rand(rng, s, s.ub_m)
 
 # Constructing an alias table by directly computing the probability vector
 #

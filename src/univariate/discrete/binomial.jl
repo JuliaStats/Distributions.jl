@@ -162,7 +162,7 @@ function sampler(d::Binomial)
     if n * min(p, 1 - p) <= 10
         return BinomialGeomSampler(n, p)
     else
-        return BinomialTRSBatchSampler(n, p)
+        return BinomialTRSSampler(n, p)
     end
 end
 
@@ -171,7 +171,7 @@ function rand(rng::AbstractRNG, d::Binomial)
     if n * min(p, 1 - p) <= 10
         return rand(rng, BinomialGeomSampler(n, p))
     else
-        return rand(rng, BinomialTRSSampler(n, p))
+        return trs_rand(rng, n, p)
     end
 end
 
