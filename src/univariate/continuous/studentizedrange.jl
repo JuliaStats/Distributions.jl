@@ -56,7 +56,7 @@ end
 Base.convert(::Type{StudentizedRange{T}}, d::StudentizedRange{T}) where {T<:Real} = d
 
 ### Parameters
-params(d::StudentizedRange) = (d.ν, d.k)
+namedparams(d::StudentizedRange) = (; d.ν, d.k)
 @inline partype(d::StudentizedRange{T}) where {T <: Real} = T
 
 

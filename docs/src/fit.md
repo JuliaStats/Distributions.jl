@@ -17,7 +17,12 @@ This statement fits a distribution of type `D` to a given dataset `x`, where `x`
 
     ```jldoctest; setup = :(using Distributions)
     julia> fit(Cauchy{Float32}, collect(-4:4))
-    Cauchy{Float64}(μ=0.0, σ=2.0)
+    Cauchy distribution
+    Parameters:
+      μ = 0.0
+      σ = 2.0
+    Support:
+      -Inf < x < Inf
     ```
 
 ## Maximum Likelihood Estimation

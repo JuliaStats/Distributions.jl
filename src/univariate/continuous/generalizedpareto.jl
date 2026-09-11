@@ -77,7 +77,7 @@ Base.convert(::Type{GeneralizedPareto{T}}, d::GeneralizedPareto{T}) where {T<:Re
 location(d::GeneralizedPareto) = d.μ
 scale(d::GeneralizedPareto) = d.σ
 shape(d::GeneralizedPareto) = d.ξ
-params(d::GeneralizedPareto) = (d.μ, d.σ, d.ξ)
+namedparams(d::GeneralizedPareto) = (; d.μ, d.σ, d.ξ)
 partype(::GeneralizedPareto{T}) where {T} = T
 
 #### Statistics

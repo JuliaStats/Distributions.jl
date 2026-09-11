@@ -123,7 +123,7 @@ function truncated(d::Truncated, l::Real, ::Nothing)
     return truncated(d.untruncated, d.lower === nothing ? l : max(l, d.lower), d.upper)
 end
 
-params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
+namedparams(d::Truncated) = (; d.untruncated, d.lower, d.upper)
 partype(d::Truncated{<:UnivariateDistribution,<:ValueSupport,T}) where {T<:Real} = promote_type(partype(d.untruncated), T)
 
 Base.eltype(::Type{<:Truncated{D}}) where {D<:UnivariateDistribution} = eltype(D)
@@ -235,23 +235,17 @@ end
 
 ## show
 
-function show(io::IO, d::Truncated)
-    print(io, "Truncated(")
-    d0 = d.untruncated
-    uml, namevals = _use_multline_show(d0)
-    uml ? show_multline(io, d0, namevals) :
-          show_oneline(io, d0, namevals)
-    if d.lower === nothing
-        print(io, "; upper=$(d.upper))")
-    elseif d.upper === nothing
-        print(io, "; lower=$(d.lower))")
-    else
-        print(io, "; lower=$(d.lower), upper=$(d.upper))")
-    end
-    uml && println(io)
+show(io::IO, d::Truncated) = _showcall(io, "truncated", d.untruncated, d.lower, d.upper)
+
+function _showname(io::IO, d::Truncated)
+    print(io, "Truncated ")
+    _showname(io, d.untruncated)
 end
 
-_use_multline_show(d::Truncated) = _use_multline_show(d.untruncated)
+function _showparams(io::IO, d::Truncated)
+    _showparams(io, d.untruncated)
+    _showsection(io, "Truncation", _bounds(d.lower, d.upper))
+end
 
 
 ### specialized truncated distributions

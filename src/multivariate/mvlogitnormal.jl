@@ -29,16 +29,10 @@ end
 MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
-distrname(d::MvLogitNormal) = string("MvLogitNormal{", distrname(d.normal), "}")
-
-function Base.show(io::IO, d::MvLogitNormal; indent::String="  ")
-    print(io, distrname(d))
-    println(io, "(")
-    normstr = strip(sprint(show, d.normal; context=IOContext(io)))
-    normstr = replace(normstr, "\n" => "\n$indent")
-    print(io, indent)
-    println(io, normstr)
-    println(io, ")")
+function _showname(io::IO, d::MvLogitNormal)
+    print(io, "MvLogitNormal{")
+    _showname(io, d.normal)
+    print(io, '}')
 end
 
 # Conversions
@@ -56,7 +50,7 @@ canonform(d::MvLogitNormal{<:MvNormal}) = MvLogitNormal(canonform(d.normal))
 length(d::MvLogitNormal) = length(d.normal) + 1
 Base.eltype(::Type{<:MvLogitNormal{D}}) where {D} = eltype(D)
 Base.eltype(d::MvLogitNormal) = eltype(d.normal)
-params(d::MvLogitNormal) = params(d.normal)
+namedparams(d::MvLogitNormal) = namedparams(d.normal)
 @inline partype(d::MvLogitNormal) = partype(d.normal)
 
 location(d::MvLogitNormal) = mean(d.normal)

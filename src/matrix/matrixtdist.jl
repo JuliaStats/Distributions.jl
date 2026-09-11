@@ -73,7 +73,6 @@ MatrixTDist(ν::Real, M::AbstractMatrix, Σ::Union{AbstractMatrix, LinearAlgebra
 #  REPL display
 #  -----------------------------------------------------------------------------
 
- show(io::IO, d::MatrixTDist) = show_multline(io, d, [(:ν, d.ν), (:M, d.M), (:Σ, Matrix(d.Σ)), (:Ω, Matrix(d.Ω))])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
@@ -118,7 +117,7 @@ cov(d::MatrixTDist, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n, 
 
 var(d::MatrixTDist) = d.ν <= 2 ? throw(ArgumentError("var only defined for df > 2")) : reshape(diag(cov(d)), size(d))
 
-params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
+namedparams(d::MatrixTDist) = (; d.ν, d.M, d.Σ, d.Ω)
 
 @inline partype(d::MatrixTDist{T}) where {T <: Real} = T
 

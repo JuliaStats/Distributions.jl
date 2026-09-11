@@ -481,6 +481,28 @@ Base.@propagate_inbounds function loglikelihood(
     return sum(Base.Fix1(logpdf, d), x)
 end
 
+"""
+    namedparams(d::Distribution)
+
+Return the parameters of `d` as a `NamedTuple`, e.g. `(μ = 0.0, σ = 1.0)` for `Normal()`.
+
+Every distribution implements `namedparams`. A distribution that wraps another one, such as
+`truncated(Normal(), 0, 1)`, reports the wrapped distribution as one of its parameters.
+"""
+function namedparams end
+
+# `params` flattens wrapped distributions, e.g. `params(truncated(Normal(), 0, 1))` is
+# `(0.0, 1.0, 0.0, 1.0)`. Distributions whose `params` contains a distribution specialize it.
+StatsAPI.params(d::Distribution) = _flattenparams(values(namedparams(d)))
+
+# Recursion over the tuple: since its length and element types are known, the compiler infers and
+# unrolls the whole flattening.
+_flattenparams(::Tuple{}) = ()
+_flattenparams(ps::Tuple) = (_paramvalues(first(ps))..., _flattenparams(Base.tail(ps))...)
+
+_paramvalues(x) = (x,)
+_paramvalues(d::Distribution) = params(d)
+
 ## TODO: the following types need to be improved
 abstract type SufficientStats end
 abstract type IncompleteDistribution end

@@ -8,6 +8,9 @@ abstract type EdgeworthAbstract <: ContinuousUnivariateDistribution end
 
 skewness(d::EdgeworthAbstract) = skewness(d.dist) / sqrt(d.n)
 kurtosis(d::EdgeworthAbstract) = kurtosis(d.dist) / d.n
+namedparams(d::EdgeworthAbstract) = (; d.dist, d.n)
+
+@distr_support EdgeworthAbstract -Inf Inf
 
 struct EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D

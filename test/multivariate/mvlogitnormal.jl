@@ -144,15 +144,9 @@ end
     end
 
     @testset "show" begin
+        # the display is tested in test/show.jl
         d = MvLogitNormal([1.0, 2.0, 3.0], Diagonal([4.0, 5.0, 6.0]))
-        @test sprint(show, d) === """
-        MvLogitNormal{DiagNormal}(
-          DiagNormal(
-          dim: 3
-          μ: [1.0, 2.0, 3.0]
-          Σ: [4.0 0.0 0.0; 0.0 5.0 0.0; 0.0 0.0 6.0]
-          )
-        )
-        """
+        @test repr(d) ==
+            "MvLogitNormal([1.0, 2.0, 3.0], [4.0 0.0 0.0; 0.0 5.0 0.0; 0.0 0.0 6.0])"
     end
 end

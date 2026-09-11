@@ -50,7 +50,7 @@ Base.convert(::Type{LogNormal{T}}, d::LogNormal{T}) where {T<:Real} = d
 
 #### Parameters
 
-params(d::LogNormal) = (d.μ, d.σ)
+namedparams(d::LogNormal) = (; d.μ, d.σ)
 partype(::LogNormal{T}) where {T} = T
 
 #### Statistics

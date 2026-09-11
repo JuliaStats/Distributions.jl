@@ -30,7 +30,9 @@ rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
 rand(rng::AbstractRNG, d::UnivariateGMM) =
     (k = rand(rng, d.prior); d.means[k] + randn(rng) * d.stds[k])
 
-params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
+namedparams(d::UnivariateGMM) = (; d.means, d.stds, d.prior)
+# `params` reports the wrapped distribution itself, so that `typeof(d)(params(d)...)` returns `d`
+params(d::UnivariateGMM) = values(namedparams(d))
 
 struct UnivariateGMMSampler{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: Sampleable{Univariate,Continuous}
     means::VT1

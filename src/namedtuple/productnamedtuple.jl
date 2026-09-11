@@ -13,11 +13,10 @@ directly.
 
 ```jldoctest ProductNamedTuple; setup = :(using Distributions, Random; Random.seed!(832))
 julia> d = product_distribution((x=Normal(), y=Dirichlet([2, 4])))
-ProductNamedTupleDistribution{(:x, :y)}(
-x: Normal{Float64}(μ=0.0, σ=1.0)
-y: Dirichlet{Int64, Vector{Int64}, Float64}(alpha=[2, 4])
-)
-
+ProductNamedTupleDistribution distribution
+Marginals:
+  x = Normal(0.0, 1.0)
+  y = Dirichlet([2, 4])
 
 julia> nt = rand(d)
 (x = 1.5155385995160346, y = [0.533531876438439, 0.466468123561561])
@@ -56,6 +55,8 @@ function _gentype(d::Distribution{CholeskyVariate})
     T = eltype(d)
     return LinearAlgebra.Cholesky{T,Matrix{T}}
 end
+namedparams(d::ProductNamedTupleDistribution) = (; d.dists)
+
 function _gentype(d::ProductNamedTupleDistribution{K}) where {K}
     return NamedTuple{K,Tuple{map(_gentype, values(d.dists))...}}
 end
@@ -63,13 +64,7 @@ _gentype(::Distribution) = Any
 
 _product_namedtuple_eltype(dists) = typejoin(map(_gentype, dists)...)
 
-function Base.show(io::IO, d::ProductNamedTupleDistribution)
-    return show_multline(io, d, collect(pairs(d.dists)))
-end
-
-function distrname(::ProductNamedTupleDistribution{K}) where {K}
-    return "ProductNamedTupleDistribution{$K}"
-end
+_showparams(io::IO, d::ProductNamedTupleDistribution) = _showsection(io, "Marginals", d.dists)
 
 """
     product_distribution(dists::NamedTuple{K,Tuple{Vararg{Distribution}}}) where {K}

@@ -21,7 +21,12 @@ Then, we create a standard-normal distribution `d` and obtain samples using `ran
 
 ```jldoctest getting-started
 julia> d = Normal()
-Normal{Float64}(μ=0.0, σ=1.0)
+Normal distribution
+Parameters:
+  μ = 0.0
+  σ = 1.0
+Support:
+  -Inf < x < Inf
 ```
 
 The object `d` represents a probability distribution, in our case the standard-normal distribution.
@@ -81,14 +86,19 @@ In addition, you can create truncated distributions from univariate distribution
 julia> truncated(Normal(mu, sigma), l, u)
 ```
 
-To find out which parameters are appropriate for a given distribution `D`, you can use `fieldnames(D)`:
+To find out which parameters a distribution has, look at how it is displayed:
 
 ```jldoctest getting-started
-julia> fieldnames(Cauchy)
-(:μ, :σ)
+julia> Cauchy(0.0, 1.0)
+Cauchy distribution
+Parameters:
+  μ = 0.0
+  σ = 1.0
+Support:
+  -Inf < x < Inf
 ```
 
-This tells you that a Cauchy distribution is initialized with location `μ` and scale `β`.
+This tells you that a Cauchy distribution is initialized with location `μ` and scale `σ`.
 
 ## Estimate the Parameters
 
@@ -96,7 +106,12 @@ It is often useful to approximate an empirical distribution with a theoretical d
 
 ```julia-repl
 julia> fit(Normal, x)
-Normal{Float64}(μ=-0.04827714875398303, σ=0.9256810813636542)
+Normal distribution
+Parameters:
+  μ = -0.04827714875398303
+  σ = 0.9256810813636542
+Support:
+  -Inf < x < Inf
 ```
 
 Since `x` is a random draw from `Normal`, it's easy to check that the fitted values are sensible. Indeed, the estimates [0.04, 1.12] are close to the true values of [0.0, 1.0] that we used to generate `x`.

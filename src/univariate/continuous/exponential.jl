@@ -48,7 +48,7 @@ Base.convert(::Type{Exponential{T}}, d::Exponential{T}) where {T<:Real} = d
 scale(d::Exponential) = d.θ
 rate(d::Exponential) = inv(d.θ)
 
-params(d::Exponential) = (d.θ,)
+namedparams(d::Exponential) = (; d.θ)
 partype(::Exponential{T}) where {T<:Real} = T
 
 #### Statistics

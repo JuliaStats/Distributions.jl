@@ -106,13 +106,13 @@ Base.@deprecate MvNormalCanon(d::Int, prec::Real) MvNormalCanon(LinearAlgebra.Di
 
 ### Show
 
-distrname(d::IsoNormalCanon) = "IsoNormalCanon"
-distrname(d::DiagNormalCanon) = "DiagNormalCanon"
-distrname(d::FullNormalCanon) = "FullNormalCanon"
+_showname(io::IO, ::IsoNormalCanon) = print(io, "IsoNormalCanon")
+_showname(io::IO, ::DiagNormalCanon) = print(io, "DiagNormalCanon")
+_showname(io::IO, ::FullNormalCanon) = print(io, "FullNormalCanon")
 
-distrname(d::ZeroMeanIsoNormalCanon) = "ZeroMeanIsoNormalCanon"
-distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
-distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
+_showname(io::IO, ::ZeroMeanIsoNormalCanon) = print(io, "ZeroMeanIsoNormalCanon")
+_showname(io::IO, ::ZeroMeanDiagNormalCanon) = print(io, "ZeroMeanDiagNormalCanon")
+_showname(io::IO, ::ZeroMeanFullNormalCanon) = print(io, "ZeroMeanFullNormalCanon")
 
 ### Conversion
 function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where {T<:Real}
@@ -140,7 +140,7 @@ canonform(d::MvNormal{T,C,Zeros{T}}) where {C, T<:Real} = MvNormalCanon(inv(d.Σ
 
 length(d::MvNormalCanon) = length(d.μ)
 mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
-params(d::MvNormalCanon) = (d.μ, d.h, d.J)
+namedparams(d::MvNormalCanon) = (; d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
 Base.eltype(::Type{<:MvNormalCanon{T}}) where {T} = T
 
