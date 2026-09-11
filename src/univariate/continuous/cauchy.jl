@@ -51,7 +51,7 @@ Base.convert(::Type{Cauchy{T}}, d::Cauchy{T}) where {T<:Real} = d
 location(d::Cauchy) = d.μ
 scale(d::Cauchy) = d.σ
 
-params(d::Cauchy) = (d.μ, d.σ)
+namedparams(d::Cauchy) = (; d.μ, d.σ)
 @inline partype(d::Cauchy{T}) where {T<:Real} = T
 
 

@@ -69,7 +69,6 @@ Wishart(df::Real, S::Cholesky) = Wishart(df, PDMat(S))
 #  REPL display
 #  -----------------------------------------------------------------------------
 
-show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, d.S)])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
@@ -103,7 +102,7 @@ end
 size(d::Wishart) = size(d.S)
 
 rank(d::Wishart) = d.rank
-params(d::Wishart) = (d.df, d.S)
+namedparams(d::Wishart) = (; d.df, d.S)
 @inline partype(d::Wishart{T}) where {T<:Real} = T
 
 mean(d::Wishart) = d.df * Matrix(d.S)

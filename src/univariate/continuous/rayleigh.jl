@@ -47,7 +47,7 @@ Base.convert(::Type{Rayleigh{T}}, d::Rayleigh{T}) where {T<:Real} = d
 #### Parameters
 
 scale(d::Rayleigh) = d.σ
-params(d::Rayleigh) = (d.σ,)
+namedparams(d::Rayleigh) = (; d.σ)
 partype(::Rayleigh{T}) where {T<:Real} = T
 
 

@@ -53,7 +53,7 @@ shape(d::Gamma) = d.α
 scale(d::Gamma) = d.θ
 rate(d::Gamma) = 1 / d.θ
 
-params(d::Gamma) = (d.α, d.θ)
+namedparams(d::Gamma) = (; d.α, d.θ)
 partype(::Gamma{T}) where {T} = T
 
 #### Statistics

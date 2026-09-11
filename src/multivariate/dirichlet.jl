@@ -65,13 +65,12 @@ convert(::Type{Dirichlet{T}}, alpha::AbstractVector{T}) where {T<:Real} =
     Dirichlet(alpha)
 convert(::Type{Dirichlet{T}}, d::Dirichlet{T}) where {T<:Real} = d
 
-Base.show(io::IO, d::Dirichlet) = show(io, d, (:alpha,))
 
 # Properties
 
 length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
-params(d::Dirichlet) = (d.alpha,)
+namedparams(d::Dirichlet) = (; d.alpha)
 @inline partype(::Dirichlet{T}) where {T<:Real} = T
 
 function var(d::Dirichlet)

@@ -74,7 +74,7 @@ Base.convert(::Type{PGeneralizedGaussian{T}}, d::PGeneralizedGaussian{T}) where 
 #### Parameters
 partype(::PGeneralizedGaussian{T}) where {T<:Real} = T
 
-params(d::PGeneralizedGaussian) = (d.μ, d.α, d.p)
+namedparams(d::PGeneralizedGaussian) = (; d.μ, d.α, d.p)
 location(d::PGeneralizedGaussian) = d.μ
 shape(d::PGeneralizedGaussian) = d.p
 scale(d::PGeneralizedGaussian) = d.α

@@ -49,7 +49,9 @@ convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
 ### Parameters
 
 ncategories(d::Categorical) = support(d).stop
-params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
+namedparams(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (p = probs(d),)
+
+show(io::IO, d::Categorical) = _showcall(io, "Categorical", probs(d))
 partype(::Categorical{T}) where {T<:Real} = T
 
 function Base.isapprox(c1::Categorical, c2::Categorical; kwargs...)

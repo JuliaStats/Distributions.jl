@@ -42,13 +42,10 @@ using Test
     end
 
     @testset "show" begin
+        # the display is tested in test/show.jl
         d = ProductNamedTupleDistribution((x=Gamma(1.0, 2.0), y=Normal()))
-        @test repr(d) == """
-        ProductNamedTupleDistribution{(:x, :y)}(
-        x: Gamma{Float64}(α=1.0, θ=2.0)
-        y: Normal{Float64}(μ=0.0, σ=1.0)
-        )
-        """
+        @test repr(d) ==
+            "ProductNamedTupleDistribution((x = Gamma(1.0, 2.0), y = Normal(0.0, 1.0)))"
     end
 
     @testset "Properties" begin

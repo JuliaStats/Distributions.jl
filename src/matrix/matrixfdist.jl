@@ -57,7 +57,6 @@ MatrixFDist(n1::Real, n2::Real, B::Union{AbstractMatrix, LinearAlgebra.Cholesky}
 #  REPL display
 #  -----------------------------------------------------------------------------
 
- show(io::IO, d::MatrixFDist) = show_multline(io, d, [(:n1, d.W.df), (:n2, d.n2), (:B, Matrix(d.W.S))])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
@@ -84,7 +83,7 @@ rank(d::MatrixFDist) = size(d, 1)
 
 insupport(d::MatrixFDist, Σ::AbstractMatrix) = isreal(Σ) && size(Σ) == size(d) && isposdef(Σ)
 
-params(d::MatrixFDist) = (d.W.df, d.n2, d.W.S)
+namedparams(d::MatrixFDist) = (n1 = d.W.df, n2 = d.n2, B = d.W.S)
 
 function mean(d::MatrixFDist)
     p = size(d, 1)

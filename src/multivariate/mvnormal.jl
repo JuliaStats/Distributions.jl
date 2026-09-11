@@ -221,22 +221,20 @@ end
 
 ### Show
 
-distrname(d::IsoNormal)  = "IsoNormal"    # Note: IsoNormal, etc are just alias names.
-distrname(d::DiagNormal) = "DiagNormal"
-distrname(d::FullNormal) = "FullNormal"
+# Note: IsoNormal, etc. are just alias names, `nameof` returns `MvNormal` for all of them
+_showname(io::IO, ::IsoNormal) = print(io, "IsoNormal")
+_showname(io::IO, ::DiagNormal) = print(io, "DiagNormal")
+_showname(io::IO, ::FullNormal) = print(io, "FullNormal")
 
-distrname(d::ZeroMeanIsoNormal) = "ZeroMeanIsoNormal"
-distrname(d::ZeroMeanDiagNormal) = "ZeroMeanDiagNormal"
-distrname(d::ZeroMeanFullNormal) = "ZeroMeanFullNormal"
-
-Base.show(io::IO, d::MvNormal) =
-    show_multline(io, d, [(:dim, length(d)), (:μ, mean(d)), (:Σ, cov(d))])
+_showname(io::IO, ::ZeroMeanIsoNormal) = print(io, "ZeroMeanIsoNormal")
+_showname(io::IO, ::ZeroMeanDiagNormal) = print(io, "ZeroMeanDiagNormal")
+_showname(io::IO, ::ZeroMeanFullNormal) = print(io, "ZeroMeanFullNormal")
 
 ### Basic statistics
 
 length(d::MvNormal) = length(d.μ)
 mean(d::MvNormal) = d.μ
-params(d::MvNormal) = (d.μ, d.Σ)
+namedparams(d::MvNormal) = (; d.μ, d.Σ)
 @inline partype(d::MvNormal{T}) where {T<:Real} = T
 
 var(d::MvNormal) = diag(d.Σ)

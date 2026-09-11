@@ -49,7 +49,7 @@ Base.convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist{T}) where {T<:Re
 location(d::SymTriangularDist) = d.μ
 scale(d::SymTriangularDist) = d.σ
 
-params(d::SymTriangularDist) = (d.μ, d.σ)
+namedparams(d::SymTriangularDist) = (; d.μ, d.σ)
 @inline partype(d::SymTriangularDist{T}) where {T<:Real} = T
 
 

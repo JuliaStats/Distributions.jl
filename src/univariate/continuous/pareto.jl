@@ -49,7 +49,7 @@ Base.convert(::Type{Pareto{T}}, d::Pareto{T}) where {T<:Real} = d
 shape(d::Pareto) = d.α
 scale(d::Pareto) = d.θ
 
-params(d::Pareto) = (d.α, d.θ)
+namedparams(d::Pareto) = (; d.α, d.θ)
 @inline partype(d::Pareto{T}) where {T<:Real} = T
 
 

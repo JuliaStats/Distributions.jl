@@ -48,13 +48,12 @@ DirichletMultinomial(n::Integer, α::AbstractVector{T}) where {T <: Real} = Diri
 DirichletMultinomial(n::Integer, α::AbstractVector{T}) where {T <: Integer} = DirichletMultinomial(n, float(α))
 DirichletMultinomial(n::Integer, k::Integer) = DirichletMultinomial(n, ones(k))
 
-Base.show(io::IO, d::DirichletMultinomial) = show(io, d, (:n, :α,))
 
 # Parameters
 ncategories(d::DirichletMultinomial) = length(d.α)
 length(d::DirichletMultinomial) = ncategories(d)
 ntrials(d::DirichletMultinomial) = d.n
-params(d::DirichletMultinomial) = (d.n, d.α)
+namedparams(d::DirichletMultinomial) = (; d.n, d.α)
 @inline partype(d::DirichletMultinomial{T}) where {T} = T
 
 # Statistics

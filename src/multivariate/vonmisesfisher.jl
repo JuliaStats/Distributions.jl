@@ -39,7 +39,6 @@ function VonMisesFisher(θ::Vector)
     return VonMisesFisher(θ * (1 / κ), κ)
 end
 
-show(io::IO, d::VonMisesFisher) = show(io, d, (:μ, :κ))
 
 ### Conversions
 convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} = VonMisesFisher{T}(convert(Vector{T}, d.μ), T(d.κ); checknorm=false)
@@ -56,7 +55,7 @@ meandir(d::VonMisesFisher) = d.μ
 concentration(d::VonMisesFisher) = d.κ
 
 insupport(d::VonMisesFisher, x::AbstractVector{T}) where {T<:Real} = isunitvec(x)
-params(d::VonMisesFisher) = (d.μ, d.κ)
+namedparams(d::VonMisesFisher) = (; d.μ, d.κ)
 @inline partype(d::VonMisesFisher{T}) where {T<:Real} = T
 
 ### Evaluation

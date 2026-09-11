@@ -56,7 +56,7 @@ shape(d::InverseGamma) = shape(d.invd)
 scale(d::InverseGamma) = d.θ
 rate(d::InverseGamma) = scale(d.invd)
 
-params(d::InverseGamma) = (shape(d), scale(d))
+namedparams(d::InverseGamma) = (α = shape(d), θ = scale(d))
 partype(::InverseGamma{T}) where {T} = T
 
 

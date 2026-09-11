@@ -52,7 +52,7 @@ Base.convert(::Type{Erlang{T}}, d::Erlang{T}) where {T<:Real} = d
 shape(d::Erlang) = d.α
 scale(d::Erlang) = d.θ
 rate(d::Erlang) = inv(d.θ)
-params(d::Erlang) = (d.α, d.θ)
+namedparams(d::Erlang) = (; d.α, d.θ)
 @inline partype(d::Erlang{T}) where {T<:Real} = T
 
 #### Statistics

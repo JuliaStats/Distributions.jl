@@ -166,7 +166,9 @@ components(d::MixtureModel) = d.components
 component(d::MixtureModel, k::Int) = d.components[k]
 
 probs(d::MixtureModel) = probs(d.prior)
-params(d::MixtureModel) = ([params(c) for c in d.components], params(d.prior)[1])
+namedparams(d::MixtureModel) = (; d.components, d.prior)
+# `params` reports the parameters of the components, not the components themselves
+params(d::MixtureModel) = ([params(c) for c in d.components], probs(d))
 partype(d::MixtureModel) = promote_type(partype(d.prior), map(partype, d.components)...)
 
 minimum(d::MixtureModel) = minimum([minimum(dci) for dci in d.components])
@@ -256,18 +258,20 @@ end
 
 #### show
 
-function show(io::IO, d::MixtureModel)
+# the components are more informative than the parameters of `d`
+function _showparams(io::IO, d::MixtureModel)
+    print(io, "\nComponents:")
     K = ncomponents(d)
     pr = probs(d)
-    println(io, "MixtureModel{$(component_type(d))}(K = $K)")
-    Ks = min(K, 8)
-    for i = 1:Ks
-        @printf(io, "components[%d] (prior = %.4f): ", i, pr[i])
-        println(io, component(d, i))
+    # only the REPL sets `:limit`, and only there the components should be truncated
+    shown = get(io, :limit, false)::Bool ? min(K, 8) : K
+    for i in 1:shown
+        print(io, "\n  [", i, "] prior = ")
+        show(io, pr[i])
+        print(io, "  ")
+        show(io, component(d, i))
     end
-    if Ks < K
-        println(io, "The rest are omitted ...")
-    end
+    shown < K && print(io, "\n  ⋮ (", K - shown, " components omitted)")
 end
 
 

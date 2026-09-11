@@ -34,7 +34,6 @@ VonMises(μ::Integer, κ::Integer; check_args::Bool=true) = VonMises(float(μ), 
 VonMises(κ::Real; check_args::Bool=true) = VonMises(zero(κ), κ; check_args=check_args)
 VonMises() = VonMises(0.0, 1.0; check_args=false)
 
-show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 
 @distr_support VonMises d.μ - π d.μ + π
 
@@ -46,7 +45,7 @@ Base.convert(::Type{VonMises{T}}, d::VonMises{T}) where {T<:Real} = d
 
 #### Parameters
 
-params(d::VonMises) = (d.μ, d.κ)
+namedparams(d::VonMises) = (; d.μ, d.κ)
 partype(::VonMises{T}) where {T<:Real} = T
 
 
