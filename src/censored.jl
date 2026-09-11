@@ -103,10 +103,7 @@ function censored(d::Censored, l::Real, ::Nothing)
     return censored(d.uncensored, d.lower === nothing ? l : max(l, d.lower), d.upper)
 end
 
-function params(d::Censored)
-    d0params = params(d.uncensored)
-    return (d0params..., d.lower, d.upper)
-end
+namedparams(d::Censored) = (; d.uncensored, d.lower, d.upper)
 
 function partype(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T}
     return promote_type(partype(d.uncensored), T)
@@ -141,21 +138,17 @@ end
 
 #### Show
 
-function show(io::IO, ::MIME"text/plain", d::Censored)
-    print(io, "Censored(")
-    d0 = d.uncensored
-    uml, namevals = _use_multline_show(d0)
-    uml ? show_multline(io, d0, namevals; newline=false) : show_oneline(io, d0, namevals)
-    if d.lower === nothing
-        print(io, "; upper=$(d.upper))")
-    elseif d.upper === nothing
-        print(io, "; lower=$(d.lower))")
-    else
-        print(io, "; lower=$(d.lower), upper=$(d.upper))")
-    end
+show(io::IO, d::Censored) = _showcall(io, "censored", d.uncensored, d.lower, d.upper)
+
+function _showname(io::IO, d::Censored)
+    print(io, "Censored ")
+    _showname(io, d.uncensored)
 end
 
-_use_multline_show(d::Censored) = _use_multline_show(d.uncensored)
+function _showparams(io::IO, d::Censored)
+    _showparams(io, d.uncensored)
+    _showsection(io, "Censoring", _bounds(d.lower, d.upper))
+end
 
 
 #### Statistics

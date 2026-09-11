@@ -42,7 +42,7 @@ convert(::Type{LogLogistic{T}}, d::LogLogistic{T}) where {T<:Real} = d
 convert(::Type{LogLogistic{T}}, d::LogLogistic) where {T<:Real} = LogLogistic{T}(T(d.α), T(d.β))
 
 #### Parameters
-params(d::LogLogistic) = (d.α, d.β)
+namedparams(d::LogLogistic) = (; d.α, d.β)
 partype(::LogLogistic{T}) where {T} = T
 
 #### Statistics 

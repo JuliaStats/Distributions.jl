@@ -192,9 +192,8 @@ at = [0.0, 1.0, 0.0, 1.0]
 end
 
 @testset "show" begin
-    @test sprint(show, "text/plain", truncated(Normal(); lower=2.0)) == "Truncated($(Normal()); lower=2.0)"
-    @test sprint(show, "text/plain", truncated(Normal(); upper=3.0)) == "Truncated($(Normal()); upper=3.0)"
-    @test sprint(show, "text/plain", truncated(Normal(), 2.0, 3.0)) == "Truncated($(Normal()); lower=2.0, upper=3.0)"
+    # the display is tested in test/show.jl
+    @test repr(truncated(Normal(), 2.0, 3.0)) == "truncated(Normal(0.0, 1.0), 2.0, 3.0)"
 end
 
 @testset "sampling with small mass (#1548)" begin

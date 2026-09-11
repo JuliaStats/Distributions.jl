@@ -50,7 +50,7 @@ Base.convert(::Type{JohnsonSU{T}}, d::JohnsonSU{T}) where {T<:Real} = d
 shape(d::JohnsonSU) = d.ξ
 scale(d::JohnsonSU) = d.λ
 
-params(d::JohnsonSU) = (d.ξ, d.λ, d.γ, d.δ)
+namedparams(d::JohnsonSU) = (; d.ξ, d.λ, d.γ, d.δ)
 partype(d::JohnsonSU{T}) where {T<:Real} = T
 
 #### Statistics

@@ -38,7 +38,7 @@ Base.convert(::Type{Cosine{T}}, d::Cosine{T}) where {T<:Real} = d
 location(d::Cosine) = d.μ
 scale(d::Cosine) = d.σ
 
-params(d::Cosine) = (d.μ, d.σ)
+namedparams(d::Cosine) = (; d.μ, d.σ)
 @inline partype(d::Cosine{T}) where {T<:Real} = T
 
 

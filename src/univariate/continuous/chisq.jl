@@ -37,7 +37,7 @@ Chisq(ν::Integer; check_args::Bool=true) = Chisq(float(ν); check_args=check_ar
 #### Parameters
 
 dof(d::Chisq) = d.ν
-params(d::Chisq) = (d.ν,)
+namedparams(d::Chisq) = (; d.ν)
 @inline partype(d::Chisq{T}) where {T<:Real} = T
 
 ### Conversions

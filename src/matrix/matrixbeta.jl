@@ -49,7 +49,6 @@ end
 #  REPL display
 #  -----------------------------------------------------------------------------
 
- show(io::IO, d::MatrixBeta) = show_multline(io, d, [(:n1, d.W1.df), (:n2, d.W2.df)])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
@@ -78,7 +77,7 @@ rank(d::MatrixBeta) = size(d, 1)
 
 insupport(d::MatrixBeta, U::AbstractMatrix) = isreal(U) && size(U) == size(d) && isposdef(U) && isposdef(I - U)
 
-params(d::MatrixBeta) = (size(d, 1), d.W1.df, d.W2.df)
+namedparams(d::MatrixBeta) = (p = size(d, 1), n1 = d.W1.df, n2 = d.W2.df)
 
 mean(d::MatrixBeta) = ((p, n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, p, p))
 

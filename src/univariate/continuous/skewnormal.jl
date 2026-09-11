@@ -44,7 +44,7 @@ Base.convert(::Type{SkewNormal{T}}, d::SkewNormal) where {T<:Real} = SkewNormal{
 Base.convert(::Type{SkewNormal{T}}, d::SkewNormal{T}) where {T<:Real} = d
 
 #### Parameters
-params(d::SkewNormal) = (d.ξ, d.ω, d.α)
+namedparams(d::SkewNormal) = (; d.ξ, d.ω, d.α)
 @inline partype(d::SkewNormal{T}) where {T<:Real} = T
 
 #### Statistics

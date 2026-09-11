@@ -100,8 +100,8 @@ using FiniteDifferences
     end
 
     @testset "REPL display" begin
-        d = LKJCholesky(5, 1)
-        @test sprint(show, d) == "$(typeof(d))(\nd: 5\nη: 1.0\nuplo: L\n)\n"
+        # the display is tested in test/show.jl
+        @test repr(LKJCholesky(5, 1)) == "LKJCholesky(5, 1.0, 'L')"
     end
 
     @testset "Conversion" begin

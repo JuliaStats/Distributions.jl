@@ -1,79 +1,60 @@
-
-
-# the name of a distribution
+# Display of distributions
 #
-#   Generally, this should be just the type name, e.g. Normal.
-#   Under certain circumstances, one may want to specialize
-#   this function to provide a name that is easier to read,
-#   especially when the type is parametric.
+# `show(io, d)` is the single-line form that containers and string interpolation use. It prints how
+# `d` is constructed from its parameters. Distributions that are not constructed by their own type,
+# such as `truncated`, define it themselves.
 #
-distrname(d::Distribution) = string(typeof(d))
+# `show(io, MIME"text/plain"(), d)` is the multi-line report that the REPL displays. It is built
+# from two internal hooks: `_showname` prints the name of `d` and `_showparams` its parameters.
+# Every line is printed with a leading newline, so that a report never ends with one.
 
-show(io::IO, d::Distribution) = show(io, d, fieldnames(typeof(d)))
+show(io::IO, d::Distribution) = _showcall(io, nameof(typeof(d)), _namedparams(d)...)
 
-# For some distributions, the fields may contain internal details,
-# which we don't want to show, this function allows one to
-# specify which fields to show.
-#
-function show(io::IO, d::Distribution, pnames)
-    uml, namevals = _use_multline_show(d, pnames)
-    uml ? show_multline(io, d, namevals) : show_oneline(io, d, namevals)
+function show(io::IO, ::MIME"text/plain", d::Distribution)
+    _showname(io, d)
+    print(io, " distribution")
+    _showparams(io, d)
+    return nothing
 end
 
-const _NameVal = Tuple{Symbol,Any}
+_showname(io::IO, d::Distribution) = print(io, nameof(typeof(d)))
 
-function _use_multline_show(d::Distribution, pnames)
-    # decide whether to use one-line or multi-line format
-    #
-    # Criteria: if total number of values is greater than 8, or
-    # there are params that are neither numbers, tuples, or vectors,
-    # we use multi-line format
-    #
-    namevals = _NameVal[]
-    multline = false
-    tlen = 0
-    for (i, p) in enumerate(pnames)
-        pv = getfield(d, p)
-        if !(isa(pv, Number) || isa(pv, NTuple) || isa(pv, AbstractVector))
-            multline = true
-        else
-            tlen += length(pv)
-        end
-        push!(namevals, (p, pv))
+_showparams(io::IO, d::Distribution) = _showsection(io, "Parameters", _namedparams(d))
+
+# Only the display falls back to the fields, so that `show` works for a distribution that does not
+# implement `namedparams`; `params` keeps throwing rather than computing with a guess.
+_namedparams(d::Distribution) = applicable(namedparams, d) ? namedparams(d) : _fieldparams(d)
+
+function _fieldparams(d::Distribution)
+    T = typeof(d)
+    return NamedTuple{fieldnames(T)}(ntuple(i -> getfield(d, i), Val(fieldcount(T))))
+end
+
+function _showsection(io::IO, header, nt::NamedTuple)
+    isempty(nt) && return nothing
+    print(io, '\n', header, ':')
+    names = map(string, keys(nt))
+    width = maximum(textwidth, names)
+    for (name, value) in zip(names, values(nt))
+        print(io, "\n  ", rpad(name, width), " = ")
+        show(io, value)
     end
-    if tlen > 8
-        multline = true
-    end
-    return (multline, namevals)
+    return nothing
 end
 
-function _use_multline_show(d::Distribution)
-    _use_multline_show(d, fieldnames(typeof(d)))
-end
-
-function show_oneline(io::IO, d::Distribution, namevals)
-    print(io, distrname(d))
-    np = length(namevals)
-    print(io, '(')
-    for (i, nv) in enumerate(namevals)
-        (p, pv) = nv
-        print(io, p)
-        print(io, '=')
-        show(io, pv)
-        if i < np
-            print(io, ", ")
-        end
+# Single-line form of a distribution that is constructed by a function, e.g. `truncated`
+function _showcall(io::IO, name, args...)
+    print(io, name, '(')
+    for (i, arg) in enumerate(args)
+        i > 1 && print(io, ", ")
+        show(io, arg)
     end
     print(io, ')')
+    return nothing
 end
 
-function show_multline(io::IO, d::Distribution, namevals; newline=true)
-    print(io, distrname(d))
-    println(io, "(")
-    for (p, pv) in namevals
-        print(io, p)
-        print(io, ": ")
-        println(io, pv)
-    end
-    newline ? println(io, ")") : print(io, ")")
-end
+# Bounds of `Truncated` and `Censored`, one of which is `nothing` if `d` is bounded on one side only
+_bounds(lower, upper) = (; lower, upper)
+_bounds(lower, ::Nothing) = (; lower)
+_bounds(::Nothing, upper) = (; upper)
+_bounds(::Nothing, ::Nothing) = (;)

@@ -29,6 +29,8 @@ minimum(d::Dirac) = d.value
 maximum(d::Dirac) = d.value
 support(d::Dirac) = (d.value,)
 
+namedparams(d::Dirac) = (; d.value)
+
 #### Properties
 mean(d::Dirac) = d.value
 var(d::Dirac{T}) where {T} = zero(T)

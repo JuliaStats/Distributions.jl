@@ -111,7 +111,7 @@ end
         @test insupport(d, 2)
         @test !insupport(d, -1.1)
         @test !insupport(d, 2.1)
-        @test sprint(show, "text/plain", d) == "Censored($(Normal(0.0, 1.0)); lower=-1, upper=2)"
+        @test repr(d) == "censored(Normal(0.0, 1.0), -1, 2)"
 
         d = Censored(Cauchy(0, 1), nothing, 2)
         @test d isa Censored
@@ -125,7 +125,7 @@ end
         @test insupport(d, -3)
         @test insupport(d, 2)
         @test !insupport(d, 2.1)
-        @test sprint(show, "text/plain", d) == "Censored($(Cauchy(0.0, 1.0)); upper=2)"
+        @test repr(d) == "censored(Cauchy(0.0, 1.0), nothing, 2)"
 
         d = Censored(Gamma(1, 2), 2, nothing)
         @test d isa Censored
@@ -138,7 +138,7 @@ end
         @test @inferred insupport(d, 2.1)
         @test insupport(d, 2.0)
         @test !insupport(d, 1.9)
-        @test sprint(show, "text/plain", d) == "Censored($(Gamma(1, 2)); lower=2)"
+        @test repr(d) == "censored(Gamma(1.0, 2.0), 2, nothing)"
 
         d = Censored(Binomial(10, 0.2), -1.5, 9.5)
         @test extrema(d) === (0.0, 9.5)
