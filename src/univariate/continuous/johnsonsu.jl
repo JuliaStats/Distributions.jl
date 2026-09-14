@@ -72,12 +72,25 @@ end
 
 #### Evaluation
 
-yval(d::JohnsonSU, x::Real) = (x - d.ξ) / d.λ
-zval(d::JohnsonSU, x::Real) = d.γ + d.δ * asinh(yval(d, x))
-xval(d::JohnsonSU, x::Real) = d.λ * sinh((x - d.γ) / d.δ) + d.ξ
+xval(d::JohnsonSU, z::Real) = muladd(d.λ, sinh((z - d.γ) / d.δ), d.ξ)
+yval(d::JohnsonSU, x::Real) = x - d.ξ
+function zval_yval(d::JohnsonSU, x::Real)
+    y = x - d.ξ
+    z = muladd(d.δ, asinh(y / d.λ), d.γ)
+    return z, y
+end
+zval(d::JohnsonSU, x::Real) = first(zval_yval(d, x))
 
-pdf(d::JohnsonSU, x::Real) = d.δ / (d.λ * hypot(1, yval(d, x))) * normpdf(zval(d, x))
-logpdf(d::JohnsonSU, x::Real) = log(d.δ) - log(d.λ) - log1psq(yval(d, x)) / 2 + normlogpdf(zval(d, x))
+function pdf(d::JohnsonSU, x::Real)
+    z, y = zval_yval(d, x)
+    return d.δ / hypot(d.λ, y) * normpdf(z)
+end
+function logpdf(d::JohnsonSU, x::Real)
+    z, y = zval_yval(d, x)
+    a, b = minmax(abs(y), d.λ)
+    log_hypot_λ_y = log(b) + log1psq(a / b) / 2
+    return log(d.δ) - log_hypot_λ_y + normlogpdf(z)
+end
 cdf(d::JohnsonSU, x::Real) = normcdf(zval(d, x))
 logcdf(d::JohnsonSU, x::Real) = normlogcdf(zval(d, x))
 ccdf(d::JohnsonSU, x::Real) = normccdf(zval(d, x))
@@ -95,6 +108,11 @@ invlogccdf(d::JohnsonSU, lq::Real) = xval(d, norminvlogccdf(lq))
 #### Sampling
 
 rand(rng::AbstractRNG, d::JohnsonSU) = xval(d, randn(rng))
+function rand!(rng::AbstractRNG, d::JohnsonSU, A::AbstractArray{<:Real})
+    randn!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 ## Fitting
 
