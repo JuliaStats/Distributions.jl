@@ -317,6 +317,30 @@ end
 end
 
 @testset "partype" begin
-    # bare `MixtureModel` (a UnionAll) falls back to the generic `Real` default
-    @test @inferred(partype(MixtureModel)) === Real
+    @testset "MixtureModel" begin
+        # the prior is promoted with the components
+        d = MixtureModel([Normal(0.0f0, 1.0f0), Normal(1.0f0, 2.0f0)], Float32[0.5, 0.5])
+        @test @inferred(partype(d)) === @inferred(partype(typeof(d))) === Float32
+        @test @inferred(partype(MixtureModel([Normal(0.0f0, 1.0f0), Normal(1.0f0, 2.0f0)]))) === Float64
+        @test @inferred(partype(MixtureModel([Poisson(1), Poisson(2)], Float32[0.5, 0.5]))) === Float64
+
+        # an instance is more precise if the components are not concretely typed
+        d = MixtureModel(Distribution{Univariate,Continuous}[Normal(0.0f0, 1.0f0), Gamma(1.0, 2.0)], Float32[0.5, 0.5])
+        @test partype(d) === Float64
+        @test partype(typeof(d)) === Real
+
+        # bare `MixtureModel` (a UnionAll) falls back to the generic `Real` default
+        @test @inferred(partype(MixtureModel)) === Real
+    end
+
+    @testset "UnivariateGMM" begin
+        # the means and standard deviations are promoted with the prior
+        d = UnivariateGMM(Float32[0, 1], Float32[1, 2], Categorical(Float32[0.5, 0.5]))
+        @test @inferred(partype(d)) === @inferred(partype(typeof(d))) === Float32
+        @test @inferred(partype(UnivariateGMM(Float32[0, 1], Float32[1, 2], Categorical([0.5, 0.5])))) === Float64
+        @test @inferred(partype(UnivariateGMM([0.0, 1.0], Float32[1, 2], Categorical(Float32[0.5, 0.5])))) === Float64
+        @test @inferred(partype(UnivariateGMM([0, 1], Float32[1, 2], Categorical(Float32[0.5, 0.5])))) === Float32
+        # bare `UnivariateGMM` (a UnionAll) falls back to the generic `Real` default
+        @test @inferred(partype(UnivariateGMM)) === Real
+    end
 end

@@ -29,8 +29,8 @@ test_evaluation(d, vs, true)
 test_stats(d, vs)
 test_params(d)
 
-# bare `DiscreteNonParametric` (a UnionAll) falls back to the generic `Real` default
 @test @inferred(partype(DiscreteNonParametric([1, 2], Float32[0.5, 0.5]))) === Float32
+# bare `DiscreteNonParametric` (a UnionAll) falls back to the generic `Real` default
 @test @inferred(partype(DiscreteNonParametric)) === Real
 
 @test func[1](d) ∈ [40., 80., 120., -60.]

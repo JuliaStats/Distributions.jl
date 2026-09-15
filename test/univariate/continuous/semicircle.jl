@@ -6,9 +6,9 @@ d = Semicircle(2.0)
 
 @test params(d) == (2.0,)
 
-# bare `Semicircle` (a UnionAll) falls back to the generic `Real` default
 @test @inferred(partype(d)) === Float64
 @test @inferred(partype(Semicircle(1.0f0))) === Float32
+# bare `Semicircle` (a UnionAll) falls back to the generic `Real` default
 @test @inferred(partype(Semicircle)) === Real
 
 @test minimum(d) == -2.0

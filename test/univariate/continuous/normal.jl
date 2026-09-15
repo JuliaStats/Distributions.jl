@@ -236,7 +236,8 @@ end
     @test @inferred(partype(ContinuousUnivariateDistribution)) === Real
     @test @inferred(partype(Normal)) === Real
 
-    # `partype(eltype(container))` works whether or not the container is concretely typed
+    # `partype(eltype(container))` is exact for a concretely typed container, and the
+    # generic default otherwise
     @test @inferred(partype(eltype([Normal(0.0f0, 1.0f0)]))) === Float32
     @test @inferred(partype(eltype(Normal[Normal(0.0, 1.0)]))) === Real
     @test @inferred(partype(eltype(Distribution[Normal(0.0, 1.0)]))) === Real

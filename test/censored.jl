@@ -103,8 +103,9 @@ end
         @test eltype(d) === Float64
         @test params(d) === (params(Normal(0.0, 1.0))..., -1, 2)
         @test @inferred(partype(d)) === Float64
-        # promotes the wrapped `partype` with the bound types; bare `Censored` -> `Real`
+        # promotes the wrapped `partype` with the bound types
         @test @inferred(partype(censored(Normal(0.0f0, 1.0f0); lower = 0))) === Float32
+        # bare `Censored` (a UnionAll) falls back to the generic `Real` default
         @test @inferred(partype(Censored)) === Real
         @test @inferred extrema(d) == (-1, 2)
         @test @inferred islowerbounded(d)

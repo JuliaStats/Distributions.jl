@@ -55,10 +55,8 @@ function verify_and_test(D::Type, d::UnivariateDistribution, dct::AbstractDict, 
     pars = params(d)
 
     # verify parameter type
-    # truncated parameters may be nothing
-    @test partype(d) === mapfoldl(
-        typeof, (S, T) -> T <: Distribution ? promote_type(S, partype(T)) : (T <: Nothing ? S : promote_type(S, eltype(T))), pars; init = Union{})
-    
+    test_partype(d)
+
     # promotion constructor:
     if !(D <: Distributions.Truncated)
         float_pars = map(x -> isa(x, AbstractFloat), pars)

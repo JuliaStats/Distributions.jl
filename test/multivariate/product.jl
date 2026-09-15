@@ -21,8 +21,10 @@ using Distributions: Product
     # Check that methods for `Product` are consistent.
     @test length(d_product) == length(ds)
     @test eltype(d_product) === eltype(ds[1])
-    # bare `Product` (a UnionAll) falls back to the generic `Real` default
     @test @inferred(partype(d_product)) === Float64
+    d_product32 = @test_deprecated(Product(Normal.(Float32.(μ), 1.0f0)))
+    @test @inferred(partype(d_product32)) === Float32
+    # bare `Product` (a UnionAll) falls back to the generic `Real` default
     @test @inferred(partype(Product)) === Real
     @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf.(ds, x))
     @test mean(d_product) == mean.(ds)

@@ -36,9 +36,9 @@ naive_sol = naive_pb(p)
 
 @test Distributions.poissonbinomial_pdf_fft(p) ≈ Distributions.poissonbinomial_pdf(p)
 
-# bare `PoissonBinomial` (a UnionAll) falls back to the generic `Real` default
 @test @inferred(partype(PoissonBinomial(Float32[0.1, 0.2]))) === Float32
 @test @inferred(partype(PoissonBinomial(p))) === Float64
+# bare `PoissonBinomial` (a UnionAll) falls back to the generic `Real` default
 @test @inferred(partype(PoissonBinomial)) === Real
 
 # Test the special base where PoissonBinomial distribution reduces

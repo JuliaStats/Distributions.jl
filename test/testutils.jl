@@ -666,21 +666,21 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
 end
 
 # The element type of a single parameter: a scalar is its own type, arrays/tuples promote
-# their entries recursively, a distribution-valued parameter contributes its own `partype`,
-# and an absent (`nothing`) optional parameter contributes nothing.
+# their entries recursively, a distribution contributes its own `partype`, and anything not
+# real-valued (`nothing`, or the `uplo` of `LKJCholesky`) contributes nothing.
 recursive_partype(x::Real) = typeof(x)
 recursive_partype(::Nothing) = Union{}
 recursive_partype(d::Distribution) = partype(d)
 recursive_partype(x::Union{AbstractArray,Tuple}) =
     mapreduce(recursive_partype, promote_type, x; init = Union{})
-recursive_partype(x) = eltype(x)
+recursive_partype(x) = eltype(x) <: Real ? eltype(x) : Union{}
 
 function test_partype(d::Distribution)
     # `partype` is the promotion of the element types of the parameters (the empty
     # promotion, `Union{}`, being the identity for `promote_type`), and the instance method
     # must agree with the type method
-    @test partype(d) === partype(typeof(d))
-    @test partype(d) ===
+    @test @inferred(partype(d)) === @inferred(partype(typeof(d)))
+    @test @inferred(partype(d)) ===
         mapreduce(recursive_partype, promote_type, params(d); init = Union{})
 end
 

@@ -3,7 +3,7 @@ using Distributions
 @testset "Soliton" begin
     K, M, δ, atol = 100, 60, 0.2, 0
     Ω = Soliton(K, M, δ, atol)
-    # the degree distribution uses `Float64` probabilities, so `partype` is `Float64`
+    # `δ` and `atol` are stored as `Float64`, so `partype` is `Float64`
     @test @inferred(partype(Ω)) === Float64
     @test @inferred(partype(Soliton)) === Float64
     @test pdf(Ω, M) > pdf(Ω, M-1)

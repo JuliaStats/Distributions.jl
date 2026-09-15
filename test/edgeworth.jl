@@ -39,5 +39,13 @@ for i = 0.01:0.01:0.99
 
 end
 
-
-
+@testset "partype" begin
+    # `n` is stored as a `Float64` and promotes with the underlying distribution
+    @testset for E in (EdgeworthSum, EdgeworthMean, EdgeworthZ)
+        @test @inferred(partype(E(Gamma(1.0f0, 1.0f0), 10))) === Float64
+        @test @inferred(partype(E(Gamma(1//1, 1//1), 10))) === Float64
+        @test @inferred(partype(E(Gamma(big(1.0), big(1.0)), 10))) === BigFloat
+        # the bare type (a UnionAll) falls back to the generic `Real` default
+        @test @inferred(partype(E)) === Real
+    end
+end

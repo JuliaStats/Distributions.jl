@@ -123,10 +123,12 @@ function sqrt!!(x::Vector{<:Real})
 end
 
 """
-    partype(::Type{Distribution})
+    partype(dist)
 
 The element type of the parameters of a distribution, i.e. a type wide enough to represent
 (the promotion of) all of the distribution's parameters.
+
+A distribution without parameters returns `Union{}`, the identity of `promote_type`.
 
 !!! note
     The definition `partype(d) = partype(typeof(d))` is provided for convenience so that
