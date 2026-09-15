@@ -74,6 +74,11 @@ function Base.eltype(::Type{<:ProductDistribution{<:Any,<:Any,<:Any,<:ValueSuppo
     return T
 end
 
+partype(::Type{<:ProductDistribution{<:Any,<:Any,D}}) where {D<:Tuple} =
+    __product_promote_type(partype, D)
+partype(::Type{<:ProductDistribution{<:Any,<:Any,D}}) where {D<:AbstractArray} =
+    partype(eltype(D))
+
 size(d::ProductDistribution) = d.size
 
 mean(d::ProductDistribution) = reshape(mapreduce(vec ∘ mean, vcat, d.dists), size(d))

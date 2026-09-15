@@ -256,3 +256,18 @@ end
         end
     end
 end
+
+@testset "partype" begin
+    # a tuple promotes the parameters of its entries
+    @test @inferred(partype(product_distribution(Normal(0.0f0, 1.0f0), Gamma(1.0f0, 2.0f0)))) === Float32
+    @test @inferred(partype(product_distribution(Normal(0.0f0, 1.0f0), Gamma(1.0, 2.0)))) === Float64
+    @test @inferred(partype(product_distribution(Normal(0.0f0, 1.0f0), DiscreteUniform(1, 10)))) === Float32
+    @test @inferred(partype(product_distribution(Normal(1//1, 2//1), Gamma(1.0f0, 2.0f0)))) === Float32
+    @test @inferred(partype(product_distribution(DiscreteUniform(1, 10), Hypergeometric(2, 2, 2)))) === Int
+    # an array uses its element type
+    @test @inferred(partype(product_distribution(fill(Poisson(1.0f0), 3)))) === Float32
+    @test @inferred(partype(product_distribution(Fill(Poisson(1.0f0), 3)))) === Float32
+    @test @inferred(partype(product_distribution(fill(Poisson(1.0f0), 2, 3)))) === Float32
+    # bare `ProductDistribution` (a UnionAll) falls back to the generic `Real` default
+    @test @inferred(partype(Distributions.ProductDistribution)) === Real
+end

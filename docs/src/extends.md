@@ -6,6 +6,8 @@ Generally, you don't have to implement every API method listed in the documentat
 
 By default, `Discrete` sampleables have the support of type `Int` while `Continuous` sampleables have the support of type `Float64`. If this assumption does not hold for your new distribution or sampler, or its `ValueSupport` is neither `Discrete` nor `Continuous`, you should implement the `eltype` method in addition to the other methods listed below.
 
+A new distribution should also implement [`partype`](@ref) for its type, since the generic default is the abstract type `Real`.
+
 **Note:** The methods that need to be implemented are different for distributions of different variate forms.
 
 

@@ -20,7 +20,7 @@ Biweight(μ::Real=0.0) = Biweight(μ, one(μ); check_args=false)
 
 ## Parameters
 params(d::Biweight) = (d.μ, d.σ)
-@inline partype(d::Biweight{T}) where {T<:Real} = T
+partype(::Type{<:Biweight{T}}) where {T<:Real} = T
 
 ## Properties
 mean(d::Biweight) = d.μ

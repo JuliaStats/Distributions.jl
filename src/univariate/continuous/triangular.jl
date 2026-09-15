@@ -56,7 +56,7 @@ Base.convert(::Type{TriangularDist{T}}, d::TriangularDist{T}) where {T<:Real} = 
 #### Parameters
 
 params(d::TriangularDist) = (d.a, d.b, d.c)
-partype(::TriangularDist{T}) where {T<:Real} = T
+partype(::Type{<:TriangularDist{T}}) where {T<:Real} = T
 
 
 #### Statistics

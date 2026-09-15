@@ -87,7 +87,7 @@ minimum(d::JointOrderStatistics) = Fill(minimum(d.dist), length(d))
 maximum(d::JointOrderStatistics) = Fill(maximum(d.dist), length(d))
 
 params(d::JointOrderStatistics) = tuple(params(d.dist)..., d.n, d.ranks)
-partype(d::JointOrderStatistics) = partype(d.dist)
+partype(::Type{<:JointOrderStatistics{D}}) where {D} = partype(D)
 Base.eltype(::Type{<:JointOrderStatistics{D}}) where {D} = Base.eltype(D)
 Base.eltype(d::JointOrderStatistics) = eltype(d.dist)
 

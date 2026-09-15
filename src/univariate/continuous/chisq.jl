@@ -38,7 +38,7 @@ Chisq(ν::Integer; check_args::Bool=true) = Chisq(float(ν); check_args=check_ar
 
 dof(d::Chisq) = d.ν
 params(d::Chisq) = (d.ν,)
-@inline partype(d::Chisq{T}) where {T<:Real} = T
+partype(::Type{<:Chisq{T}}) where {T<:Real} = T
 
 ### Conversions
 convert(::Type{Chisq{T}}, ν::Real) where {T<:Real} = Chisq(T(ν))

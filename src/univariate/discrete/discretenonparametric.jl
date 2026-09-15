@@ -41,6 +41,7 @@ DiscreteNonParametric(vs::AbstractVector{T}, ps::AbstractVector{P}; check_args::
     DiscreteNonParametric{T,P,typeof(vs),typeof(ps)}(vs, ps; check_args=check_args)
 
 Base.eltype(::Type{<:DiscreteNonParametric{T}}) where T = T
+partype(::Type{<:DiscreteNonParametric{T,P}}) where {T,P} = promote_type(T, P)
 
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =

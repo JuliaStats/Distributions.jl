@@ -78,7 +78,7 @@ succprob(d::PoissonBinomial) = d.p
 failprob(d::PoissonBinomial{T}) where {T} = one(T) .- d.p
 
 params(d::PoissonBinomial) = (d.p,)
-partype(::PoissonBinomial{T}) where {T} = T
+partype(::Type{<:PoissonBinomial{T}}) where {T} = T
 
 #### Properties
 

@@ -93,7 +93,7 @@ function mean(d::MatrixFDist)
     return (n1 / (n2 - p - 1)) * Matrix(B)
 end
 
-@inline partype(d::MatrixFDist{T}) where {T <: Real} = T
+partype(::Type{<:MatrixFDist{T}}) where {T <: Real} = T
 
 #  Konno (1988 JJSS) Corollary 2.4.i
 function cov(d::MatrixFDist, i::Integer, j::Integer, k::Integer, l::Integer)
