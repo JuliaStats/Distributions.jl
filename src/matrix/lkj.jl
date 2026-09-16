@@ -47,7 +47,6 @@ end
 #  REPL display
 #  -----------------------------------------------------------------------------
 
-show(io::IO, d::LKJ) = show_multline(io, d, [(:d, d.d), (:η, d.η)])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
@@ -91,7 +90,7 @@ function var(lkj::LKJ)
     σ² * (ones(partype(lkj), d, d) - I)
 end
 
-params(d::LKJ) = (d.d, d.η)
+namedparams(d::LKJ) = (; d.d, d.η)
 
 @inline partype(d::LKJ{T}) where {T <: Real} = T
 

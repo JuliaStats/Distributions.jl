@@ -25,8 +25,7 @@ Base.:(==)(r1::RealInterval, r2::RealInterval) = r1.lb == r2.lb && r1.ub == r2.u
 """
     params(d::UnivariateDistribution)
 
-Return a tuple of parameters. Let `d` be a distribution of type `D`, then `D(params(d)...)`
-will construct exactly the same distribution as ``d``.
+Return a tuple of parameters.
 """
 params(d::UnivariateDistribution)
 

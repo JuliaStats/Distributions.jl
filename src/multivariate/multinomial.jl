@@ -46,7 +46,7 @@ length(d::Multinomial) = ncategories(d)
 probs(d::Multinomial) = d.p
 ntrials(d::Multinomial) = d.n
 
-params(d::Multinomial) = (d.n, d.p)
+namedparams(d::Multinomial) = (; d.n, d.p)
 @inline partype(d::Multinomial{T}) where {T<:Real} = T
 
 ### Conversions

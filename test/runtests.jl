@@ -107,6 +107,8 @@ const tests = [
     "eachvariate",
     "univariate/continuous/triangular",
     "statsapi",
+    "namedparams",
+    "show",
     "univariate/continuous/inversegaussian",
 
     ### missing files compared to /src:
@@ -136,7 +138,6 @@ const tests = [
     # "samplers/poissonbinomial",
     # "samplers/vonmises",
     # "samplers/vonmisesfisher",
-    # "show",
     # "truncated/loguniform",
     # "univariate/continuous/beta",
     # "univariate/continuous/beta",

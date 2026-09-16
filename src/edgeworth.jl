@@ -8,6 +8,9 @@ abstract type EdgeworthAbstract <: ContinuousUnivariateDistribution end
 
 skewness(d::EdgeworthAbstract) = skewness(d.dist) / sqrt(d.n)
 kurtosis(d::EdgeworthAbstract) = kurtosis(d.dist) / d.n
+namedparams(d::EdgeworthAbstract) = (; d.dist, d.n)
+
+@distr_support EdgeworthAbstract -Inf Inf
 
 struct EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
@@ -107,6 +110,19 @@ end
 
 mean(d::EdgeworthMean) = mean(d.dist)
 var(d::EdgeworthMean) = var(d.dist) / d.n
+
+function _showname(io::IO, d::EdgeworthAbstract)
+    print(io, "Edgeworth expansion of the ", _statistic(d), " of a ")
+    _showname(io, d.dist)
+end
+_statistic(::EdgeworthZ) = "z-statistic"
+_statistic(::EdgeworthSum) = "sum"
+_statistic(::EdgeworthMean) = "mean"
+
+function _showparams(io::IO, d::EdgeworthAbstract)
+    _showparams(io, d.dist)
+    _showsection(io, "Sample", (; d.n))
+end
 
 function pdf(d::EdgeworthAbstract, x::Float64)
     m, s = mean(d), std(d)

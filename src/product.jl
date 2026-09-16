@@ -76,6 +76,12 @@ end
 
 size(d::ProductDistribution) = d.size
 
+namedparams(d::ProductDistribution) = (; d.dists)
+
+show(io::IO, d::ProductDistribution) = _showcall(io, "product_distribution", d.dists...)
+show(io::IO, d::ProductDistribution{<:Any,<:Any,<:AbstractArray}) =
+    _showcall(io, "product_distribution", d.dists)
+
 mean(d::ProductDistribution) = reshape(mapreduce(vec ∘ mean, vcat, d.dists), size(d))
 var(d::ProductDistribution) = reshape(mapreduce(vec ∘ var, vcat, d.dists), size(d))
 cov(d::ProductDistribution) = Diagonal(vec(var(d)))

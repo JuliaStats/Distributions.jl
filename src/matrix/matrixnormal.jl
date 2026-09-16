@@ -55,7 +55,6 @@ MatrixNormal(m::Int, n::Int) = MatrixNormal(zeros(m, n), Matrix(1.0I, m, m), Mat
 #  REPL display
 #  -----------------------------------------------------------------------------
 
-show(io::IO, d::MatrixNormal) = show_multline(io, d, [(:M, d.M), (:U, Matrix(d.U)), (:V, Matrix(d.V))])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
@@ -96,7 +95,7 @@ cov(d::MatrixNormal, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n,
 
 var(d::MatrixNormal) = reshape(diag(cov(d)), size(d))
 
-params(d::MatrixNormal) = (d.M, d.U, d.V)
+namedparams(d::MatrixNormal) = (; d.M, d.U, d.V)
 
 @inline partype(d::MatrixNormal{T}) where {T<:Real} = T
 

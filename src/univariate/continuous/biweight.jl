@@ -19,7 +19,7 @@ Biweight(μ::Real=0.0) = Biweight(μ, one(μ); check_args=false)
 @distr_support Biweight d.μ - d.σ d.μ + d.σ
 
 ## Parameters
-params(d::Biweight) = (d.μ, d.σ)
+namedparams(d::Biweight) = (; d.μ, d.σ)
 @inline partype(d::Biweight{T}) where {T<:Real} = T
 
 ## Properties

@@ -27,7 +27,21 @@ Base.size(d::ReshapedDistribution) = d.dims
 Base.eltype(::Type{ReshapedDistribution{<:Any,<:ValueSupport,D}}) where {D} = eltype(D)
 
 partype(d::ReshapedDistribution) = partype(d.dist)
-params(d::ReshapedDistribution) = (d.dist, d.dims)
+namedparams(d::ReshapedDistribution) = (; d.dist, d.dims)
+# Unlike the generic method, `params` does not flatten the wrapped distribution
+params(d::ReshapedDistribution) = values(namedparams(d))
+
+show(io::IO, d::ReshapedDistribution) = _showcall(io, "reshape", d.dist, d.dims...)
+
+function _showname(io::IO, d::ReshapedDistribution)
+    print(io, "Reshaped ")
+    _showname(io, d.dist)
+end
+
+function _showparams(io::IO, d::ReshapedDistribution)
+    _showparams(io, d.dist)
+    print(io, "\nSize:\n  ", join(d.dims, '×'))
+end
 
 function insupport(d::ReshapedDistribution{N}, x::AbstractArray{<:Real,N}) where {N}
     return size(d) == size(x) && insupport(d.dist, reshape(x, size(d.dist)))

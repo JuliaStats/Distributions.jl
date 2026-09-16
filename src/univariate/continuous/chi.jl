@@ -43,7 +43,7 @@ Base.convert(::Type{Chi{T}}, d::Chi{T}) where {T<:Real} = d
 #### Parameters
 
 dof(d::Chi) = d.ν
-params(d::Chi) = (d.ν,)
+namedparams(d::Chi) = (; d.ν)
 @inline partype(d::Chi{T}) where {T<:Real} = T
 
 

@@ -50,7 +50,6 @@ InverseWishart(df::Real, Ψ::Cholesky) = InverseWishart(df, PDMat(Ψ))
 #  REPL display
 #  -----------------------------------------------------------------------------
 
-show(io::IO, d::InverseWishart) = show_multline(io, d, [(:df, d.df), (:Ψ, Matrix(d.Ψ))])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
@@ -77,7 +76,7 @@ insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 size(d::InverseWishart) = size(d.Ψ)
 rank(d::InverseWishart) = rank(d.Ψ)
 
-params(d::InverseWishart) = (d.df, d.Ψ)
+namedparams(d::InverseWishart) = (; d.df, d.Ψ)
 @inline partype(d::InverseWishart{T}) where {T<:Real} = T
 
 function mean(d::InverseWishart)
