@@ -47,6 +47,7 @@ const tests = [
     "multivariate/dirichletmultinomial",
     "univariate/continuous/logitnormal",
     "multivariate/mvtdist",
+    "multivariate/mvlaplace",
     "univariate/continuous/kolmogorov",
     "edgeworth",
     "matrixreshaped", # extra file compared to /src
