@@ -110,7 +110,7 @@ function _plotdensity(
     GR.figure(;
         grid=false,
         backgroundcolor=0, # white instead of transparent background for dark Documenter scheme
-        font="Helvetica_Regular",# work around https://github.com/JuliaPlots/Plots.jl/issues/2596
+        font="Helvetica_Regular", # work around https://github.com/JuliaPlots/Plots.jl/issues/2596
         kwargs...
     )
     return kind(xs, Base.Fix1(pdf, dist))
