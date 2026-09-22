@@ -240,6 +240,15 @@ end
     @test isa(g, DiagNormal)
     @test g.μ      ≈ uw
     @test g.Σ.diag ≈ diag(Cw)
+
+    # fit_mle should accept the aliases in instantiated or fully concrete form,
+    # not just as the bare `UnionAll` name (#2073 regression)
+    for A in (FullNormal, DiagNormal, IsoNormal)
+        g = fit_mle(A, x)
+        @test fit_mle(A{Float64}, x) == g          # instantiated alias
+        @test fit_mle(typeof(g), x) == g           # concrete member type
+        @test fit_mle(A{Float64}, x, w) == fit_mle(A, x, w)
+    end
 end
 
 @testset "MvNormal affine transformations" begin
