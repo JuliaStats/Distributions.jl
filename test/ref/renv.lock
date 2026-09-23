@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.5.1",
+    "Version": "4.5.2",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -1333,6 +1333,12 @@
       "NeedsCompilation": "no",
       "Author": "Diethelm Wuertz [aut] (original code), Tobias Setz [aut], Yohan Chalabi [aut], Martin Maechler [ctb] (<https://orcid.org/0000-0002-8685-9910>), Georgi N. Boshnakov [cre, aut]",
       "Maintainer": "Georgi N. Boshnakov <georgi.boshnakov@manchester.ac.uk>",
+      "Repository": "CRAN"
+    },
+    "tweedie": {
+      "Package": "tweedie",
+      "Version": "3.0.17",
+      "Source": "Repository",
       "Repository": "CRAN"
     },
     "vctrs": {
