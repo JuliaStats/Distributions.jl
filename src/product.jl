@@ -75,6 +75,7 @@ function Base.eltype(::Type{<:ProductDistribution{<:Any,<:Any,<:Any,<:ValueSuppo
 end
 
 size(d::ProductDistribution) = d.size
+Base.axes(d::ProductDistribution) = (axes(first(d.dists))..., axes(d.dists)...)
 
 mean(d::ProductDistribution) = reshape(mapreduce(vec ∘ mean, vcat, d.dists), size(d))
 var(d::ProductDistribution) = reshape(mapreduce(vec ∘ var, vcat, d.dists), size(d))

@@ -44,11 +44,15 @@ function Dirichlet(d::Integer, alpha::Real; check_args::Bool=true)
     return Dirichlet{typeof(alpha)}(Fill(alpha, d); check_args=false)
 end
 
+Base.axes(d::Dirichlet) = axes(d.alpha)
+
 struct DirichletCanon{T<:Real,Ts<:AbstractVector{T}}
     alpha::Ts
 end
 
 length(d::DirichletCanon) = length(d.alpha)
+
+Base.axes(d::DirichletCanon) = axes(d.alpha)
 
 Base.eltype(::Type{<:Dirichlet{T}}) where {T} = T
 
@@ -85,23 +89,14 @@ end
 
 function cov(d::Dirichlet)
     α = d.alpha
+    ax = axes(α, 1)
     α0 = d.alpha0
     c = inv(α0^2 * (α0 + 1))
 
     T = typeof(zero(eltype(α))^2 * c)
-    k = length(α)
-    C = Matrix{T}(undef, k, k)
-    for j = 1:k
-        αj = α[j]
-        αjc = αj * c
-        for i in 1:(j-1)
-            C[i,j] = C[j,i]
-        end
-        C[j,j] = (α0 - αj) * αjc
-        for i in (j+1):k
-            C[i,j] = - α[i] * αjc
-        end
-    end
+    C = similar(α, T, (ax, ax))
+    @. C = -α * α' * c
+    C[diagind(C)] .+= (α0 * c) .* α
 
     return C
 end

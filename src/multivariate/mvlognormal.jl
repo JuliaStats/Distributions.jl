@@ -189,6 +189,7 @@ function convert(::Type{MvLogNormal{T}}, pars...) where T<:Real
 end
 
 length(d::MvLogNormal) = length(d.normal)
+Base.axes(d::MvLogNormal) = axes(d.normal)
 params(d::MvLogNormal) = params(d.normal)
 @inline partype(d::MvLogNormal{T}) where {T<:Real} = T
 

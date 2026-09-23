@@ -75,6 +75,7 @@ insupport(::Type{InverseWishart}, X::Matrix) = isposdef(X)
 insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
 size(d::InverseWishart) = size(d.Ψ)
+Base.axes(d::InverseWishart) = axes(d.Ψ)
 rank(d::InverseWishart) = rank(d.Ψ)
 
 params(d::InverseWishart) = (d.df, d.Ψ)
