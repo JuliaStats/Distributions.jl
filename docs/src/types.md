@@ -23,13 +23,25 @@ Base.rand(::Distributions.Sampleable)
 Distributions.VariateForm
 ```
 
-The `VariateForm` subtypes defined in `Distributions.jl` are:
+The most commonly used `VariateForm` is the `ArrayLikeVariate`:
+```@docs
+Distributions.ArrayLikeVariate
+```
+
+The `ArrayLikeVariate` types defined in `Distributions.jl` are:
 
 **Type** | **A single sample** | **Multiple samples**
 --- | --- |---
 `Univariate == ArrayLikeVariate{0}` | a scalar number | A numeric array of arbitrary shape, each element being a sample
 `Multivariate == ArrayLikeVariate{1}` | a numeric vector | A matrix, each column being a sample
 `Matrixvariate == ArrayLikeVariate{2}` | a numeric matrix | An array of matrices, each element being a sample matrix
+
+`Distributions.jl` also defines some other `VariateForm` subtypes
+
+```@docs
+Distributions.NamedTupleVariate
+Distributions.CholeskyVariate
+```
 
 ### ValueSupport
 
@@ -70,7 +82,7 @@ We use `Distribution`, a subtype of `Sampleable` as defined below, to capture pr
 abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
 ```
 
-```@doc
+```@docs
 Distributions.Distribution
 ```
 
