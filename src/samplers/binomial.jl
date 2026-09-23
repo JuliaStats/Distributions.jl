@@ -228,6 +228,79 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
     (s.comp ? s.n - y : y)::Int
 end
 
+#=
+BTRS algorithm from:
+
+W. Hörmann
+"The generation of binomial random variates"
+Journal of Statistical Computation and Simulation, 46(1-2):101-110
+doi:10.1080/00949659308811496
+
+Valid only for n * min(p, 1-p) >= 10
+=#
+struct BinomialTRSSampler <: Sampleable{Univariate,Discrete}
+    comp::Bool
+    n::Int
+    a::Float64
+    b::Float64
+    c::Float64    # n*p + 0.5
+    v_r::Float64
+    r::Float64    # p / q
+    α::Float64
+    m::Int        # floor((n+1)*p)
+    ub_m::Float64 # k-independent part of ub
+end
+
+function trs_params(n::Int, prob::Float64)
+    comp = prob > 0.5
+    p = comp ? 1.0 - prob : prob
+    q = 1.0 - p
+    n * p >= 10 ||
+        throw(ArgumentError("BinomialTRSSampler requires n * min(prob, 1-prob) >= 10"))
+    spq = sqrt(n * p * q)
+    b = 1.15 + 2.53 * spq
+    a = -0.0873 + 0.0248 * b + 0.01 * p
+    c = n * p + 0.5
+    v_r = 0.92 - 4.2 / b
+    α = (2.83 + 5.1 / b) * spq
+    m = floor(Int, (n + 1) * p)
+    return (; comp, n, a, b, c, v_r, r = p / q, α, m)
+end
+
+trs_ub_m(ub_m::Float64, _) = ub_m
+function trs_ub_m(::Nothing, params)
+    (; n, r, m) = params
+    return (m + 0.5) * log((m + 1) / (r * (n - m + 1))) +
+           lstirling_asym(m + 1) + lstirling_asym(n - m + 1)
+end
+
+function BinomialTRSSampler(n::Int, prob::Float64)
+    params = trs_params(n, prob)
+    return BinomialTRSSampler(params..., trs_ub_m(nothing, params))
+end
+
+function trs_rand(rng::AbstractRNG, params, ub_m)
+    (; comp, n, a, b, c, v_r, r, α, m) = params
+    while true
+        u = rand(rng) - 0.5
+        v = rand(rng)
+        us = 0.5 - abs(u)
+        kf = (2 * a / us + b) * u + c
+        (kf < 0.0 || kf >= n + 1) && continue
+        k = floor(Int, kf)
+        (us >= 0.07 && v <= v_r) && return comp ? n - k : k
+        v = log(v * α / (a / (us * us) + b))
+        ub = trs_ub_m(ub_m, params) + (n + 1) * log((n - m + 1) / (n - k + 1)) +
+             (k + 0.5) * log(r * (n - k + 1) / (k + 1)) -
+             lstirling_asym(k + 1) - lstirling_asym(n - k + 1)
+        v <= ub && return comp ? n - k : k
+    end
+end
+
+trs_rand(rng::AbstractRNG, n::Int, prob::Float64) =
+    trs_rand(rng, trs_params(n, prob), nothing)
+
+rand(rng::AbstractRNG, s::BinomialTRSSampler) = trs_rand(rng, s, s.ub_m)
 
 # Constructing an alias table by directly computing the probability vector
 #
@@ -238,33 +311,3 @@ end
 BinomialAliasSampler(n::Int, p::Float64) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
 
 rand(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
-
-
-# Integrated Polyalgorithm sampler that automatically chooses the proper one
-#
-# It is important for type-stability
-#
-mutable struct BinomialPolySampler <: Sampleable{Univariate,Discrete}
-    use_btpe::Bool
-    geom_sampler::BinomialGeomSampler
-    btpe_sampler::BinomialTPESampler
-end
-
-function BinomialPolySampler(n::Int, p::Float64)
-    q = 1.0 - p
-    if n * min(p, q) > 20
-        use_btpe = true
-        geom_sampler = BinomialGeomSampler()
-        btpe_sampler = BinomialTPESampler(n, p)
-    else
-        use_btpe = false
-        geom_sampler = BinomialGeomSampler(n, p)
-        btpe_sampler = BinomialTPESampler()
-    end
-    BinomialPolySampler(use_btpe, geom_sampler, btpe_sampler)
-end
-
-BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
-
-rand(rng::AbstractRNG, s::BinomialPolySampler) =
-    s.use_btpe ? rand(rng, s.btpe_sampler) : rand(rng, s.geom_sampler)

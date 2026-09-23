@@ -157,19 +157,22 @@ end
 
 @_delegate_statsfuns Binomial binom n p
 
+function sampler(d::Binomial)
+    n, p = d.n, d.p
+    if n * min(p, 1 - p) <= 10
+        return BinomialGeomSampler(n, p)
+    else
+        return BinomialTRSSampler(n, p)
+    end
+end
+
 function rand(rng::AbstractRNG, d::Binomial)
-    p, n = d.p, d.n
-    if p <= 0.5
-        r = p
+    n, p = d.n, d.p
+    if n * min(p, 1 - p) <= 10
+        return rand(rng, BinomialGeomSampler(n, p))
     else
-        r = 1.0-p
+        return trs_rand(rng, n, p)
     end
-    if r*n <= 10.0
-        y = rand(rng, BinomialGeomSampler(n,r))
-    else
-        y = rand(rng, BinomialTPESampler(n,r))
-    end
-    p <= 0.5 ? y : n-y
 end
 
 function mgf(d::Binomial, t::Real)
