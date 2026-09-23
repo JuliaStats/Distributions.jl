@@ -61,20 +61,6 @@ function Base.isapprox(c1::Categorical, c2::Categorical; kwargs...)
         isapprox(probs(c1), probs(c2); kwargs...)
 end
 
-### Statistics
-
-function median(d::Categorical{T}) where {T<:Real}
-    k = ncategories(d)
-    p = probs(d)
-    cp = zero(T)
-    i = 0
-    while cp < 1/2 && i <= k
-        i += 1
-        cp += p[i]
-    end
-    i
-end
-
 ### Evaluation
 
 # the fallbacks are overridden by `DiscreteNonParameteric`

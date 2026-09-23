@@ -214,3 +214,19 @@ end
     @test DiscreteNonParametric(1:2, [0.5, 0.5]) == DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
     @test DiscreteNonParametric(1:2, [0.5, 0.5]) ≈ DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
 end
+
+@testset "quantile with a thin upper tail" begin
+    # https://github.com/JuliaStats/Distributions.jl/issues/2090
+    d0 = BetaBinomial(1000, 0.1, 20)
+    d = DiscreteNonParametric(0:1000, map(Base.Fix1(pdf, d0), 0:1000))
+    @test quantile(d, 1) == 1000 == maximum(d)
+    @test quantile(d, 0) == 0 == minimum(d)
+    @test quantile(d, 1//2) == quantile(d0, 1//2)
+
+    # the last support point has zero probability
+    @test quantile(DiscreteNonParametric(1:3, [0.5, 0.5, 0.0]), 1) == 2
+
+    for q in (-eps(), nextfloat(1.0), NaN)
+        @test_throws DomainError(q, "`q` must satisfy `0 <= q <= 1`") quantile(d, q)
+    end
+end

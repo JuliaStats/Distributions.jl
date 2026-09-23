@@ -82,10 +82,12 @@ function kurtosis(d::BetaBinomial)
     return (left * right) - 3
 end
 
-function logpdf(d::BetaBinomial, k::Real)
+logpdf(d::BetaBinomial, k::Real) = logpdf_int(d, k)
+
+function logpdf(d::BetaBinomial, k::Integer)
     n, α, β = d.n, d.α, d.β
     _insupport = insupport(d, k)
-    _k = _insupport ? round(Int, k) : 0
+    _k = _insupport ? k : 0
     logbinom = - log1p(n) - logbeta(_k + 1, n - _k + 1)
     lognum   = logbeta(_k + α, n - _k + β)
     logdenom = logbeta(α, β)
@@ -103,15 +105,49 @@ for f in (:ccdf, :logcdf, :logccdf)
     end
 end
 
-# Shifted categorical distribution corresponding to `BetaBinomial`
-_categorical(d::BetaBinomial) = Categorical(map(Base.Fix1(pdf, d), support(d)))
+function entropy(d::BetaBinomial)
+    broadcasted = Broadcast.broadcasted(support(d)) do k
+        xlogx(pdf(d, k))
+    end
+    return -sum(Broadcast.instantiate(broadcasted))
+end
 
-entropy(d::BetaBinomial) = entropy(_categorical(d))
-median(d::BetaBinomial) = median(_categorical(d)) - 1
-mode(d::BetaBinomial) = mode(_categorical(d)) - 1
-modes(d::BetaBinomial) = modes(_categorical(d)) .- 1
+# `pdf(d, k + 1) / pdf(d, k) = (n - k) * (k + α) / ((k + 1) * (n - k - 1 + β))`, i.e.
+# `pdf(d, k + 1) >= pdf(d, k)` iff `k * (2 - α - β) + n * (α - 1) - (β - 1) >= 0`
+function mode(d::BetaBinomial)
+    n, α, β = params(d)
+    c = α + β - 2
+    if c < 0
+        # `pdf` is U-shaped, hence maximized at a boundary of the support
+        return logbeta(n + α, β) > logbeta(α, n + β) ? n : 0
+    elseif iszero(c)
+        return α > 1 ? n : 0
+    else
+        # `pdf` increases up to `ceil(kstar)` and decreases afterwards
+        kstar = (n * (α - 1) - (β - 1)) / c
+        return kstar < 0 ? 0 : (kstar >= n ? n : ceil(Int, kstar))
+    end
+end
 
-quantile(d::BetaBinomial, p::Float64) = quantile(_categorical(d), p) - 1
+function modes(d::BetaBinomial)
+    n, α, β = params(d)
+    c = α + β - 2
+    if c < 0
+        if !iszero(n) && logbeta(n + α, β) == logbeta(α, n + β)
+            return [0, n]
+        end
+    elseif iszero(c)
+        # `α == β == 1` corresponds to a uniform distribution on the support
+        isone(α) && return collect(support(d))
+    else
+        kstar = (n * (α - 1) - (β - 1)) / c
+        0 <= kstar < n && isinteger(kstar) && return [Int(kstar), Int(kstar) + 1]
+    end
+    return [mode(d)]
+end
+
+quantile(d::BetaBinomial, p::Real) = integerunitrange_quantile(d, p)
+cquantile(d::BetaBinomial, p::Real) = integerunitrange_cquantile(d, p)
 
 #### Sampling
 

@@ -499,6 +499,32 @@ end
 
 ### special definitions for distributions with integer-valued support
 
+function pdf_int(d::DiscreteUnivariateDistribution, x::Real)
+    # `0` is only evaluated to obtain a value of the correct type
+    _isinteger = isinteger(x)
+    p = float(pdf(d, _isinteger ? round(Int, x) : 0))
+    return if _isinteger
+        p
+    elseif isnan(x)
+        oftype(p, NaN)
+    else
+        zero(p)
+    end
+end
+
+function logpdf_int(d::DiscreteUnivariateDistribution, x::Real)
+    # `0` is only evaluated to obtain a value of the correct type
+    _isinteger = isinteger(x)
+    p = float(logpdf(d, _isinteger ? round(Int, x) : 0))
+    return if _isinteger
+        p
+    elseif isnan(x)
+        oftype(p, NaN)
+    else
+        oftype(p, -Inf)
+    end
+end
+
 function cdf_int(d::DiscreteUnivariateDistribution, x::Real)
     # handle `NaN` and `±Inf` which can't be truncated to `Int`
     isfinite_x = isfinite(x)
@@ -571,10 +597,10 @@ function integerunitrange_cdf(d::DiscreteUnivariateDistribution, x::Integer)
 
     result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
         c = sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
-        x < minimum_d ? zero(c) : c
+        x < minimum_d ? zero(c) : min(c, one(c))
     else
         c = 1 - sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
-        x >= maximum_d ? one(c) : c
+        x >= maximum_d ? one(c) : max(c, zero(c))
     end
 
     return result
@@ -586,10 +612,10 @@ function integerunitrange_ccdf(d::DiscreteUnivariateDistribution, x::Integer)
 
     result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
         c = 1 - sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
-        x < minimum_d ? one(c) : c
+        x < minimum_d ? one(c) : max(c, zero(c))
     else
         c = sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
-        x >= maximum_d ? zero(c) : c
+        x >= maximum_d ? zero(c) : min(c, one(c))
     end
 
     return result
@@ -601,10 +627,10 @@ function integerunitrange_logcdf(d::DiscreteUnivariateDistribution, x::Integer)
 
     result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
         c = logsumexp(logpdf(d, y) for y in minimum_d:(max(x, minimum_d)))
-        x < minimum_d ? oftype(c, -Inf) : c
+        x < minimum_d ? oftype(c, -Inf) : min(c, zero(c))
     else
-        c = log1mexp(logsumexp(logpdf(d, y) for y in (min(x + 1, maximum_d)):maximum_d))
-        x >= maximum_d ? zero(c) : c
+        s = logsumexp(logpdf(d, y) for y in (min(x + 1, maximum_d)):maximum_d)
+        x >= maximum_d ? zero(s) : log1mexp(min(s, zero(s)))
     end
 
     return result
@@ -615,14 +641,67 @@ function integerunitrange_logccdf(d::DiscreteUnivariateDistribution, x::Integer)
     isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
 
     result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
-        c = log1mexp(logsumexp(logpdf(d, y) for y in minimum_d:(max(x, minimum_d))))
-        x < minimum_d ? zero(c) : c
+        s = logsumexp(logpdf(d, y) for y in minimum_d:(max(x, minimum_d)))
+        x < minimum_d ? zero(s) : log1mexp(min(s, zero(s)))
     else
         c = logsumexp(logpdf(d, y) for y in (min(x + 1, maximum_d)):maximum_d)
-        x >= maximum_d ? oftype(c, -Inf) : c
+        x >= maximum_d ? oftype(c, -Inf) : min(c, zero(c))
     end
 
     return result
+end
+
+# implementation of the quantile for distributions whose support is a unitrange of integers
+#
+# the lower tail is summed if `p <= 1/2` and the upper tail otherwise, as in
+# `integerunitrange_cdf`: `cdf` rounds to 1 for many `x` in the upper tail, e.g.
+# `cdf(BetaBinomial(1000, 0.1, 20), 814) == 1`
+function integerunitrange_quantile(d::DiscreteUnivariateDistribution, p::Real)
+    0 <= p <= 1 || throw(DomainError(p, "`p` must satisfy `0 <= p <= 1`"))
+    return p <= 1//2 ? integerunitrange_invcdf(d, p) : integerunitrange_invccdf(d, 1 - p)
+end
+
+function integerunitrange_cquantile(d::DiscreteUnivariateDistribution, p::Real)
+    0 <= p <= 1 || throw(DomainError(p, "`p` must satisfy `0 <= p <= 1`"))
+    return p <= 1//2 ? integerunitrange_invccdf(d, p) : integerunitrange_invcdf(d, 1 - p)
+end
+
+# unlike the cdf, the quantile requires a finite support: its far end terminates the search
+# if `p` is never reached, e.g. for `p = 1` below
+function integerunitrange_support(d::DiscreteUnivariateDistribution)
+    hasfinitesupport(d) || error("support is unbounded")
+    xs = support(d)
+    xs isa UnitRange{Int} || error("support is not a unitrange of integers")
+    return xs
+end
+
+# smallest `x` in the support with `cdf(d, x) = sum(pdf(d, y) for y in minimum(d):x) >= p`
+function integerunitrange_invcdf(d::DiscreteUnivariateDistribution, p::Real)
+    xs = integerunitrange_support(d)
+
+    x = first(xs)
+    c = pdf(d, x)
+    while c < p && x < last(xs)
+        x += 1
+        c += pdf(d, x)
+    end
+
+    return x
+end
+
+# smallest `x` in the support with `ccdf(d, x) = sum(pdf(d, y) for y in (x + 1):maximum(d)) <= p`
+function integerunitrange_invccdf(d::DiscreteUnivariateDistribution, p::Real)
+    xs = integerunitrange_support(d)
+
+    # `c == ccdf(d, x - 1)`, hence `x` is a solution as soon as `c > p`
+    x = last(xs)
+    c = pdf(d, x)
+    while c <= p && x > first(xs)
+        x -= 1
+        c += pdf(d, x)
+    end
+
+    return x
 end
 
 ### macros to use StatsFuns for method implementation

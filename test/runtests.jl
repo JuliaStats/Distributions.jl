@@ -43,6 +43,7 @@ const tests = [
     "univariate/discrete/binomial",
     "univariate/discrete/betabinomial",
     "univariate/discrete/poissonbinomial",
+    "univariate/discrete/noncentralhypergeometric",
     "multivariate/dirichlet",
     "multivariate/dirichletmultinomial",
     "univariate/continuous/logitnormal",
@@ -157,7 +158,6 @@ const tests = [
     # "univariate/continuous/noncentralf",
     # "univariate/discrete/geometric",
     # "univariate/discrete/hypergeometric",
-    # "univariate/discrete/noncentralhypergeometric",
     # "univariate/discrete/poisson",
     # "univariate/discrete/skellam",
 

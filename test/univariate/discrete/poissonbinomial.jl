@@ -146,6 +146,31 @@ end
     @test x ≈ fftw_fft
 end
 
+@testset "quantile" begin
+    # https://github.com/JuliaStats/Distributions.jl/issues/2090
+    @test @inferred(quantile(PoissonBinomial(range(0.05, 0.95; length=100)), 1)) == 100
+    @test @inferred(quantile(PoissonBinomial(fill(0.9, 800)), 1)) == 800
+
+    d = PoissonBinomial([0.1, 0.2, 0.3])
+    @test @inferred(quantile(d, 1//2)) == quantile(d, 0.5) == median(d)
+    @test @inferred(quantile(d, 0.5f0)) isa Int
+    for p in (-0.1, 1.1, NaN)
+        err = DomainError(p, "`p` must satisfy `0 <= p <= 1`")
+        @test_throws err quantile(d, p)
+        @test_throws err cquantile(d, p)
+    end
+
+    # `maximum(d)` is not attained if some success probability is zero
+    @test @inferred(quantile(PoissonBinomial([0.0, 0.5]), 1)) == 1
+
+    @testset "$(succprob(d))" for d in (PoissonBinomial([0.1, 0.2, 0.3]),
+                                        PoissonBinomial(fill(0.8, 6)),
+                                        PoissonBinomial(range(0.05, 0.95; length=100)),
+                                        PoissonBinomial(fill(0.9, 800)))
+        test_quantile_invariants(d)
+    end
+end
+
 @testset "automatic differentiation" begin
     # Test autodiff using ForwardDiff
     f = x -> logpdf(PoissonBinomial(x), 0)
