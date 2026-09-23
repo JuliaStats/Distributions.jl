@@ -85,11 +85,10 @@ In addition to the methods listed in the common interface above, we also provide
 ```@docs
 location(::MvLogNormal)
 scale(::MvLogNormal)
-median(::MvLogNormal)
 mode(::MvLogNormal)
 ```
 
-It can be necessary to calculate the parameters of the lognormal (location vector and scale matrix) from a given covariance and mean, median or mode. To that end, the following functions are provided.
+It can be necessary to calculate the parameters of the lognormal (location vector and scale matrix) from a given covariance and mean or mode. To that end, the following functions are provided.
 
 ```@docs
 location{D<:Distributions.AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix)
