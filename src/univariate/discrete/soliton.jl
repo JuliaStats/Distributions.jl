@@ -85,6 +85,7 @@ function soliton_ρ(K::Integer, i::Integer)
 end
 
 StatsBase.params(Ω::Soliton) = (Ω.K, Ω.M, Ω.δ, Ω.atol)
+partype(::Type{Soliton}) = Float64
 
 function pdf(Ω::Soliton, i::Real)
     j = searchsortedfirst(Ω.degrees, i)

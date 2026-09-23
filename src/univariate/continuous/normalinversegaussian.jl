@@ -45,7 +45,7 @@ end
 Base.convert(::Type{NormalInverseGaussian{T}}, d::NormalInverseGaussian{T}) where {T<:Real} = d
 
 params(d::NormalInverseGaussian) = (d.μ, d.α, d.β, d.δ)
-@inline partype(d::NormalInverseGaussian{T}) where {T<:Real} = T
+partype(::Type{<:NormalInverseGaussian{T}}) where {T<:Real} = T
 
 mean(d::NormalInverseGaussian) = d.μ + d.δ * d.β / d.γ
 var(d::NormalInverseGaussian) = d.δ * d.α^2 / d.γ^3

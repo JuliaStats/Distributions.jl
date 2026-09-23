@@ -86,7 +86,7 @@ Base.convert(::Type{LogitNormal{T}}, d::LogitNormal{T}) where {T<:Real} = d
 params(d::LogitNormal) = (d.μ, d.σ)
 location(d::LogitNormal) = d.μ
 scale(d::LogitNormal) = d.σ
-@inline partype(d::LogitNormal{T}) where {T<:Real} = T
+partype(::Type{<:LogitNormal{T}}) where {T<:Real} = T
 
 #### Statistics
 

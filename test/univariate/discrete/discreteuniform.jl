@@ -28,3 +28,10 @@ end
         @test fit(DiscreteUniform, data) == DiscreteUniform(10, 20)
     end
 end
+
+@testset "partype" begin
+    # the bounds are stored as `Int`, so `partype` is `Int` regardless of the input type
+    @test @inferred(partype(DiscreteUniform(0, 4))) === Int
+    @test @inferred(partype(DiscreteUniform(0.0, 4))) === Int
+    @test @inferred(partype(DiscreteUniform)) === Int
+end

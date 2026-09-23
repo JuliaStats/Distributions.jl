@@ -102,7 +102,11 @@ end
         @test d isa Censored
         @test eltype(d) === Float64
         @test params(d) === (params(Normal(0.0, 1.0))..., -1, 2)
-        @test partype(d) === Float64
+        @test @inferred(partype(d)) === Float64
+        # promotes the wrapped `partype` with the bound types
+        @test @inferred(partype(censored(Normal(0.0f0, 1.0f0); lower = 0))) === Float32
+        # bare `Censored` (a UnionAll) falls back to the generic `Real` default
+        @test @inferred(partype(Censored)) === Real
         @test @inferred extrema(d) == (-1, 2)
         @test @inferred islowerbounded(d)
         @test @inferred isupperbounded(d)
@@ -117,7 +121,7 @@ end
         @test d isa Censored
         @test eltype(d) === Base.promote_type(eltype(Cauchy(0, 1)), Int)
         @test params(d) === (params(Cauchy(0, 1))..., nothing, 2)
-        @test partype(d) === Float64
+        @test @inferred(partype(d)) === Float64
         @test extrema(d) == (-Inf, 2.0)
         @test @inferred !islowerbounded(d)
         @test @inferred isupperbounded(d)
@@ -131,7 +135,7 @@ end
         @test d isa Censored
         @test eltype(d) === Base.promote_type(eltype(Gamma(1, 2)), Int)
         @test params(d) === (params(Gamma(1, 2))..., 2, nothing)
-        @test partype(d) === Float64
+        @test @inferred(partype(d)) === Float64
         @test extrema(d) == (2.0, Inf)
         @test @inferred islowerbounded(d)
         @test @inferred !isupperbounded(d)

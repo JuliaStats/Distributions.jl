@@ -23,6 +23,7 @@ struct Dirac{T} <: DiscreteUnivariateDistribution
 end
 
 Base.eltype(::Type{Dirac{T}}) where {T} = T
+partype(::Type{<:Dirac{T}}) where {T} = T
 
 insupport(d::Dirac, x::Real) = x == d.value
 minimum(d::Dirac) = d.value

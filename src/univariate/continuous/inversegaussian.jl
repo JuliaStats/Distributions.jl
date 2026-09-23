@@ -55,7 +55,7 @@ Base.convert(::Type{InverseGaussian{T}}, d::InverseGaussian{T}) where {T<:Real} 
 
 shape(d::InverseGaussian) = d.λ
 params(d::InverseGaussian) = (d.μ, d.λ)
-partype(::InverseGaussian{T}) where {T} = T
+partype(::Type{<:InverseGaussian{T}}) where {T} = T
 
 #### Statistics
 

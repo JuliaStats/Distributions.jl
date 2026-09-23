@@ -50,7 +50,7 @@ shape(d::Pareto) = d.α
 scale(d::Pareto) = d.θ
 
 params(d::Pareto) = (d.α, d.θ)
-@inline partype(d::Pareto{T}) where {T<:Real} = T
+partype(::Type{<:Pareto{T}}) where {T<:Real} = T
 
 
 #### Statistics

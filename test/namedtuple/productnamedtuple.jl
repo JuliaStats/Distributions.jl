@@ -72,6 +72,15 @@ using Test
             end
         end
 
+        @testset "partype" begin
+            # the parameters of all of the named distributions are promoted
+            @test @inferred(partype(ProductNamedTupleDistribution((x=Normal(0.0f0, 1.0f0), y=Gamma(1.0f0, 2.0f0))))) === Float32
+            @test @inferred(partype(ProductNamedTupleDistribution((x=Normal(0.0f0, 1.0f0), y=Gamma(1.0, 2.0))))) === Float64
+            @test @inferred(partype(ProductNamedTupleDistribution((x=Normal(0.0f0, 1.0f0), y=DiscreteUniform(1, 10))))) === Float32
+            # bare `ProductNamedTupleDistribution` (a UnionAll) falls back to `Real`
+            @test @inferred(partype(ProductNamedTupleDistribution)) === Real
+        end
+
         @testset "minimum" begin
             nt = (x=Normal(1.0, 2.0), y=Gamma(), z=MvNormal(Diagonal(ones(5))))
             d = ProductNamedTupleDistribution(nt)

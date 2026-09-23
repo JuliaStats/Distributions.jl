@@ -48,7 +48,7 @@ Base.convert(::Type{Levy{T}}, d::Levy{T}) where {T<:Real} = d
 
 location(d::Levy) = d.μ
 params(d::Levy) = (d.μ, d.σ)
-partype(::Levy{T}) where {T} = T
+partype(::Type{<:Levy{T}}) where {T} = T
 
 
 #### Statistics

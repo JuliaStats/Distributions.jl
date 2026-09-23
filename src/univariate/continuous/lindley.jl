@@ -42,7 +42,7 @@ Base.convert(::Type{Lindley{T}}, d::Lindley{T}) where {T} = d
 
 shape(d::Lindley) = d.θ
 params(d::Lindley) = (shape(d),)
-partype(::Lindley{T}) where {T} = T
+partype(::Type{<:Lindley{T}}) where {T} = T
 
 ### Statistics
 

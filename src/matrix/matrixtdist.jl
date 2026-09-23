@@ -120,7 +120,7 @@ var(d::MatrixTDist) = d.ν <= 2 ? throw(ArgumentError("var only defined for df >
 
 params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 
-@inline partype(d::MatrixTDist{T}) where {T <: Real} = T
+partype(::Type{<:MatrixTDist{T}}) where {T <: Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation

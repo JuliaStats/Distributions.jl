@@ -90,6 +90,9 @@ end
 
 Base.eltype(::Type{<:ProductNamedTupleDistribution{<:Any,<:Any,<:Any,T}}) where {T} = T
 
+partype(::Type{<:ProductNamedTupleDistribution{<:Any,D}}) where {D<:Tuple} =
+    __product_promote_type(partype, D)
+
 Base.minimum(d::ProductNamedTupleDistribution) = map(minimum, d.dists)
 
 Base.maximum(d::ProductNamedTupleDistribution) = map(maximum, d.dists)

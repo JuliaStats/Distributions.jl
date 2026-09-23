@@ -22,6 +22,8 @@ function EdgeworthZ(d::UnivariateDistribution, n::Real; check_args::Bool=true)
     return EdgeworthZ{typeof(d)}(d, n; check_args=check_args)
 end
 
+partype(::Type{<:EdgeworthZ{D}}) where {D} = promote_type(partype(D), Float64)
+
 mean(d::EdgeworthZ) = 0.0
 var(d::EdgeworthZ) = 1.0
 
@@ -88,6 +90,8 @@ function EdgeworthSum(d::UnivariateDistribution, n::Real; check_args::Bool=true)
     return EdgeworthSum{typeof(d)}(d, n; check_args=check_args)
 end
 
+partype(::Type{<:EdgeworthSum{D}}) where {D} = promote_type(partype(D), Float64)
+
 mean(d::EdgeworthSum) = d.n*mean(d.dist)
 var(d::EdgeworthSum) = d.n*var(d.dist)
 
@@ -104,6 +108,8 @@ end
 function EdgeworthMean(d::UnivariateDistribution, n::Real; check_args::Bool=true)
     return EdgeworthMean{typeof(d)}(d, n; check_args=check_args)
 end
+
+partype(::Type{<:EdgeworthMean{D}}) where {D} = promote_type(partype(D), Float64)
 
 mean(d::EdgeworthMean) = mean(d.dist)
 var(d::EdgeworthMean) = var(d.dist) / d.n

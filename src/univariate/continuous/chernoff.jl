@@ -33,6 +33,8 @@ cdf(Chernoff(),-x)              # For tail probabilities, use this instead of 1-
 struct Chernoff <: ContinuousUnivariateDistribution
 end
 
+partype(::Type{Chernoff}) = Union{}
+
 module ChernoffComputations
     import QuadGK.quadgk
     # The following arrays of constants have been precomputed to speed up computation.

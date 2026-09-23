@@ -23,6 +23,7 @@ See below for details.
 
 ```@docs
 params(::UnivariateDistribution)
+partype
 scale(::UnivariateDistribution)
 location(::UnivariateDistribution)
 shape(::UnivariateDistribution)
