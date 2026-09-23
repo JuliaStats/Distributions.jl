@@ -43,7 +43,7 @@ Base.convert(::Type{Poisson{T}}, d::Poisson{T}) where {T<:Real} = d
 
 ### Parameters
 
-params(d::Poisson) = (d.λ,)
+namedparams(d::Poisson) = (; d.λ)
 partype(::Poisson{T}) where {T} = T
 
 rate(d::Poisson) = d.λ

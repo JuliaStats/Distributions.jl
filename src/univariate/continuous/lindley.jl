@@ -41,7 +41,7 @@ Base.convert(::Type{Lindley{T}}, d::Lindley{T}) where {T} = d
 ### Parameters
 
 shape(d::Lindley) = d.θ
-params(d::Lindley) = (shape(d),)
+namedparams(d::Lindley) = (; d.θ)
 partype(::Lindley{T}) where {T} = T
 
 ### Statistics

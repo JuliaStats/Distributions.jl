@@ -77,7 +77,7 @@ ntrials(d::PoissonBinomial) = length(d.p)
 succprob(d::PoissonBinomial) = d.p
 failprob(d::PoissonBinomial{T}) where {T} = one(T) .- d.p
 
-params(d::PoissonBinomial) = (d.p,)
+namedparams(d::PoissonBinomial) = (; d.p)
 partype(::PoissonBinomial{T}) where {T} = T
 
 #### Properties

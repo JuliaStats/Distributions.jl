@@ -49,7 +49,7 @@ Base.convert(::Type{BetaBinomial{T}}, d::BetaBinomial{T}) where {T<:Real} = d
 
 ntrials(d::BetaBinomial) = d.n
 
-params(d::BetaBinomial) = (d.n, d.α, d.β)
+namedparams(d::BetaBinomial) = (; d.n, d.α, d.β)
 partype(::BetaBinomial{T}) where {T} = T
 
 #### Properties

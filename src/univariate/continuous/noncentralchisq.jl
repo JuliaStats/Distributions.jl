@@ -51,7 +51,7 @@ Base.convert(::Type{NoncentralChisq{T}}, d::NoncentralChisq{T}) where {T<:Real} 
 
 ### Parameters
 
-params(d::NoncentralChisq) = (d.ν, d.λ)
+namedparams(d::NoncentralChisq) = (; d.ν, d.λ)
 @inline partype(d::NoncentralChisq{T}) where {T<:Real} = T
 
 

@@ -30,7 +30,7 @@ Base.minimum(d::LogUniform) = d.a
 Base.maximum(d::LogUniform) = d.b
 
 #### Parameters
-params(d::LogUniform) = (d.a, d.b)
+namedparams(d::LogUniform) = (; d.a, d.b)
 partype(::LogUniform{T}) where {T<:Real} = T
 
 #### Statistics

@@ -54,7 +54,7 @@ Base.convert(::Type{Weibull{T}}, d::Weibull{T}) where {T<:Real} = d
 shape(d::Weibull) = d.α
 scale(d::Weibull) = d.θ
 
-params(d::Weibull) = (d.α, d.θ)
+namedparams(d::Weibull) = (; d.α, d.θ)
 partype(::Weibull{T}) where {T<:Real} = T
 
 

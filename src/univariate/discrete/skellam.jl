@@ -55,7 +55,7 @@ Base.convert(::Type{Skellam{T}}, d::Skellam{T}) where {T<:Real} = d
 
 #### Parameters
 
-params(d::Skellam) = (d.μ1, d.μ2)
+namedparams(d::Skellam) = (; d.μ1, d.μ2)
 partype(::Skellam{T}) where {T} = T
 
 

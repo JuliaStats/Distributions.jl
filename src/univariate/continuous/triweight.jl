@@ -28,7 +28,7 @@ Base.convert(::Type{Triweight{T}}, d::Triweight{T}) where {T<:Real} = d
 
 location(d::Triweight) = d.μ
 scale(d::Triweight) = d.σ
-params(d::Triweight) = (d.μ, d.σ)
+namedparams(d::Triweight) = (; d.μ, d.σ)
 @inline partype(d::Triweight{T}) where {T<:Real} = T
 
 

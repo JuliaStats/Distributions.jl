@@ -42,7 +42,7 @@ Base.convert(::Type{TDist{T}}, d::TDist{T}) where {T<:Real} = d
 #### Parameters
 
 dof(d::TDist) = d.ν
-params(d::TDist) = (d.ν,)
+namedparams(d::TDist) = (; d.ν)
 @inline partype(d::TDist{T}) where {T<:Real} = T
 
 
