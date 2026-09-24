@@ -18,6 +18,17 @@ function _linspace(a::Float64, b::Float64, n::Int)
     return r
 end
 
+# Enables testing against values computed at high precision by transforming an expression
+# that uses numeric literals and constants to wrap those in `big()`, similar to how the
+# high-precision values for irrational constants are defined with `Base.@irrational` and
+# in IrrationalConstants.jl. See e.g. `test/truncated/normal.jl` for example use.
+bigly(x) = x
+bigly(x::Symbol) = x in (:π, :ℯ, :Inf, :NaN) ? Expr(:call, :big, x) : x
+bigly(x::Real) = Expr(:call, :big, x)
+bigly(x::Expr) = (map!(bigly, x.args, x.args); x)
+macro bigly(ex)
+    return esc(bigly(ex))
+end
 
 #################################################
 #
