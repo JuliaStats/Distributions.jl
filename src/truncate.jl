@@ -233,6 +233,62 @@ function rand(rng::AbstractRNG, d::Truncated)
     end
 end
 
+function rand(rng::AbstractRNG, d::Truncated, n::Int)
+    d0 = d.untruncated
+    tp = d.tp
+    lower = d.lower
+    upper = d.upper
+
+    # Use the same three regimes as the scalar version
+    if tp > 0.25
+        # Regime 1: Rejection sampling with batch optimization
+        # Get the correct type and memory by sampling from the untruncated distribution
+        samples = rand(rng, d0, n)
+        n_collected = 0
+        max_batch = 0
+        batch_buffer = Vector{eltype(samples)}()
+        while n_collected < n
+            n_remaining = n - n_collected
+            n_expected = n_remaining / tp
+            δn_expected = sqrt(n_remaining * tp * (1 - tp))
+            n_batch_f = n_expected + 3δn_expected
+            n_batch = ceil(Int, n_batch_f)
+            if n_batch > max_batch
+                resize!(batch_buffer, n_batch)
+                max_batch = n_batch
+            end
+            rand!(rng, d0, batch_buffer)
+            for i in 1:n_batch
+                s = batch_buffer[i]
+                if _in_closed_interval(s, lower, upper)
+                    n_collected += 1
+                    samples[n_collected] = s
+                    n_collected == n && break
+                end
+            end
+        end
+        return samples
+    elseif tp > sqrt(eps(typeof(float(tp))))
+        # Regime 2: Quantile-based sampling
+        # Sample one value first to determine the correct type
+        sample_type = typeof(quantile(d0, d.lcdf + rand(rng) * d.tp))
+        samples = Vector{sample_type}(undef, n)
+        for i in 1:n
+            samples[i] = quantile(d0, d.lcdf + rand(rng) * d.tp)
+        end
+        return samples
+    else
+        # Regime 3: Log-space computation
+        # Sample one value first to determine the correct type
+        sample_type = typeof(invlogcdf(d0, logaddexp(d.loglcdf, d.logtp - randexp(rng))))
+        samples = Vector{sample_type}(undef, n)
+        for i in 1:n
+            samples[i] = invlogcdf(d0, logaddexp(d.loglcdf, d.logtp - randexp(rng)))
+        end
+        return samples
+    end
+end
+
 ## show
 
 function show(io::IO, d::Truncated)
