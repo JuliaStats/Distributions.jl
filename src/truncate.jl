@@ -192,7 +192,7 @@ function ccdf(d::Truncated, x::Real)
     result = clamp((d.ucdf - cdf(d.untruncated, x)) / d.tp, 0, 1)
     # Special cases for values outside of the support to avoid e.g. NaN issues with `Binomial`
     return if d.lower !== nothing && x <= d.lower
-        one(result)
+        x < d.lower ? one(result) : oftype(result, _ccdf_lower(d))
     elseif d.upper !== nothing && x > d.upper
         zero(result)
     else
@@ -203,12 +203,23 @@ end
 function logccdf(d::Truncated, x::Real)
     result = logsubexp(logccdf(d.untruncated, x), log1p(-d.ucdf)) - d.logtp
     return if d.lower !== nothing && x <= d.lower
-        zero(result)
+        x < d.lower ? zero(result) : oftype(result, _logccdf_lower(d))
     elseif d.upper !== nothing && x > d.upper
         oftype(result, -Inf)
     else
         result
     end
+end
+
+# (log) P(X > l | l ≤ X ≤ u) at the lower bound l, which is less than one only if the
+# untruncated distribution has mass at l
+_ccdf_lower(d::Truncated) = one(d.tp)
+function _ccdf_lower(d::Truncated{<:DiscreteUnivariateDistribution})
+    return clamp(1 - pdf(d.untruncated, d.lower) / d.tp, 0, 1)
+end
+_logccdf_lower(d::Truncated) = zero(d.logtp)
+function _logccdf_lower(d::Truncated{<:DiscreteUnivariateDistribution})
+    return logsubexp(d.logtp, min(logpdf(d.untruncated, d.lower), d.logtp)) - d.logtp
 end
 
 ## random number generation
