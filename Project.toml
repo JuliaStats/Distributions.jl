@@ -1,6 +1,6 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.131"
+version = "0.25.132"
 authors = ["JuliaStats"]
 
 [deps]
