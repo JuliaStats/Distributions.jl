@@ -1,7 +1,7 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-authors = ["JuliaStats"]
 version = "0.25.131"
+authors = ["JuliaStats"]
 
 [deps]
 AliasTables = "66dad0bd-aa9a-41b7-9441-69ab47430ed8"
@@ -39,7 +39,7 @@ Aqua = "0.8.9"
 Calculus = "0.5"
 ChainRulesCore = "1"
 ChainRulesTestUtils = "1"
-DensityInterface = "0.4"
+DensityInterface = "0.4, 1"
 Distributed = "<0.0.1, 1"
 FillArrays = "0.9, 0.10, 0.11, 0.12, 0.13, 1"
 FiniteDifferences = "0.12"
