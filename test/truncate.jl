@@ -237,3 +237,36 @@ end
     @test @inferred(cdf(dist, 2.82)) === 1.0
     @test @inferred(ccdf(dist, 2.82)) === 0.0
 end
+
+@testset "ccdf and logccdf at the lower bound (#2095)" begin
+    # Discrete distributions: the mass at the lower bound is not part of the ccdf
+    for (upper, p) in ((nothing, 1 / 3), (2, 1 / 3), (1, 0.0))
+        d = truncated(Binomial(2, 0.5); lower=1, upper=upper)
+        @test ccdf(d, 1) ≈ p atol=1e-15
+        @test ccdf(d, 1) ≈ 1 - cdf(d, 1) atol=1e-15
+        @test logccdf(d, 1) ≈ log(p)
+        @test ccdf(d, 0) === 1.0
+        @test logccdf(d, 0) === 0.0
+    end
+    d = truncated(Poisson(1.0); lower=20)
+    @test ccdf(d, 20) ≈ 1 - pdf(Poisson(1.0), 20) / ccdf(Poisson(1.0), 19)
+    @test logccdf(d, 20) ≈ log1p(-pdf(Poisson(1.0), 20) / ccdf(Poisson(1.0), 19))
+
+    # Continuous distributions: no mass at the lower bound
+    d = truncated(Normal(); lower=10.0)
+    @test @inferred(ccdf(d, 10.0)) === 1.0
+    @test @inferred(logccdf(d, 10.0)) === 0.0
+    for d in (
+        truncated(Normal(); lower=0.0),
+        truncated(Gamma(2, 1), 1.0, 3.0),
+        truncated(Beta(2, 3); lower=0.3),
+    )
+        l = d.lower
+        @test @inferred(ccdf(d, l)) === 1.0
+        @test @inferred(logccdf(d, l)) === 0.0
+        @test ccdf(d, prevfloat(l)) === 1.0
+        @test logccdf(d, prevfloat(l)) === 0.0
+        @test ccdf(d, nextfloat(l)) ≈ 1
+        @test logccdf(d, nextfloat(l)) ≈ 0 atol=1e-12
+    end
+end
