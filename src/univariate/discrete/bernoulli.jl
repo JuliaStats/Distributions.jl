@@ -96,11 +96,13 @@ ccdf(d::Bernoulli, x::Bool) = x ? zero(d.p) : succprob(d)
 ccdf(d::Bernoulli, x::Int) = x < 0 ? one(d.p) :
                              x < 1 ? succprob(d) : zero(d.p)
 
-function quantile(d::Bernoulli{T}, p::Real) where T<:Real
-    0 <= p <= 1 ? (p <= failprob(d) ? zero(T) : one(T)) : T(NaN)
+function quantile(d::Bernoulli, p::Real)
+    _check_quantile_arg(p)
+    p <= failprob(d) ? false : true
 end
-function cquantile(d::Bernoulli{T}, p::Real) where T<:Real
-    0 <= p <= 1 ? (p >= succprob(d) ? zero(T) : one(T)) : T(NaN)
+function cquantile(d::Bernoulli, p::Real)
+    _check_cquantile_arg(p)
+    p >= succprob(d) ? false : true
 end
 
 mgf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(t)

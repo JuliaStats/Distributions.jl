@@ -47,7 +47,10 @@ logcdf(d::Dirac, x::Real) = x < d.value ? -Inf : isnan(x) ? NaN : 0.0
 ccdf(d::Dirac, x::Real) = x < d.value ? 1.0 : isnan(x) ? NaN : 0.0
 logccdf(d::Dirac, x::Real) = x < d.value ? 0.0 : isnan(x) ? NaN : -Inf
 
-quantile(d::Dirac{T}, p::Real) where {T} = 0 <= p <= 1 ? d.value : T(NaN)
+function quantile(d::Dirac, p::Real)
+    _check_quantile_arg(p)
+    return d.value
+end
 
 mgf(d::Dirac, t) = exp(t * d.value)
 cgf(d::Dirac, t) = t*d.value
