@@ -215,7 +215,7 @@ Instead of `pdf` one should implement `_pdf(d, x)` which does not have to check 
 `x`. However, since the default definition of `pdf(d, x)` falls back to `logpdf(d, x)`
 usually it is sufficient to implement `logpdf`.
 
-See also: [`logpdf`](@ref).
+See also: [`logpdf`](@ref), [`updf`](@ref)
 """
 @inline function pdf(
     d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M}
@@ -244,6 +244,19 @@ function _pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) 
 end
 
 """
+    updf(d::Distribution, x)
+
+Evaluate the unnormalized probability density function of `d` at `x`.
+
+The unnormalized probability density function contains all terms in the probability density
+function that are dependent on `x` and not necessarily constant terms or other terms
+dependent on parameters of the distribution.
+
+See also: [`pdf`](@ref), [`logupdf`](@ref)
+"""
+updf(d::Distribution, x) = pdf(d, x)
+
+"""
     logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
 
 Evaluate the logarithm of the probability density function of `d` at `x`.
@@ -256,7 +269,7 @@ be disabled by using `@inbounds`.
 Instead of `logpdf` one should implement `_logpdf(d, x)` which does not have to check the
 size of `x`.
 
-See also: [`pdf`](@ref), [`gradlogpdf`](@ref).
+See also: [`pdf`](@ref), [`logupdf`](@ref), [`gradlogpdf`](@ref).
 """
 @inline function logpdf(
     d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M}
@@ -281,13 +294,26 @@ See also: [`pdf`](@ref), [`gradlogpdf`](@ref).
 end
 
 """
+    logupdf(d::Distribution, x)
+
+Evaluate the logarithm of the unnormalized probability density function of `d` at `x`.
+
+The result is equivalent to `log(updf(d, x))` but may be more numerically stable.
+
+See also: [`updf`](@ref), [`logpdf`](@ref), [`gradlogpdf`](@ref)
+"""
+logupdf(d::Distribution, x) = logpdf(d, x)
+
+"""
     gradlogpdf(d::Distribution, x)
 
 Evaluate the gradient of the logarithm of the probability density function of `d` at `x`.
 
+Note that this is the gradient of both [`logpdf`](@ref) and [`logupdf`](@ref).
+
 For univariate distributions, return the derivative.
 
-See also: [`logpdf`](@ref).
+See also: [`logpdf`](@ref), [`logupdf`](@ref)
 """
 function gradlogpdf end
 
@@ -480,6 +506,20 @@ Base.@propagate_inbounds function loglikelihood(
 ) where {N}
     return sum(Base.Fix1(logpdf, d), x)
 end
+
+"""
+    logulikelihood(d::Distribution, x)
+
+The unnormalized log-likelihood of distribution `d` with respect to all variate(s) contained
+in `x`.
+
+The unnormalized log-likelihood contains all terms in the log-likelihood that are dependent
+on the parameters of the distribution and not necessarily constant terms or other terms
+dependent on `x`.
+
+See also: [`loglikelihood`](@ref)
+"""
+logulikelihood(d::Distribution, x) = loglikelihood(d, x)
 
 ## TODO: the following types need to be improved
 abstract type SufficientStats end
