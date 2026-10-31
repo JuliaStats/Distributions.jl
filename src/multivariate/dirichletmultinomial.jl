@@ -88,6 +88,8 @@ function insupport(d::DirichletMultinomial, x::AbstractVector{T}) where T<:Real
     return sum(x) == ntrials(d)
 end
 function _logpdf(d::DirichletMultinomial{S}, x::AbstractVector{T}) where {T<:Real, S<:Real}
+    R = promote_type(float(S), float(T))
+    insupport(d, x) || return -R(Inf)
     c = loggamma(S(d.n + 1)) + loggamma(d.α0) - loggamma(d.n + d.α0)
     for j in eachindex(x)
         xj, αj = x[j], d.α[j]

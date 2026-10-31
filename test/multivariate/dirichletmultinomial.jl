@@ -94,3 +94,37 @@ for w in (.1 * ones(10_000), ones(10_000), 10 * ones(10_000))
 end
 
 end
+
+@testset "DirichletMultinomial support in density evaluation" begin
+    for S in (Float32, Float64, BigFloat), T in (Int, Float32, Float64)
+        α = S[0.2, 0.5, 0.3]
+        x = T[2, 3, 1]
+        before = copy(x)
+        d = DirichletMultinomial(6, α)
+        valid = logpdf(d, x)
+        @test isfinite(valid)
+        @test pdf(d, x) ≈ exp(valid)
+        for n in (5, 7)
+            invalid = DirichletMultinomial(n, α)
+            @test !insupport(invalid, x)
+            @test logpdf(invalid, x) == -Inf
+            @test pdf(invalid, x) == 0
+            @test typeof(logpdf(invalid, x)) == typeof(valid)
+            @test typeof(pdf(invalid, x)) == typeof(valid)
+        end
+        @test x == before
+        @test α == S[0.2, 0.5, 0.3]
+    end
+
+    d = DirichletMultinomial(6, [1.2, 2.5, 0.7])
+    for x in ([1.5, 3.5, 1], [-1, 6, 1], [NaN, 5, 1], [Inf, 5, 1])
+        @test !insupport(d, x)
+        @test logpdf(d, x) == -Inf
+        @test pdf(d, x) == 0
+    end
+    for x in ([2, 3], [2, 3, 1, 0])
+        @test !insupport(d, x)
+        @test_throws DimensionMismatch logpdf(d, x)
+        @test_throws DimensionMismatch pdf(d, x)
+    end
+end
