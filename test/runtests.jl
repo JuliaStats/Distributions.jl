@@ -17,6 +17,7 @@ const tests = [
     "univariate/discrete/dirac",
     "truncate",
     "truncated/normal",
+    "truncated/lognormal",
     "truncated/exponential",
     "truncated/uniform",
     "truncated/discrete_uniform",

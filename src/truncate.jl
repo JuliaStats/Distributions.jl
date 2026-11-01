@@ -85,6 +85,7 @@ Generic wrapper for a truncated distribution.
 
 The *truncated normal distribution* is a particularly important one in the family of truncated distributions.
 Unlike the general case, truncated normal distributions support `mean`, `mode`, `modes`, `var`, `std`, and `entropy`.
+Log-normal distributions truncated from one side (only a lower or only an upper bound) support `mean`, `var`, and `std`.
 """
 struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T<: Real, TL<:Union{T,Nothing}, TU<:Union{T,Nothing}} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
@@ -257,6 +258,7 @@ _use_multline_show(d::Truncated) = _use_multline_show(d.untruncated)
 ### specialized truncated distributions
 
 include(joinpath("truncated", "normal.jl"))
+include(joinpath("truncated", "lognormal.jl"))
 include(joinpath("truncated", "exponential.jl"))
 include(joinpath("truncated", "uniform.jl"))
 include(joinpath("truncated", "loguniform.jl"))

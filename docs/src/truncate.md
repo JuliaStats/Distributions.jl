@@ -42,3 +42,4 @@ are defined for all truncated univariate distributions:
 Functions to compute statistics, such as `mean`, `mode`, `var`, `std`, and `entropy`, are not available for generic truncated distributions.
 Generally, there are no easy ways to compute such quantities due to the complications incurred by truncation.
 However, these methods are supported for truncated normal distributions `Truncated{<:Normal}` which can be constructed with `truncated(::Normal, ...)`.
+`mean`, `var` and `std` are also supported for log-normal distributions truncated from one side, `truncated(::LogNormal; lower=l)` and `truncated(::LogNormal; upper=u)`.
