@@ -51,7 +51,7 @@ end
 
 const IsoTDist  = GenericMvTDist{Float64, ScalMat{Float64}, Vector{Float64}}
 const DiagTDist = GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}, Vector{Float64}}
-const MvTDist = GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}, Vector{Float64}}
+const MvTDist = GenericMvTDist{Float64, typeof(PDMat(Matrix{Float64}(I, 1, 1))), Vector{Float64}}
 
 MvTDist(df::Real, μ::Vector{<:Real}, C::PDMat) = GenericMvTDist(df, μ, C)
 MvTDist(df::Real, C::PDMat) = GenericMvTDist(df, C)
@@ -125,8 +125,8 @@ sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vec
 
 
 function mvtdist_consts(d::AbstractMvTDist)
-    H = convert(eltype(d), 0.5)
-    logpi = convert(eltype(d), log(pi))
+    H = convert(float(eltype(d)), 0.5)
+    logpi = convert(float(eltype(d)), log(pi))
     hdf = H * d.df
     hdim = H * d.dim
     shdfhdim = hdf + hdim
