@@ -47,7 +47,6 @@ struct Soliton <: DiscreteUnivariateDistribution
     end
 end
 
-
 """
     degrees(Ω)
 

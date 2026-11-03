@@ -65,7 +65,6 @@ convert(::Type{Dirichlet{T}}, alpha::AbstractVector{T}) where {T<:Real} =
     Dirichlet(alpha)
 convert(::Type{Dirichlet{T}}, d::Dirichlet{T}) where {T<:Real} = d
 
-
 # Properties
 
 length(d::Dirichlet) = length(d.alpha)

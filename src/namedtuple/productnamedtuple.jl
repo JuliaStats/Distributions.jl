@@ -13,7 +13,7 @@ directly.
 
 ```jldoctest ProductNamedTuple; setup = :(using Distributions, Random; Random.seed!(832))
 julia> d = product_distribution((x=Normal(), y=Dirichlet([2, 4])))
-ProductNamedTupleDistribution distribution
+Product distribution
 Marginals:
   x = Normal(0.0, 1.0)
   y = Dirichlet([2, 4])
@@ -55,8 +55,6 @@ function _gentype(d::Distribution{CholeskyVariate})
     T = eltype(d)
     return LinearAlgebra.Cholesky{T,Matrix{T}}
 end
-namedparams(d::ProductNamedTupleDistribution) = (; d.dists)
-
 function _gentype(d::ProductNamedTupleDistribution{K}) where {K}
     return NamedTuple{K,Tuple{map(_gentype, values(d.dists))...}}
 end
@@ -64,8 +62,11 @@ _gentype(::Distribution) = Any
 
 _product_namedtuple_eltype(dists) = typejoin(map(_gentype, dists)...)
 
+namedparams(d::ProductNamedTupleDistribution) = (; d.dists)
+
 show(io::IO, d::ProductNamedTupleDistribution) = _showcall(io, "product_distribution", d.dists)
 
+_showname(io::IO, ::ProductNamedTupleDistribution) = print(io, "Product")
 _showparams(io::IO, d::ProductNamedTupleDistribution) = _showsection(io, "Marginals", d.dists)
 
 """

@@ -48,7 +48,6 @@ DirichletMultinomial(n::Integer, α::AbstractVector{T}) where {T <: Real} = Diri
 DirichletMultinomial(n::Integer, α::AbstractVector{T}) where {T <: Integer} = DirichletMultinomial(n, float(α))
 DirichletMultinomial(n::Integer, k::Integer) = DirichletMultinomial(n, ones(k))
 
-
 # Parameters
 ncategories(d::DirichletMultinomial) = length(d.α)
 length(d::DirichletMultinomial) = ncategories(d)

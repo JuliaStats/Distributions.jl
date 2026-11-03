@@ -39,7 +39,6 @@ function VonMisesFisher(θ::Vector)
     return VonMisesFisher(θ * (1 / κ), κ)
 end
 
-
 ### Conversions
 convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} = VonMisesFisher{T}(convert(Vector{T}, d.μ), T(d.κ); checknorm=false)
 Base.convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher{T}) where {T<:Real} = d

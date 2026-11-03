@@ -197,6 +197,8 @@ end
         # a distribution that names itself
         @testset "$(nameof(typeof(d)))" for (d, name) in [
             Categorical([0.2, 0.3, 0.5]) => "Categorical",
+            product_distribution(Normal(), Gamma(1.0, 2.0)) => "Product",
+            product_distribution((x=Normal(), y=Dirichlet([2.0, 4.0]))) => "Product",
             MvNormal(ScalMat(2, 1.0)) => "Multivariate normal",
             MvNormal(Diagonal(ones(2))) => "Multivariate normal",
             MvNormal(ones(2), PDMat(Matrix(1.0I, 2, 2))) => "Multivariate normal",

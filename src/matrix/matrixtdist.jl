@@ -70,11 +70,6 @@ MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat, Ω::Union{AbstractMa
 MatrixTDist(ν::Real, M::AbstractMatrix, Σ::Union{AbstractMatrix, LinearAlgebra.Cholesky}, Ω::AbstractPDMat) = MatrixTDist(ν, M, PDMat(Σ), Ω)
 
 #  -----------------------------------------------------------------------------
-#  REPL display
-#  -----------------------------------------------------------------------------
-
-
-#  -----------------------------------------------------------------------------
 #  Conversion
 #  -----------------------------------------------------------------------------
 

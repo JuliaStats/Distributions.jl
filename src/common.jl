@@ -492,7 +492,8 @@ distribution as one of its parameters.
 function namedparams end
 
 # `params` flattens wrapped distributions, e.g. `params(truncated(Normal(), 0, 1))` is
-# `(0.0, 1.0, 0.0, 1.0)`. Distributions whose `params` contains a distribution specialize it.
+# `(0.0, 1.0, 0.0, 1.0)`. Distributions whose `params` keeps the wrapped distribution, such as
+# `AffineDistribution`, specialize it.
 function StatsAPI.params(d::Distribution)
     return reduce(_append, map(_paramvalues, values(namedparams(d))); init=())
 end

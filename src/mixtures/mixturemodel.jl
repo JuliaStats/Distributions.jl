@@ -258,7 +258,7 @@ end
 
 #### show
 
-# the components are more informative than the parameters of `d`
+# one line per component, truncated in the REPL, instead of one line for all of them
 function _showparams(io::IO, d::MixtureModel)
     print(io, "\nComponents:")
     K = ncomponents(d)
