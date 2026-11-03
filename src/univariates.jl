@@ -479,24 +479,6 @@ function _pdf!(r::AbstractArray{<:Real}, d::DiscreteUnivariateDistribution, X::U
     return r
 end
 
-
-abstract type RecursiveProbabilityEvaluator end
-
-function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
-    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
-
-    # fill central part: with non-zero pdf
-    if vl <= vr
-        fm1 = vfirst - 1
-        r[vl - fm1] = pv = pdf(d, vl)
-        for v = (vl+1):vr
-            r[v - fm1] = pv = nextpdf(rpe, pv, v)
-        end
-    end
-
-    return r
-end
-
 ### special definitions for distributions with integer-valued support
 
 function cdf_int(d::DiscreteUnivariateDistribution, x::Real)
