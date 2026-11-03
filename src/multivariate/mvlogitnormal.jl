@@ -29,17 +29,11 @@ end
 MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
-distrname(d::MvLogitNormal) = string("MvLogitNormal{", distrname(d.normal), "}")
-
-function Base.show(io::IO, d::MvLogitNormal; indent::String="  ")
-    print(io, distrname(d))
-    println(io, "(")
-    normstr = strip(sprint(show, d.normal; context=IOContext(io)))
-    normstr = replace(normstr, "\n" => "\n$indent")
-    print(io, indent)
-    println(io, normstr)
-    println(io, ")")
-end
+# the report shows the parameters of the wrapped distribution, in the parameterization it uses
+_showname(io::IO, ::MvLogitNormal) = print(io, "Multivariate logit-normal")
+_showname(io::IO, ::MvLogitNormal{<:MvNormalCanon}) =
+    print(io, "Canonical multivariate logit-normal")
+_showparams(io::IO, d::MvLogitNormal) = _showparams(io, d.normal)
 
 # Conversions
 
@@ -56,7 +50,7 @@ canonform(d::MvLogitNormal{<:MvNormal}) = MvLogitNormal(canonform(d.normal))
 length(d::MvLogitNormal) = length(d.normal) + 1
 Base.eltype(::Type{<:MvLogitNormal{D}}) where {D} = eltype(D)
 Base.eltype(d::MvLogitNormal) = eltype(d.normal)
-params(d::MvLogitNormal) = params(d.normal)
+namedparams(d::MvLogitNormal) = (; d.normal)
 @inline partype(d::MvLogitNormal) = partype(d.normal)
 
 location(d::MvLogitNormal) = mean(d.normal)

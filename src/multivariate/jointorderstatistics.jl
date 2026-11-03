@@ -86,10 +86,20 @@ end
 minimum(d::JointOrderStatistics) = Fill(minimum(d.dist), length(d))
 maximum(d::JointOrderStatistics) = Fill(maximum(d.dist), length(d))
 
-params(d::JointOrderStatistics) = tuple(params(d.dist)..., d.n, d.ranks)
+namedparams(d::JointOrderStatistics) = (; d.dist, d.n, d.ranks)
 partype(d::JointOrderStatistics) = partype(d.dist)
 Base.eltype(::Type{<:JointOrderStatistics{D}}) where {D} = Base.eltype(D)
 Base.eltype(d::JointOrderStatistics) = eltype(d.dist)
+
+function _showname(io::IO, d::JointOrderStatistics)
+    print(io, "Joint order statistics of a ")
+    _showname(io, d.dist)
+end
+
+function _showparams(io::IO, d::JointOrderStatistics)
+    _showparams(io, d.dist)
+    _showsection(io, "Order", (; d.n, d.ranks))
+end
 
 function logpdf(d::JointOrderStatistics, x::AbstractVector{<:Real})
     n = d.n

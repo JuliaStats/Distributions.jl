@@ -56,10 +56,20 @@ minimum(d::OrderStatistic) = minimum(d.dist)
 maximum(d::OrderStatistic) = maximum(d.dist)
 insupport(d::OrderStatistic, x::Real) = insupport(d.dist, x)
 
-params(d::OrderStatistic) = tuple(params(d.dist)..., d.n, d.rank)
+namedparams(d::OrderStatistic) = (; d.dist, d.n, d.rank)
 partype(d::OrderStatistic) = partype(d.dist)
 Base.eltype(::Type{<:OrderStatistic{D}}) where {D} = Base.eltype(D)
 Base.eltype(d::OrderStatistic) = eltype(d.dist)
+
+function _showname(io::IO, d::OrderStatistic)
+    print(io, "Order statistic of a ")
+    _showname(io, d.dist)
+end
+
+function _showparams(io::IO, d::OrderStatistic)
+    _showparams(io, d.dist)
+    _showsection(io, "Order", (; d.n, d.rank))
+end
 
 # distribution of the ith order statistic from an IID uniform distribution, with CDF Uᵢₙ(x)
 function _uniform_orderstatistic(d::OrderStatistic)

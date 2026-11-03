@@ -48,7 +48,7 @@ convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) wher
 Base.convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric{T,P,Ts,Ps}) where {T,P,Ts,Ps} = d
 
 # Accessors
-params(d::DiscreteNonParametric) = (d.support, d.p)
+namedparams(d::DiscreteNonParametric) = (; d.support, d.p)
 
 """
     support(d::DiscreteNonParametric)

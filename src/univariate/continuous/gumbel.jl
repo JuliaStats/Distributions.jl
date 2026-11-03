@@ -53,7 +53,7 @@ Base.convert(::Type{Gumbel{T}}, d::Gumbel{T}) where {T<:Real} = d
 
 location(d::Gumbel) = d.μ
 scale(d::Gumbel) = d.θ
-params(d::Gumbel) = (d.μ, d.θ)
+namedparams(d::Gumbel) = (; d.μ, d.θ)
 partype(::Gumbel{T}) where {T} = T
 
 function Base.rand(rng::Random.AbstractRNG, d::Gumbel)

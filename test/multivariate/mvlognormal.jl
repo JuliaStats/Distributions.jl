@@ -25,7 +25,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6,
     end
     @test isa(mo, Vector{Float64})
     @test isa(s, Vector{Float64})
-    @test isa(S, Matrix{Float64})
+    @test isa(S, AbstractMatrix{Float64})
     @test length(mn) == d
     @test length(md) == d
     @test length(mo) == d

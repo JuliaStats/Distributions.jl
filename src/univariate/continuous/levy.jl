@@ -47,7 +47,7 @@ Base.convert(::Type{Levy{T}}, d::Levy{T}) where {T<:Real} = d
 #### Parameters
 
 location(d::Levy) = d.μ
-params(d::Levy) = (d.μ, d.σ)
+namedparams(d::Levy) = (; d.μ, d.σ)
 partype(::Levy{T}) where {T} = T
 
 

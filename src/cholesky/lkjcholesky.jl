@@ -60,12 +60,6 @@ function _char_uplo(uplo::Union{Symbol,Char})
 end
 
 #  -----------------------------------------------------------------------------
-#  REPL display
-#  -----------------------------------------------------------------------------
-
-Base.show(io::IO, d::LKJCholesky) = show(io, d, (:d, :η, :uplo))
-
-#  -----------------------------------------------------------------------------
 #  Conversion
 #  -----------------------------------------------------------------------------
 
@@ -119,7 +113,7 @@ function mode(d::LKJCholesky; check_args::Bool=true)
     return LinearAlgebra.Cholesky(factors, d.uplo, 0)
 end
 
-StatsBase.params(d::LKJCholesky) = (d.d, d.η, d.uplo)
+namedparams(d::LKJCholesky) = (; d.d, d.η, d.uplo)
 
 @inline partype(::LKJCholesky{T}) where {T <: Real} = T
 

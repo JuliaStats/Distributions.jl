@@ -58,7 +58,7 @@ Base.convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{T}) wh
 ### Parameters
 @inline partype(::SkewedExponentialPower{T}) where {T<:Real} = T
 
-params(d::SkewedExponentialPower) = (d.μ, d.σ, d.p, d.α)
+namedparams(d::SkewedExponentialPower) = (; d.μ, d.σ, d.p, d.α)
 location(d::SkewedExponentialPower) = d.μ
 shape(d::SkewedExponentialPower) = d.p
 scale(d::SkewedExponentialPower) = d.σ

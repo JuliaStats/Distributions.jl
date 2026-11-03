@@ -102,8 +102,29 @@ Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution{T}) where {T<:
 
 location(d::AffineDistribution) = d.μ
 scale(d::AffineDistribution) = d.σ
-params(d::AffineDistribution) = (d.μ,d.σ,d.ρ)
+namedparams(d::AffineDistribution) = (; d.μ, d.σ, d.ρ)
+# Unlike the generic method, `params` does not flatten the wrapped distribution
+params(d::AffineDistribution) = values(namedparams(d))
 partype(d::AffineDistribution{T}) where {T} = promote_type(partype(d.ρ), T)
+
+function show(io::IO, d::AffineDistribution)
+    show(io, d.μ)
+    print(io, " + ")
+    show(io, d.σ)
+    print(io, " * ")
+    show(io, d.ρ)
+    return nothing
+end
+
+function _showname(io::IO, d::AffineDistribution)
+    print(io, "Affine ")
+    _showname(io, d.ρ)
+end
+
+function _showparams(io::IO, d::AffineDistribution)
+    _showparams(io, d.ρ)
+    _showsection(io, "Transformation", (; d.μ, d.σ))
+end
 
 #### Statistics
 

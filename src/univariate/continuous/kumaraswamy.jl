@@ -42,7 +42,7 @@ Base.convert(::Type{Kumaraswamy{T}}, d::Kumaraswamy{T}) where {T} = d
 
 ### Parameters
 
-params(d::Kumaraswamy) = (d.a, d.b)
+namedparams(d::Kumaraswamy) = (; d.a, d.b)
 partype(::Kumaraswamy{T}) where {T} = T
 
 ### Evaluation

@@ -58,7 +58,7 @@ Base.convert(::Type{Rician{T}}, d::Rician{T}) where {T<:Real} = d
 shape(d::Rician) = d.ν^2 / (2 * d.σ^2)
 scale(d::Rician) = d.ν^2 + 2 * d.σ^2
 
-params(d::Rician) = (d.ν, d.σ)
+namedparams(d::Rician) = (; d.ν, d.σ)
 partype(d::Rician{T}) where {T<:Real} = T
 
 #### Statistics

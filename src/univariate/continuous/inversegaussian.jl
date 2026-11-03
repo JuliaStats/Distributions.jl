@@ -54,7 +54,7 @@ Base.convert(::Type{InverseGaussian{T}}, d::InverseGaussian{T}) where {T<:Real} 
 #### Parameters
 
 shape(d::InverseGaussian) = d.λ
-params(d::InverseGaussian) = (d.μ, d.λ)
+namedparams(d::InverseGaussian) = (; d.μ, d.λ)
 partype(::InverseGaussian{T}) where {T} = T
 
 #### Statistics
