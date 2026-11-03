@@ -54,7 +54,6 @@ function _showcall(io::IO, name, args...)
 end
 
 # Bounds of `Truncated` and `Censored`, one of which is `nothing` if `d` is bounded on one side only
-_bounds(lower, upper) = (; lower, upper)
-_bounds(lower, ::Nothing) = (; lower)
-_bounds(::Nothing, upper) = (; upper)
-_bounds(::Nothing, ::Nothing) = (;)
+_bounds(lower::Real, upper::Real) = (; lower, upper)
+_bounds(lower::Real, ::Nothing) = (; lower)
+_bounds(::Nothing, upper::Real) = (; upper)

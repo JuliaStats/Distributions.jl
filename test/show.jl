@@ -40,6 +40,8 @@ end
         censored(truncated(Normal(); lower=0.0); upper=2.0),
         2 * Beta(2.0, 3.0) + 1,
         OrderStatistic(Normal(), 5, 2),
+        Distributions.EdgeworthZ(Normal(), 10),
+        Distributions.EdgeworthSum(Normal(), 10),
         Distributions.EdgeworthMean(Normal(), 10),
         Dirichlet(ones(20)),
         JointOrderStatistics(Normal(), 5, (2, 3)),
@@ -54,6 +56,7 @@ end
         product_distribution([Normal(), Gamma(1.0, 2.0)]),
         product_distribution(Normal(), Gamma(1.0, 2.0)),
         product_distribution((x=Normal(), y=Dirichlet([2.0, 4.0]))),
+        product_distribution([Dirichlet([1.0, 2.0]), Dirichlet([3.0, 4.0])]),
         Wishart(5.0, PDMat(Matrix(1.0I, 3, 3))),
         InverseWishart(5.0, PDMat(Matrix(1.0I, 3, 3))),
         MatrixNormal(zeros(2, 3), PDMat(Matrix(1.0I, 2, 2)), PDMat(Matrix(1.0I, 3, 3))),
@@ -266,6 +269,10 @@ end
               σ = 1.0
             Sample:
               n = 10.0"""
+        @test firstline(Distributions.EdgeworthZ(Normal(), 10)) ==
+            "Edgeworth expansion of the z-statistic of a Normal distribution"
+        @test firstline(Distributions.EdgeworthSum(Normal(), 10)) ==
+            "Edgeworth expansion of the sum of a Normal distribution"
 
         d = MixtureModel([Normal(), Gamma(1.0, 2.0)], [0.25, 0.75])
         @test repr("text/plain", d) == """
