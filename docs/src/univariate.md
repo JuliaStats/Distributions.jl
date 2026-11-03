@@ -94,30 +94,61 @@ rand!(::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
 ## Continuous Distributions
 
 ```@setup plotdensity
-using Distributions, GR
+using Distributions
+import GR
 
 # display figures as SVGs
 GR.inline("svg")
+
+# generic plot density of univariate distribution
+function _plotdensity(
+    xs,
+    dist::UnivariateDistribution;
+    kind,
+    kwargs...
+)
+    GR.figure(;
+        grid=false,
+        backgroundcolor=0, # white instead of transparent background for dark Documenter scheme
+        font="Helvetica_Regular", # work around https://github.com/JuliaPlots/Plots.jl/issues/2596
+        kwargs...
+    )
+    return kind(xs, Base.Fix1(pdf, dist))
+end
 
 # plot probability density of continuous distributions
 function plotdensity(
     (xmin, xmax),
     dist::ContinuousUnivariateDistribution;
     npoints=299,
-    title="",
+    linewidth=2.0, # thick lines
     kwargs...,
 )
-    figure(;
-        title=title,
+    _plotdensity(
+        range(xmin, xmax; length=npoints),
+        dist;
+        kind=GR.plot,
         xlabel="x",
         ylabel="density",
-        grid=false,
-        backgroundcolor=0, # white instead of transparent background for dark Documenter scheme
-        font="Helvetica_Regular", # work around https://github.com/JuliaPlots/Plots.jl/issues/2596
-        linewidth=2.0, # thick lines
-        kwargs...,
+        linewidth,
+        kwargs...
     )
-    return plot(range(xmin, xmax; length=npoints), Base.Fix1(pdf, dist))
+end
+
+# plot probability density of discrete distributions
+function plotdensity(
+    points,
+    dist::DiscreteUnivariateDistribution;
+    kwargs...,
+)
+    _plotdensity(
+        points,
+        dist;
+        kind=GR.stem,
+        xlabel="k",
+        ylabel="P(X=k)",
+        kwargs...
+    )
 end
 
 # convenience function with automatic title
@@ -127,7 +158,7 @@ function plotdensity(
     args=();
     title=string(T) * "(" * join(args, ", ") * ")",
     kwargs...
-) where {T<:ContinuousUnivariateDistribution}
+) where {T<:UnivariateDistribution}
     return plotdensity(xmin_xmax, T(args...); title=title, kwargs...)
 end
 ```
@@ -508,20 +539,109 @@ plotdensity((0.001, 3), Weibull, (0.5, 1)) # hide
 
 ```@docs
 Bernoulli
+```
+```@example plotdensity
+plotdensity([0, 1], Bernoulli, (0.3,); xlim=(-1, 2), ylim=(0, 1)) # hide
+```
+
+```@docs
 BernoulliLogit
+```
+```@example plotdensity
+plotdensity([0, 1], BernoulliLogit, (0.3,); xlim=(-1, 2), ylim=(0, 1)) # hide
+```
+
+```@docs
 BetaBinomial
+```
+```@example plotdensity
+plotdensity(0:10, BetaBinomial, (10, 2, 3), xlim=(-1, 11), ylim=(0, 0.16)) # hide
+```
+
+```@docs
 Binomial
+```
+```@example plotdensity
+plotdensity(0:20, Binomial, (20, 0.3), xlim=(-1, 20), ylim=(0, 0.2)) # hide
+```
+
+```@docs
 Categorical
+```
+```@example plotdensity
+# need specific title because string(Categorical) = "Categorical{P} where P<:Real" instead of just "Categorical" # hide
+ps = [0.3, 0.2, 0.5] # hide
+plotdensity(1:3, Categorical, (ps,), xlim=(0, 4), ylim=(0, 0.7), title="Categorical($ps)") # hide
+```
+
+```@docs
 Dirac
+```
+```@example plotdensity
+plotdensity([2], Dirac, (2,); xlim=(0, 4), ylim=(0, 1.3)) # hide
+```
+
+```@docs
 DiscreteUniform
+```
+```@example plotdensity
+plotdensity(1:6, DiscreteUniform, (1, 6); xlim=(0, 7), ylim=(0, 0.28), title_size=20) # hide
+```
+
+```@docs
 DiscreteNonParametric
+```
+```@example plotdensity
+plotdensity([1, 4, 6, 9], DiscreteNonParametric, ([1, 4, 6, 9], [0.3, 0.2, 0.1, 0.4]); xlim=(0, 10), ylim=(0, 0.5)) # hide
+```
+
+```@docs
 Geometric
+```
+```@example plotdensity
+plotdensity(0:15, Geometric, (0.3,); xlim=(-1, 15), ylim=(0, 0.35)) # hide
+```
+
+```@docs
 Hypergeometric
+```
+```@example plotdensity
+plotdensity(10:20, Hypergeometric, (20, 10, 20); xlim=(9, 21), ylim=(0, 0.4)) # hide
+```
+
+```@docs
 NegativeBinomial
+```
+```@example plotdensity
+plotdensity(0:30, NegativeBinomial, (7, 0.5), xlim=(-1, 30), ylim=(0, 0.13)) # hide
+```
+
+```@docs
 Poisson
+```
+```@example plotdensity
+plotdensity(0:20, Poisson, (5,); xlim=(-1, 20), ylim=(0, 0.2)) # hide
+```
+
+```@docs
 PoissonBinomial
+```
+```@example plotdensity
+plotdensity(0:7, PoissonBinomial, ([0.1, 0.7, 0.4, 0.5, 0.3, 0.8, 0.5],); xlim=(-1, 8), ylim=(0.0, 0.35)) # hide
+```
+
+```@docs
 Skellam
+```
+```@example plotdensity
+plotdensity(-20:20, Skellam, (8, 5), xlim=(-20, 20), ylim=(0, 0.14)) # hide
+```
+
+```@docs
 Soliton
+```
+```@example plotdensity
+plotdensity(1:20, Soliton, (20, 10, 0.1), xlim=(0, 21), ylim=(0, 0.4)) # hide
 ```
 
 ### Vectorized evaluation
