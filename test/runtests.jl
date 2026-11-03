@@ -72,6 +72,7 @@ const tests = [
     "univariate/discrete/geometric",
     "univariate/discrete/bernoulli",
     "univariate/discrete/poisson",
+    "univariate/discrete/skellam",
     "univariate/discrete/soliton",
     "univariate/continuous/skewnormal",
     "univariate/continuous/betaprime",
@@ -160,7 +161,6 @@ const tests = [
     # "univariate/discrete/hypergeometric",
     # "univariate/discrete/noncentralhypergeometric",
     # "univariate/discrete/poisson",
-    # "univariate/discrete/skellam",
 
     ### file is present but was not included in list
     # "multivariate_stats", # extra file compared to /src

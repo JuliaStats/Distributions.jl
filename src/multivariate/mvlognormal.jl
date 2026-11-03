@@ -225,7 +225,7 @@ Return the mode vector of the lognormal distribution, which is strictly smaller 
 mode(d::MvLogNormal) = exp.(mean(d.normal) .- var(d.normal))
 function cov(d::MvLogNormal)
     m = mean(d)
-    return m*m'.*(exp.(cov(d.normal)) .- 1)
+    return m*m'.*expm1.(cov(d.normal))
 end
 var(d::MvLogNormal) = diag(cov(d))
 

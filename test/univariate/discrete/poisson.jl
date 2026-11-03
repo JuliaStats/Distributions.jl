@@ -33,3 +33,10 @@ end
 
     @test_throws DimensionMismatch suffstats(Poisson, a, wb)
 end
+
+@testset "Poisson mgf near t = 0" begin
+    # `exp(t) - 1` cancels catastrophically for small `t`, which a large rate amplifies
+    d = Poisson(1e10)
+    t = 1e-12
+    @test mgf(d, t) ≈ exp(big(1e10) * expm1(big(t)))
+end

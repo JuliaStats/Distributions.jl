@@ -99,7 +99,7 @@ end
 
 function mgf(d::Poisson, t::Real)
     λ = rate(d)
-    return exp(λ * (exp(t) - 1))
+    return exp(λ * expm1(t))
 end
 cgf(d::Poisson, t) = mean(d) * expm1(t)
 
