@@ -121,6 +121,7 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     @test isa(d_est, VonMisesFisher)
     @test isapprox(d_est.μ, μ, atol=0.01)
     @test isapprox(d_est.κ, κ, atol=κ * 0.01)
+    return @test fit_mle(VonMisesFisher, Float32.(X)) isa VonMisesFisher{Float64}
 end
 
 
