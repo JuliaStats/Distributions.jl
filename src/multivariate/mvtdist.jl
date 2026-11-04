@@ -125,12 +125,10 @@ sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vec
 
 
 function mvtdist_consts(d::AbstractMvTDist)
-    H = convert(float(eltype(d)), 0.5)
-    logpi = convert(float(eltype(d)), log(pi))
-    hdf = H * d.df
-    hdim = H * d.dim
+    hdf = d.df / 2
+    hdim = d.dim / 2
     shdfhdim = hdf + hdim
-    v = loggamma(shdfhdim) - loggamma(hdf) - hdim*log(d.df) - hdim*logpi - H*logdet(d.Σ)
+    v = loggamma(shdfhdim) - loggamma(hdf) - hdim*log(d.df) - hdim*logπ - logdet(d.Σ) / 2
     return (shdfhdim, v)
 end
 
