@@ -32,7 +32,7 @@ function insupport(::Type{D},x::AbstractVector{T}) where {T<:Real,D<:AbstractMvL
     true
 end
 insupport(l::AbstractMvLogNormal,x::AbstractVector{T}) where {T<:Real} = insupport(typeof(l),x)
-assertinsupport(::Type{D},m::AbstractVector) where {D<:AbstractMvLogNormal} = @assert insupport(D,m) "Mean of LogNormal distribution should be strictly positive"
+assertinsupport(::Type{D},m::AbstractVector{<:Real}) where {D<:AbstractMvLogNormal} = @assert insupport(D,m) "Mean of LogNormal distribution should be strictly positive"
 
 ###Internal functions to calculate scale and location for a desired average and covariance
 function _location!(::Type{D},::Type{Val{:meancov}},mn::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
@@ -238,7 +238,13 @@ function _rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractVecOrMat{<:Real})
     return x
 end
 
-_logpdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d, x) ? (_logpdf(d.normal, log.(x)) - sum(log.(x))) : -Inf
-_pdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d,x) ? _pdf(d.normal, log.(x))/prod(x) : 0.0
+function _logpdf(d::MvLogNormal, x::AbstractVector{T}) where T <: Real
+    insupport(d, x) || return float(T)(-Inf)
+    return _logpdf(d.normal, log.(x)) - sum(log.(x))
+end
+function _pdf(d::MvLogNormal, x::AbstractVector{T}) where T <: Real
+    insupport(d,x) || return float(T)(0)
+    return _pdf(d.normal, log.(x))/prod(x)
+end
 
 Base.show(io::IO,d::MvLogNormal) = show_multline(io, d, [(:dim, length(d)), (:μ, mean(d.normal)), (:Σ, cov(d.normal))])
