@@ -118,8 +118,8 @@ rng = MersenneTwister(123)
         r = fit(Dirichlet{Float32}, x)
         @test r.alpha ≈ d.alpha atol=0.25
 
-        # r = fit_mle(Dirichlet, x, fill(2.0, n))
-        # @test r.alpha ≈ d.alpha atol=0.25
+        r = fit_mle(Dirichlet, x, fill(2.0, n))
+        @test r.alpha ≈ d.alpha atol=0.25
     end
 end
 
@@ -159,4 +159,41 @@ end
             test_rrule(Distributions._logpdf, d, x; fdm=fdm, rtol=1e-5, nans=true)
         end
     end
+end
+
+@testset "zero sample variance. Issue 602" begin
+    X = [
+        0.1 0.1
+        0.5 0.3
+        0.4 0.6
+    ]
+    μ = vec(mean(X, dims=2))
+    elogp = vec(mean(log, X, dims=2))
+    @test all(isfinite, Distributions._dirichlet_mle_init!(μ, elogp))
+    ft = fit_mle(Dirichlet, X)
+    @test ft.alpha ≈ [4.818417154882677, 17.25974156242572, 21.70076086163771]
+
+    # Uniform weights should give the same estimate as the unweighted fit
+    ftw = fit_mle(Dirichlet, X, fill(2.0, size(X, 2)))
+    @test ftw.alpha ≈ ft.alpha
+
+    # The MLE doesn't exist when all samples are identical but due to roundoff the
+    # degenerate samples can't be detected reliably, so the fit is only guaranteed
+    # to either throw or return a finite estimate
+    for n in 1:12
+        Xdegenerate = repeat([0.1, 0.5, 0.4], 1, n)
+        result = try
+            fit_mle(Dirichlet, Xdegenerate)
+        catch e
+            e
+        end
+        if result isa Dirichlet
+            @test all(αₖ -> isfinite(αₖ) && αₖ > 0, result.alpha)
+        else
+            @test result isa Union{ArgumentError, ErrorException}
+        end
+    end
+
+    # Zero entries are invalid and should throw instead of returning NaN estimates
+    @test_throws ArgumentError fit_mle(Dirichlet, [0.0 0.2 0.3; 0.5 0.3 0.3; 0.5 0.5 0.4])
 end
