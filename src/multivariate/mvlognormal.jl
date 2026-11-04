@@ -32,7 +32,9 @@ function insupport(::Type{D},x::AbstractVector{T}) where {T<:Real,D<:AbstractMvL
     true
 end
 insupport(l::AbstractMvLogNormal,x::AbstractVector{T}) where {T<:Real} = insupport(typeof(l),x)
-assertinsupport(::Type{D},m::AbstractVector{<:Real}) where {D<:AbstractMvLogNormal} = @assert insupport(D,m) "Mean of LogNormal distribution should be strictly positive"
+function assertinsupport(::Type{D},m::AbstractVector{<:Real}) where {D<:AbstractMvLogNormal}
+    insupport(D, m) || throw(DomainError(m, "Mean of MvLogNormal distribution must have all its elements strictly positive"))
+end
 
 ###Internal functions to calculate scale and location for a desired average and covariance
 function _location!(::Type{D},::Type{Val{:meancov}},mn::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
@@ -78,10 +80,15 @@ end
 
 Calculate the location vector (as above) and store the result in ``μ``
 """
-function location!(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
-    @assert size(S) == (length(m),length(m)) && length(m) == length(μ)
-    assertinsupport(D,m)
-    _location!(D,Val{s},m,S,μ)
+function location!(::Type{D}, s::Symbol, m::AbstractVector, S::AbstractMatrix, μ::AbstractVector) where {D <: AbstractMvLogNormal}
+    length(m) == length(μ) || throw(DimensionMismatch(
+        "m and μ must have the same length. Got $(length(m)) and $(length(μ))."
+    ))
+    size(S) == (length(m), length(m)) || throw(DimensionMismatch(
+        "size(S) must be (length(m), length(m)). Got $(size(S)) for length(m) = $(length(m))."
+    ))
+    assertinsupport(D, m)
+    _location!(D, Val{s}, m, S, μ)
 end
 
 """
@@ -98,10 +105,14 @@ Calculate the location vector (the mean of the underlying normal distribution).
 It is not possible to analytically calculate the location vector from e.g., median + covariance,
 or from mode + covariance.
 """
-function location(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix) where D<:AbstractMvLogNormal
-    @assert size(S) == (length(m),length(m))
-    assertinsupport(D,m)
-    _location!(D,Val{s},m,S,similar(m))
+function location(::Type{D}, s::Symbol, m::AbstractVector, S::AbstractMatrix) where {D <: AbstractMvLogNormal}
+    size(S) == (length(m), length(m)) || throw(
+        DimensionMismatch(
+            "size(S) must be (length(m), length(m)). Got $(size(S)) for length(m) = $(length(m))."
+        )
+    )
+    assertinsupport(D, m)
+    return _location!(D, Val{s}, m, S, similar(m))
 end
 
 """
@@ -109,10 +120,12 @@ end
 
 Calculate the scale parameter, as defined for the location parameter above and store the result in `Σ`.
 """
-function scale!(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix,Σ::AbstractMatrix) where D<:AbstractMvLogNormal
-    @assert size(S) == size(Σ) == (length(m),length(m))
-    assertinsupport(D,m)
-    _scale!(D,Val{s},m,S,Σ)
+function scale!(::Type{D}, s::Symbol, m::AbstractVector, S::AbstractMatrix, Σ::AbstractMatrix) where {D <: AbstractMvLogNormal}
+    size(S) == size(Σ) == (length(m), length(m)) || throw(DimensionMismatch(
+        "size(S) and size(Σ) must both be (length(m), length(m)). Got size(S) = $(size(S)) and size(Σ) = $(size(Σ)) for length(m) = $(length(m))."
+    ))
+    assertinsupport(D, m)
+    return _scale!(D, Val{s}, m, S, Σ)
 end
 
 """
@@ -120,10 +133,12 @@ end
 
 Calculate the scale parameter, as defined for the location parameter above.
 """
-function scale(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix) where D<:AbstractMvLogNormal
-    @assert size(S) == (length(m),length(m))
-    assertinsupport(D,m)
-    _scale!(D,Val{s},m,S,similar(S))
+function scale(::Type{D}, s::Symbol, m::AbstractVector, S::AbstractMatrix) where {D <: AbstractMvLogNormal}
+    size(S) == (length(m), length(m)) || throw(DimensionMismatch(
+        "size(S) must be (length(m), length(m)). Got $(size(S)) for length(m) = $(length(m))."
+    ))
+    assertinsupport(D, m)
+    return _scale!(D, Val{s}, m, S, similar(S))
 end
 
 """
