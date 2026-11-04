@@ -531,7 +531,7 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
             # of quantile for InverseGaussian and StudentizedRange
             qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
             qtol = isa(d, StudentizedRange) ? 1.0e-5 : qtol
-            if p[i] > 1.0e-6
+            if isa(d, StudentizedRange) || p[i] > 1.0e-6
                 @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
                 @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
                 @test isapprox(invlogcdf(d, lc[i])  , v, atol=qtol * (abs(v) + 1.0))

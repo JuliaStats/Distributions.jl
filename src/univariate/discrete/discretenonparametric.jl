@@ -163,7 +163,7 @@ function ccdf(d::DiscreteNonParametric, x::Real)
 end
 
 function quantile(d::DiscreteNonParametric, q::Real)
-    0 <= q <= 1 || throw(DomainError())
+    0 <= q <= 1 || throw(DomainError(q, "quantile level must be between 0 and 1 (inclusive)"))
     x = support(d)
     p = probs(d)
     k = length(x)
