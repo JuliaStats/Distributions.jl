@@ -64,6 +64,9 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     let d = LogNormal(0, 1), x = exp(1), ∂x = exp(2)
         @inferred cdf(d, ForwardDiff.Dual(x, ∂x)) ≈ ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
     end
+
+    # `exp(σ^2) - 1` cancels catastrophically for small `σ`
+    @test var(LogNormal(0.0, 1e-8)) ≈ expm1(big(1e-16)) * exp(big(1e-16))
 end
 
 

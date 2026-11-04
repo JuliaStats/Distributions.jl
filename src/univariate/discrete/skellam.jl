@@ -84,7 +84,7 @@ end
 
 function mgf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
-    exp(μ1 * (exp(t) - 1) + μ2 * (exp(-t) - 1))
+    exp(μ1 * expm1(t) + μ2 * expm1(-t))
 end
 
 function cf(d::Skellam, t::Real)
