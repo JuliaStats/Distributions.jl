@@ -105,21 +105,23 @@ logcdf(d::Geometric, x::Int) = log1mexp(log1p(-d.p) * max(x + 1, 0))
 logccdf(d::Geometric, x::Real) = logccdf_int(d, x)
 logccdf(d::Geometric, x::Int) =  log1p(-d.p) * max(x + 1, 0)
 
-quantile(d::Geometric, p::Real) = invlogccdf(d, log1p(-p))
+function quantile(d::Geometric, p::Real)
+    _check_quantile_arg(p)
+    return invlogccdf(d, log1p(-p))
+end
+function cquantile(d::Geometric, p::Real)
+    _check_cquantile_arg(p)
+    return invlogccdf(d, log(p))
+end
 
-cquantile(d::Geometric, p::Real) = invlogccdf(d, log(p))
-
-invlogcdf(d::Geometric, lp::Real) = invlogccdf(d, log1mexp(lp))
-
-function invlogccdf(d::Geometric{T}, lp::Real) where T<:Real
-    if (lp > zero(d.p)) || isnan(lp)
-        return T(NaN)
-    elseif isinf(lp)
-        return T(Inf)
-    elseif lp == zero(d.p)
-        return zero(T)
-    end
-    max(ceil(lp/log1p(-d.p)) - 1, zero(T))
+function invlogcdf(d::Geometric, lp::Real)
+    _check_invlogcdf_arg(lp)
+    return invlogccdf(d, log1mexp(lp))
+end
+function invlogccdf(d::Geometric, lp::Real)
+    _check_invlogccdf_arg(lp)
+    z = lp/log1p(-d.p) - 1
+    return ceil(Int, max(z, zero(z)))
 end
 
 function laplace_transform(d::Geometric, t)
