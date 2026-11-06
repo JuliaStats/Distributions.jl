@@ -114,7 +114,7 @@ function skewness(d::Kumaraswamy)
     σ² = var(d)
     m₂ = _kumomentaswamy(a, b, 2)
     m₃ = _kumomentaswamy(a, b, 3)
-    return (2m₃ - μ * (3m₂ - μ^2)) / (σ² * sqrt(σ²))
+    return (m₃ - 3μ * m₂ + 2μ^3) / (σ² * sqrt(σ²))
 end
 
 function kurtosis(d::Kumaraswamy)

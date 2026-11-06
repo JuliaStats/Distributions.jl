@@ -26,6 +26,7 @@ const tests = [
     "univariate/continuous/laplace",
     "univariate/continuous/cauchy",
     "univariate/continuous/uniform",
+    "univariate/continuous/kumaraswamy_skewness",
     "univariate/continuous/lognormal",
     "multivariate/mvnormal",
     "multivariate/mvlogitnormal",

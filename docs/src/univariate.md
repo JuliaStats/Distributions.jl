@@ -325,6 +325,9 @@ KSOneSided
 ```@docs
 Kumaraswamy
 ```
+
+The skewness of `Kumaraswamy(1, 1)` is approximately zero, matching `Uniform(0, 1)`.
+
 ```@example plotdensity
 plotdensity((0, 1), Kumaraswamy, (2, 5)) # hide
 ```
