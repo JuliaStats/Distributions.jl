@@ -134,13 +134,32 @@
         test_reshaped(rng, d1, sizes)
     end
 
-    @testset "support of a reshaped univariate distribution" begin
-        @test insupport(reshape(Normal(), 1), [0.5]) === true
-        d = reshape(Uniform(), 1, 1)
-        @test insupport(d, fill(0.5, 1, 1)) === true
-        @test insupport(d, fill(2.0, 1, 1)) === false
-        @test insupport(d, fill(NaN, 1, 1)) === false
-        @test insupport(d, fill(0.5, 1, 2)) === false
+    @testset "univariate distributions cannot be reshaped" begin
+        for d in (Normal(), Uniform(), Bernoulli(0.3))
+            for dims in ((), (1,), (1, 1), (2,))
+                @test_throws ArgumentError reshape(d, dims)
+                @test_throws ArgumentError ReshapedDistribution(d, dims)
+                if !isempty(dims)
+                    @test_throws ArgumentError reshape(d, dims...)
+                end
+            end
+            @test_throws ArgumentError vec(d)
+        end
+    end
+
+    @testset "one-element array distributions can be reshaped" begin
+        for d in (
+            MvNormal([0.0], ones(1, 1)),
+            MatrixNormal(zeros(1, 1), ones(1, 1), ones(1, 1)),
+        )
+            for dims in ((1,), (1, 1))
+                for reshaped in (reshape(d, dims), ReshapedDistribution(d, dims))
+                    @test size(reshaped) == dims
+                    @test vec(mean(reshaped)) == [0.0]
+                    @test insupport(reshaped, fill(0.0, dims)) === true
+                end
+            end
+        end
     end
 
     @testset "special cases" begin

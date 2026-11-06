@@ -8,6 +8,5 @@ reshape
 vec
 ```
 
-A one-element array with the same shape as the reshaped univariate distribution
-represents a single observation.
-For example, `insupport(reshape(Uniform(), 1), [0.5])` returns `true`.
+Univariate distributions have scalar variates and cannot be reshaped.
+Both `reshape` and `ReshapedDistribution` reject them with an `ArgumentError`.
