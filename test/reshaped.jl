@@ -135,15 +135,16 @@
     end
 
     @testset "univariate distributions cannot be reshaped" begin
+        expected_error = ArgumentError("univariate distributions cannot be reshaped")
         for d in (Normal(), Uniform(), Bernoulli(0.3))
             for dims in ((), (1,), (1, 1), (2,))
-                @test_throws ArgumentError reshape(d, dims)
-                @test_throws ArgumentError ReshapedDistribution(d, dims)
+                @test_throws expected_error reshape(d, dims)
+                @test_throws expected_error ReshapedDistribution(d, dims)
                 if !isempty(dims)
-                    @test_throws ArgumentError reshape(d, dims...)
+                    @test_throws expected_error reshape(d, dims...)
                 end
             end
-            @test_throws ArgumentError vec(d)
+            @test_throws expected_error vec(d)
         end
     end
 

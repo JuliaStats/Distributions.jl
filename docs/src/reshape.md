@@ -9,4 +9,4 @@ vec
 ```
 
 Univariate distributions have scalar variates and cannot be reshaped.
-Both `reshape` and `ReshapedDistribution` reject them with an `ArgumentError`.
+Both `reshape` and `vec` reject them with an error.
