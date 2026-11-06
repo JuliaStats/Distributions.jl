@@ -134,6 +134,15 @@
         test_reshaped(rng, d1, sizes)
     end
 
+    @testset "support of a reshaped univariate distribution" begin
+        @test insupport(reshape(Normal(), 1), [0.5]) === true
+        d = reshape(Uniform(), 1, 1)
+        @test insupport(d, fill(0.5, 1, 1)) === true
+        @test insupport(d, fill(2.0, 1, 1)) === false
+        @test insupport(d, fill(NaN, 1, 1)) === false
+        @test insupport(d, fill(0.5, 1, 2)) === false
+    end
+
     @testset "special cases" begin
         # MatrixNormal
         rand_posdef_mat(X) = X * X' + I

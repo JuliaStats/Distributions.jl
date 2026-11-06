@@ -44,7 +44,11 @@ function _showparams(io::IO, d::ReshapedDistribution)
 end
 
 function insupport(d::ReshapedDistribution{N}, x::AbstractArray{<:Real,N}) where {N}
-    return size(d) == size(x) && insupport(d.dist, reshape(x, size(d.dist)))
+    size(d) == size(x) || return false
+    if d.dist isa UnivariateDistribution
+        return insupport(d.dist, only(x))
+    end
+    return insupport(d.dist, reshape(x, size(d.dist)))
 end
 
 mean(d::ReshapedDistribution) = reshape(mean(d.dist), size(d))
