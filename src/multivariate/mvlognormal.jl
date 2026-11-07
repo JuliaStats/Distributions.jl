@@ -10,7 +10,7 @@
 #   - params(d)         Get the parameters from the underlying Normal distribution
 #   - location(d)       Location parameter
 #   - scale(d)          Scale parameter
-#   - _rand!(d, x)      Sample random vector(s)
+#   - rand!(rng, d, x)  Sample random vector(s)
 #   - _logpdf(d,x)      Evaluate logarithm of pdf
 #   - _pdf(d,x)         Evaluate the pdf
 #   - mean(d)           Mean of the distribution

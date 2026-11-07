@@ -20,7 +20,7 @@ function Base.rand(rng::AbstractRNG, s::Spl)
 end
 ```
 
-The package already implements vectorized versions `rand!(rng::AbstractRNG, s::Spl, dims::Int...)` and `rand(rng::AbstractRNG, s::Spl, dims::Int...)` that repeatedly call the scalar version to generate multiple samples.
+The package already implements vectorized versions `rand(rng::AbstractRNG, s::Spl, dims::Int...)` and `rand!(rng::AbstractRNG, s::Spl, x::AbstractArray{<:Real})` that repeatedly call the scalar version to generate multiple samples.
 Additionally, the package implements versions of these functions without the `rng::AbstractRNG` argument that use the default random number generator.
 
 If there is a more efficient method to generate multiple samples, one should provide the following method
@@ -42,10 +42,8 @@ function Base.rand(rng::AbstractRNG, s::Spl)
     # ... generate a single vector sample from s
 end
 
-@inline function Random.rand!(rng::AbstractRNG, s::Spl, x::AbstractVector{<:Real})
-    # `@inline` + `@boundscheck` allows users to skip bound checks by calling `@inbounds rand!(...)`
-    # Ref https://docs.julialang.org/en/v1/devdocs/boundscheck/#Eliding-bounds-checks
-    @boundscheck # ... check size (and possibly indices) of `x`
+function Random.rand!(rng::AbstractRNG, s::Spl, x::AbstractVector{<:Real})
+    length(x) == length(s) || throw(DimensionMismatch("..."))
     # ... generate a single vector sample from s in x
 end
 ```
@@ -53,10 +51,8 @@ end
 If there is a more efficient method to generate multiple vector samples in a batch, one should provide the following method
 
 ```julia
-@inline function Random.rand!(rng::AbstractRNG, s::Spl, A::AbstractMatrix{<:Real})
-    # `@inline` + `@boundscheck` allows users to skip bound checks by calling `@inbounds rand!(...)`
-    # Ref https://docs.julialang.org/en/v1/devdocs/boundscheck/#Eliding-bounds-checks
-    @boundscheck # ... check size (and possibly indices) of `x`
+function Random.rand!(rng::AbstractRNG, s::Spl, A::AbstractMatrix{<:Real})
+    size(A, 1) == length(s) || throw(DimensionMismatch("..."))
     # ... generate multiple vector samples in batch
 end
 ```
@@ -74,10 +70,8 @@ function Base.rand(rng::AbstractRNG, s::Spl)
     # ... generate a single matrix sample from s
 end
 
-@inline function Random.rand!(rng::AbstractRNG, s::Spl, x::AbstractMatrix{<:Real})
-    # `@inline` + `@boundscheck` allows users to skip bound checks by calling `@inbounds rand!(...)`
-    # Ref https://docs.julialang.org/en/v1/devdocs/boundscheck/#Eliding-bounds-checks
-    @boundscheck # ... check size (and possibly indices) of `x`
+function Random.rand!(rng::AbstractRNG, s::Spl, x::AbstractMatrix{<:Real})
+    size(x) == size(s) || throw(DimensionMismatch("..."))
     # ... generate a single matrix sample from s in x
 end
 ```

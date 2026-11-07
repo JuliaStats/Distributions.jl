@@ -35,16 +35,14 @@ _product_valuesupport(dists) = mapreduce(value_support ∘ typeof, promote_type,
 
 # type-stable and faster implementations for tuples
 function _product_valuesupport(dists::NTuple{<:Any,Distribution})
-    return __promote_type(value_support, typeof(dists))
+    return __product_promote_type(value_support, typeof(dists))
 end
 
-_common_eltype(xs) = mapreduce(eltype, promote_type, xs)
-_common_eltype(xs::NTuple{N,<:Real}) where {N} = __promote_type(eltype, typeof(xs))
-__promote_type(f::F, ::Type{Tuple{D}}) where {F,D} = f(D)
-function __promote_type(f::F, ::Type{T}) where {F,T<:Tuple}
+__product_promote_type(f::F, ::Type{Tuple{D}}) where {F,D<:Distribution} = f(D)
+function __product_promote_type(f::F, ::Type{T}) where {F,T}
     return promote_type(
         f(Base.tuple_type_head(T)),
-        __promote_type(f, Base.tuple_type_tail(T)),
+        __product_promote_type(f, Base.tuple_type_tail(T)),
     )
 end
 
@@ -112,22 +110,19 @@ length(d::VectorOfUnivariateDistribution) = length(d.dists)
 cov(d::ProductDistribution{2}, ::Val{false}) = reshape(cov(d), size(d)..., size(d)...)
 
 # Arrays of univariate distributions
-function rand(rng::AbstractRNG, d::ArrayOfUnivariateDistribution)
-    x = map(Base.Fix1(rand, rng), d.dists)
-    if x isa AbstractArray{<:Real}
-        return x
-    else
-        # For instance, if x is a tuple
-        return collect(_common_eltype(x), x)
-    end
-end
+rand(rng::AbstractRNG, d::ArrayOfUnivariateDistribution) = map(Base.Fix1(rand, rng), d.dists)
+# `[...]` promotes the samples to a common type
+rand(rng::AbstractRNG, d::VectorOfUnivariateDistribution{<:Tuple}) = [map(Base.Fix1(rand, rng), d.dists)...]
 function rand!(
     rng::AbstractRNG,
     d::ArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
 ) where {N}
     _check_rand_size(d, x)
-    map!(Base.Fix1(rand, rng), x, d.dists)
+    # `map!` does not support tuples
+    for (i, di) in zip(eachindex(x), d.dists)
+        x[i] = rand(rng, di)
+    end
     return x
 end
 
