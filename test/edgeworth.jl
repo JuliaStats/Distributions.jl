@@ -39,5 +39,20 @@ for i = 0.01:0.01:0.99
 
 end
 
+@testset "support" begin
+    @testset "$(nameof(typeof(d)))" for d in (d_s, d_m, d_z)
+        @test minimum(d) == -Inf
+        @test maximum(d) == Inf
+        @test extrema(d) == (-Inf, Inf)
+        @test insupport(d, -1.0)
+    end
+    # `dg` is non-negative, and so are its sum and its mean, but the expansion is not
+    @test minimum(dg) == 0
+    @test pdf(d_s, -1.0) > 0
+    @test cdf(d_s, -1.0) > 0
+    @test pdf(d_m, -1.0) > 0
+    @test cdf(d_m, -1.0) > 0
+end
+
 
 

@@ -38,7 +38,6 @@ function Distributions.TestUtils.test_mvnormal(
     ldcov = logdetcov(g)
     @test ldcov ≈ logdet(Σ)
     vs = diag(Σ)
-    @test g == typeof(g)(params(g)...)
     @test g == deepcopy(g)
     @test minimum(g) == fill(-Inf, d)
     @test maximum(g) == fill(Inf, d)

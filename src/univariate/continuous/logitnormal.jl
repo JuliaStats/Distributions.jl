@@ -83,7 +83,7 @@ Base.convert(::Type{LogitNormal{T}}, d::LogitNormal{T}) where {T<:Real} = d
 
 #### Parameters
 
-params(d::LogitNormal) = (d.μ, d.σ)
+namedparams(d::LogitNormal) = (; d.μ, d.σ)
 location(d::LogitNormal) = d.μ
 scale(d::LogitNormal) = d.σ
 @inline partype(d::LogitNormal{T}) where {T<:Real} = T

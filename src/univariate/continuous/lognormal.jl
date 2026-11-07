@@ -50,7 +50,7 @@ Base.convert(::Type{LogNormal{T}}, d::LogNormal{T}) where {T<:Real} = d
 
 #### Parameters
 
-params(d::LogNormal) = (d.μ, d.σ)
+namedparams(d::LogNormal) = (; d.μ, d.σ)
 partype(::LogNormal{T}) where {T} = T
 
 #### Statistics
@@ -67,7 +67,7 @@ partype(::LogNormal{T}) where {T<:Real} = T
 function var(d::LogNormal)
     (μ, σ) = params(d)
     σ2 = σ^2
-    (exp(σ2) - 1) * exp(2μ + σ2)
+    expm1(σ2) * exp(2μ + σ2)
 end
 
 function skewness(d::LogNormal)

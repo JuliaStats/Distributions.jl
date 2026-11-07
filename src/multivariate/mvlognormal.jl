@@ -187,7 +187,8 @@ function convert(::Type{MvLogNormal{T}}, pars...) where T<:Real
 end
 
 length(d::MvLogNormal) = length(d.normal)
-params(d::MvLogNormal) = params(d.normal)
+namedparams(d::MvLogNormal) = namedparams(d.normal)
+_showname(io::IO, ::MvLogNormal) = print(io, "Multivariate log-normal")
 @inline partype(d::MvLogNormal{T}) where {T<:Real} = T
 
 """
@@ -222,7 +223,7 @@ Return the mode vector of the lognormal distribution, which is strictly smaller 
 mode(d::MvLogNormal) = exp.(mean(d.normal) .- var(d.normal))
 function cov(d::MvLogNormal)
     m = mean(d)
-    return m*m'.*(exp.(cov(d.normal)) .- 1)
+    return m*m'.*expm1.(cov(d.normal))
 end
 var(d::MvLogNormal) = diag(cov(d))
 
@@ -254,4 +255,3 @@ end
 _logpdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d, x) ? (_logpdf(d.normal, log.(x)) - sum(log.(x))) : -Inf
 _pdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d,x) ? _pdf(d.normal, log.(x))/prod(x) : 0.0
 
-Base.show(io::IO,d::MvLogNormal) = show_multline(io, d, [(:dim, length(d)), (:μ, mean(d.normal)), (:Σ, cov(d.normal))])

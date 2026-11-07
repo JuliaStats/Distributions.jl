@@ -55,7 +55,7 @@ Base.convert(::Type{Skellam{T}}, d::Skellam{T}) where {T<:Real} = d
 
 #### Parameters
 
-params(d::Skellam) = (d.μ1, d.μ2)
+namedparams(d::Skellam) = (; d.μ1, d.μ2)
 partype(::Skellam{T}) where {T} = T
 
 
@@ -84,7 +84,7 @@ end
 
 function mgf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
-    exp(μ1 * (exp(t) - 1) + μ2 * (exp(-t) - 1))
+    exp(μ1 * expm1(t) + μ2 * expm1(-t))
 end
 
 function cf(d::Skellam, t::Real)

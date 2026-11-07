@@ -225,22 +225,13 @@ end
 
 ### Show
 
-distrname(d::IsoNormal)  = "IsoNormal"    # Note: IsoNormal, etc are just alias names.
-distrname(d::DiagNormal) = "DiagNormal"
-distrname(d::FullNormal) = "FullNormal"
-
-distrname(d::ZeroMeanIsoNormal) = "ZeroMeanIsoNormal"
-distrname(d::ZeroMeanDiagNormal) = "ZeroMeanDiagNormal"
-distrname(d::ZeroMeanFullNormal) = "ZeroMeanFullNormal"
-
-Base.show(io::IO, d::MvNormal) =
-    show_multline(io, d, [(:dim, length(d)), (:μ, mean(d)), (:Σ, cov(d))])
+_showname(io::IO, ::MvNormal) = print(io, "Multivariate normal")
 
 ### Basic statistics
 
 length(d::MvNormal) = length(d.μ)
 mean(d::MvNormal) = d.μ
-params(d::MvNormal) = (d.μ, d.Σ)
+namedparams(d::MvNormal) = (; d.μ, d.Σ)
 @inline partype(d::MvNormal{T}) where {T<:Real} = T
 
 var(d::MvNormal) = diag(d.Σ)
@@ -271,18 +262,8 @@ function rand(rng::AbstractRNG, d::MvNormal, n::Int)
     return x
 end
 
-Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat{<:Real})
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVecOrMat{<:Real})
     unwhiten!(d.Σ, randn!(rng, x))
-    x .+= d.μ
-    return x
-end
-
-# Workaround: randn! only works for Array, but not generally for AbstractArray
-Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector{<:Real})
-    for i in eachindex(x)
-        x[i] = randn(rng, eltype(x))
-    end
-    unwhiten!(d.Σ, x)
     x .+= d.μ
     return x
 end

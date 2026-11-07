@@ -50,7 +50,7 @@ Base.convert(::Type{Bernoulli{T}}, d::Bernoulli{T}) where {T<:Real} = d
 succprob(d::Bernoulli) = d.p
 failprob(d::Bernoulli) = 1 - d.p
 
-params(d::Bernoulli) = (d.p,)
+namedparams(d::Bernoulli) = (; d.p)
 partype(::Bernoulli{T}) where {T} = T
 
 

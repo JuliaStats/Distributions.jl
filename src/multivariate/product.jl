@@ -26,15 +26,16 @@ struct Product{
     end
 end
 
-function Product(v::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractVector{T}}
+function Product(v::AbstractVector{<:UnivariateDistribution{S}}) where {S<:ValueSupport}
     Base.depwarn(
         "`Product(v)` is deprecated, please use `product_distribution(v)`",
         :Product,
     )
-    return Product{S, T, V}(v)
+    return Product{S, eltype(v), typeof(v)}(v)
 end
 
 length(d::Product) = length(d.v)
+namedparams(d::Product) = (; d.v)
 
 rand(rng::AbstractRNG, d::Product) = map(Base.Fix1(rand, rng), d.v)
 @inline function rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
@@ -73,6 +74,6 @@ maximum(d::Product) = map(maximum, d.v)
 # will be removed when `Product` is removed
 # it will return a `ProductDistribution` then which is already the default for
 # higher-dimensional arrays and distributions
-function product_distribution(dists::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractVector{T}}
-    return Product{S,T,V}(dists)
+function product_distribution(dists::AbstractVector{<:UnivariateDistribution{S}}) where {S<:ValueSupport}
+    return Product{S,eltype(dists),typeof(dists)}(dists)
 end

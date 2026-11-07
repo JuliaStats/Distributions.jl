@@ -42,7 +42,7 @@ partype(::Hypergeometric) = Int
 
 ### Parameters
 
-params(d::Hypergeometric) = (d.ns, d.nf, d.n)
+namedparams(d::Hypergeometric) = (; d.ns, d.nf, d.n)
 
 
 ### Statistics

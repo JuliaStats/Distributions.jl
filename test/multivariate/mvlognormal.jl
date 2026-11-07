@@ -25,7 +25,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6,
     end
     @test isa(mo, Vector{Float64})
     @test isa(s, Vector{Float64})
-    @test isa(S, Matrix{Float64})
+    @test isa(S, AbstractMatrix{Float64})
     @test length(mn) == d
     @test length(md) == d
     @test length(mo) == d
@@ -111,6 +111,12 @@ end
 end
 
 ###### General Testing
+
+@testset "MvLogNormal covariance for small variances" begin
+    # `exp(σ^2) - 1` cancels catastrophically for small `σ`
+    g = MvLogNormal(MvNormal(zeros(2), Diagonal(fill(1e-16, 2))))
+    @test var(g) ≈ fill(expm1(big(1e-16)) * exp(big(1e-16)), 2)
+end
 
 @testset "Lognormal tests" begin
     mu = [0.1, 0.2, 0.3]

@@ -43,7 +43,7 @@ Base.convert(::Type{Poisson{T}}, d::Poisson{T}) where {T<:Real} = d
 
 ### Parameters
 
-params(d::Poisson) = (d.λ,)
+namedparams(d::Poisson) = (; d.λ)
 partype(::Poisson{T}) where {T} = T
 
 rate(d::Poisson) = d.λ
@@ -99,7 +99,7 @@ end
 
 function mgf(d::Poisson, t::Real)
     λ = rate(d)
-    return exp(λ * (exp(t) - 1))
+    return exp(λ * expm1(t))
 end
 cgf(d::Poisson, t) = mean(d) * expm1(t)
 

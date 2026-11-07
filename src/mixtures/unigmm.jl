@@ -32,7 +32,9 @@ function rand(rng::AbstractRNG, d::UnivariateGMM)
     return muladd(randn(rng, float(Base.promote_typeof(μ, σ))), σ, μ)
 end
 
-params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
+namedparams(d::UnivariateGMM) = (; d.means, d.stds, d.prior)
+# Unlike the generic method, `params` does not flatten the wrapped distribution
+params(d::UnivariateGMM) = values(namedparams(d))
 
 struct UnivariateGMMSampler{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: Sampleable{Univariate,Continuous}
     means::VT1

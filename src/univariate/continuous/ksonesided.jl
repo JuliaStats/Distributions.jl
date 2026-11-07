@@ -13,6 +13,8 @@ end
 
 @distr_support KSOneSided 0.0 1.0
 
+namedparams(d::KSOneSided) = (; d.n)
+
 
 #### Evaluation
 

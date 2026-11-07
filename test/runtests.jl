@@ -72,6 +72,7 @@ const tests = [
     "univariate/discrete/geometric",
     "univariate/discrete/bernoulli",
     "univariate/discrete/poisson",
+    "univariate/discrete/skellam",
     "univariate/discrete/soliton",
     "univariate/continuous/skewnormal",
     "univariate/continuous/beta",
@@ -108,6 +109,8 @@ const tests = [
     "eachvariate",
     "univariate/continuous/triangular",
     "statsapi",
+    "namedparams",
+    "show",
     "univariate/continuous/inversegaussian",
 
     ### missing files compared to /src:
@@ -137,7 +140,6 @@ const tests = [
     # "samplers/poissonbinomial",
     # "samplers/vonmises",
     # "samplers/vonmisesfisher",
-    # "show",
     # "truncated/loguniform",
     # "univariate/continuous/biweight",
     # "univariate/continuous/epanechnikov",
@@ -158,7 +160,6 @@ const tests = [
     # "univariate/discrete/hypergeometric",
     # "univariate/discrete/noncentralhypergeometric",
     # "univariate/discrete/poisson",
-    # "univariate/discrete/skellam",
 
     ### file is present but was not included in list
     # "multivariate_stats", # extra file compared to /src

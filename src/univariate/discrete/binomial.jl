@@ -59,7 +59,7 @@ ntrials(d::Binomial) = d.n
 succprob(d::Binomial) = d.p
 failprob(d::Binomial{T}) where {T} = one(T) - d.p
 
-params(d::Binomial) = (d.n, d.p)
+namedparams(d::Binomial) = (; d.n, d.p)
 @inline partype(::Binomial{T}) where {T<:Real} = T
 
 
