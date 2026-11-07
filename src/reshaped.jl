@@ -102,12 +102,12 @@ end
 function rand(rng::AbstractRNG, d::ReshapedDistribution)
     return reshape(rand(rng, d.dist), size(d))
 end
-@inline function rand!(
+function rand!(
     rng::AbstractRNG,
     d::ReshapedDistribution{N},
     x::AbstractArray{<:Real,N}
 ) where {N}
-    @boundscheck size(x) == size(d.dist)
+    _check_rand_size(d, x)
     dist = d.dist
     rand!(rng, dist, reshape(x, size(dist)))
     return x

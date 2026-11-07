@@ -119,8 +119,8 @@ function rand(rng::AbstractRNG, d::MatrixBeta)
     return A
 end
 
-@inline function rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix{<:Real})
-    @boundscheck size(A) == size(d)
+function rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix{<:Real})
+    _check_rand_size(d, A)
     S1   = PDMat( rand(rng, d.W1) )
     S2   = PDMat( rand(rng, d.W2) )
     S    = S1 + S2

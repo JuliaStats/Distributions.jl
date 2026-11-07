@@ -98,8 +98,8 @@ end
 # Sampling
 rand(rng::AbstractRNG, d::DirichletMultinomial) =
     multinom_rand(rng, ntrials(d), rand(rng, Dirichlet(d.α)))
-@inline function rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real})
-    @boundscheck length(d) == length(x)
+function rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real})
+    _check_rand_size(d, x)
     multinom_rand!(rng, ntrials(d), rand(rng, Dirichlet(d.α)), x)
 end
 

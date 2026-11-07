@@ -244,7 +244,7 @@ end
 
 for N in (1, 2)
     @eval begin
-        Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractArray{<:Real,$N})
+        function rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractArray{<:Real,$N})
             rand!(rng, d.normal, x)
             map!(exp, x, x)
             return x

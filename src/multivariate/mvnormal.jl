@@ -262,7 +262,8 @@ function rand(rng::AbstractRNG, d::MvNormal, n::Int)
     return x
 end
 
-Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVecOrMat{<:Real})
+function rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVecOrMat{<:Real})
+    _check_rand_size(d, x)
     unwhiten!(d.Σ, randn!(rng, x))
     x .+= d.μ
     return x

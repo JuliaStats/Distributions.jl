@@ -121,7 +121,7 @@ function rand(rng::AbstractRNG, d::LKJ)
 end
 
 function rand!(rng::AbstractRNG, d::LKJ, R::AbstractMatrix{<:Real})
-    @boundscheck size(R) == size(d)
+    _check_rand_size(d, R)
 
     # Currently requires one-based indexing
     # TODO: Generalize to more general indices

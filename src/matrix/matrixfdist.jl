@@ -136,8 +136,8 @@ function rand(rng::AbstractRNG, d::MatrixFDist)
     return A
 end
 
-@inline function rand!(rng::AbstractRNG, d::MatrixFDist, A::AbstractMatrix{<:Real})
-    @boundscheck size(A) == size(d)
+function rand!(rng::AbstractRNG, d::MatrixFDist, A::AbstractMatrix{<:Real})
+    _check_rand_size(d, A)
     X = rand(rng, d.W)
     Ψ = PDMat(Symmetric(X))
     rand!(rng, InverseWishart(d.n2, Ψ), A)

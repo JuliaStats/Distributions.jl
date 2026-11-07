@@ -97,8 +97,9 @@ end
 
 for N in (1, 2)
     @eval begin
-        Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvLogitNormal, x::AbstractArray{<:Real, $N})
-            y = @views _drop1(x)
+        function rand!(rng::AbstractRNG, d::MvLogitNormal, x::AbstractArray{<:Real, $N})
+            _check_rand_size(d, x)
+            y = _drop1(x)
             rand!(rng, d.normal, y)
             _softmax1!(x, y)
             return x

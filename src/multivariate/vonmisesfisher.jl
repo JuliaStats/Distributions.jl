@@ -76,7 +76,7 @@ _logpdf(d::VonMisesFisher, x::AbstractVector{T}) where {T<:Real} = d.logCκ + d.
 sampler(d::VonMisesFisher) = VonMisesFisherSampler(d.μ, d.κ)
 
 rand(rng::AbstractRNG, d::VonMisesFisher) = rand(rng, sampler(d))
-Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractVector)
+function rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractVector)
     return rand!(rng, sampler(d), x)
 end
 

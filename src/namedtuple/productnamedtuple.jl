@@ -142,15 +142,10 @@ function sampler(d::ProductNamedTupleDistribution{K,<:Any,S}) where {K,S}
     return ProductNamedTupleSampler{K,Tsamplers,S}(samplers)
 end
 
-function Base.rand(rng::AbstractRNG, d::ProductNamedTupleDistribution{K}) where {K}
+function rand(rng::AbstractRNG, d::ProductNamedTupleDistribution{K}) where {K}
     return NamedTuple{K}(map(Base.Fix1(rand, rng), d.dists))
 end
-function Base.rand(
-    rng::AbstractRNG, d::ProductNamedTupleDistribution{K}, dims::Dims
-) where {K}
-    return rand(rng, sampler(d), dims)
-end
 
-Base.@propagate_inbounds function Random.rand!(rng::AbstractRNG, d::ProductNamedTupleDistribution, xs::AbstractArray)
+function rand!(rng::AbstractRNG, d::ProductNamedTupleDistribution, xs::AbstractArray)
     return rand!(rng, sampler(d), xs)
 end

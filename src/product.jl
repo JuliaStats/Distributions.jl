@@ -121,12 +121,12 @@ function rand(rng::AbstractRNG, d::ArrayOfUnivariateDistribution)
         return collect(_common_eltype(x), x)
     end
 end
-@inline function rand!(
+function rand!(
     rng::AbstractRNG,
     d::ArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
 ) where {N}
-    @boundscheck size(x) == size(d)
+    _check_rand_size(d, x)
     map!(Base.Fix1(rand, rng), x, d.dists)
     return x
 end
@@ -151,12 +151,12 @@ function rand(
 )
     return rand(rng, first(d.dists), size(d))
 end
-@inline function rand!(
+function rand!(
     rng::AbstractRNG,
     d::FillArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
 ) where {N}
-    @boundscheck size(x) == size(d)
+    _check_rand_size(d, x)
     rand!(rng, first(d.dists), x)
     return x
 end
@@ -180,12 +180,12 @@ function rand(rng::AbstractRNG, d::ProductDistribution)
     x = mapreduce(vec ∘ Base.Fix1(rand, rng), hcat, d.dists)
     return reshape(x, size(d))
 end
-@inline function rand!(
+function rand!(
     rng::AbstractRNG,
     d::ProductDistribution{N,M},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
-    @boundscheck size(A) == size(d)
+    _check_rand_size(d, A)
     for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
         rand!(rng, di, Ai)
     end
@@ -216,17 +216,18 @@ function _product_rand(rng::AbstractRNG, spl::Sampleable{ArrayLikeVariate{N}}, d
     xi = rand(rng, spl)
     x = Array{eltype(xi)}(undef, dims)
     copyto!(x, xi)
-    vx = reshape(x, ntuple(i -> i <= N ? size(xi, i) : Colon(), N + 1))
-    @inbounds rand!(rng, spl, @view(vx[ntuple(i -> i <= N ? Colon() : 2:lastindex(vx, N + 1), N + 1)...]))
+    # stack the remaining samples along the last dimension
+    xs = reshape(x, size(xi)..., :)
+    rand!(rng, spl, selectdim(xs, N + 1, 2:size(xs, N + 1)))
     return x
 end
 
-@inline function rand!(
+function rand!(
     rng::AbstractRNG,
     d::ProductDistribution{N,M,<:FillArrays.AbstractFill},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
-    @boundscheck size(A) == size(d)
+    _check_rand_size(d, A)
     rand!(rng, sampler(first(d.dists)), A)
     return A
 end

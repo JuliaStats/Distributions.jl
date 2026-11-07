@@ -44,8 +44,8 @@ end
 
 function rand(rng::AbstractRNG, s::UnivariateGMMSampler)
     koffset = rand(rng, s.psampler) - 1
-    μ = d.means[begin+koffset]
-    σ = d.stds[begin+koffset]
+    μ = s.means[begin+koffset]
+    σ = s.stds[begin+koffset]
     return muladd(randn(rng, float(Base.promote_typeof(μ, σ))), σ, μ)
 end
 function rand!(rng::AbstractRNG, s::UnivariateGMMSampler, x::AbstractArray{<:Real})

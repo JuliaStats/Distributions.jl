@@ -123,8 +123,8 @@ function rand(rng::AbstractRNG, d::MatrixNormal)
     return Y
 end
 
-@inline function rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix{<:Real})
-    @boundscheck size(Y) == size(d)
+function rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix{<:Real})
+    _check_rand_size(d, Y)
     randn!(rng, Y)
     A = cholesky(d.U).L
     B = cholesky(d.V).U

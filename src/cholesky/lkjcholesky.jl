@@ -107,7 +107,7 @@ function mode(d::LKJCholesky; check_args::Bool=true)
         @setup(η = d.η),
         (η, η > 1, "mode is defined only when η > 1."),
     )
-    factors = Matrix{eltype(d)}(LinearAlgebra.I, size(d))
+    factors = Matrix{float(partype(d))}(LinearAlgebra.I, size(d))
     return LinearAlgebra.Cholesky(factors, d.uplo, 0)
 end
 
@@ -150,7 +150,7 @@ end
 #  Sampling
 #  -----------------------------------------------------------------------------
 
-function Base.rand(rng::AbstractRNG, d::LKJCholesky)
+function rand(rng::AbstractRNG, d::LKJCholesky)
     p = d.d
     η = d.η
     uplo = d.uplo
@@ -158,17 +158,11 @@ function Base.rand(rng::AbstractRNG, d::LKJCholesky)
     _lkj_cholesky_onion_tri!(rng, factors, p, η, uplo)
     return LinearAlgebra.Cholesky(factors, uplo, 0)
 end
-function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
-    let rng=rng, d=d
-        map(_ -> rand(rng, d), CartesianIndices(dims))
-    end
-end
 
-Base.@propagate_inbounds function rand!(d::LKJCholesky, R::LinearAlgebra.Cholesky{<:Real})
-    return rand!(default_rng(), d, R)
-end
-@inline function rand!(rng::AbstractRNG, d::LKJCholesky, R::LinearAlgebra.Cholesky{<:Real})
-    @boundscheck size(R.factors) == size(d)
+function rand!(rng::AbstractRNG, d::LKJCholesky, R::LinearAlgebra.Cholesky{<:Real})
+    if size(R) != size(d)
+        throw(DimensionMismatch(lazy"samples of size $(size(d)) cannot be stored in a Cholesky factorization of size $(size(R))"))
+    end
     _lkj_cholesky_onion_tri!(rng, R.factors, d.d, d.η, R.uplo)
     return R
 end

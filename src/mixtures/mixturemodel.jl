@@ -479,7 +479,7 @@ Base.length(s::MixtureSampler) = length(first(s.csamplers))
 # mixture sampler
 rand(rng::AbstractRNG, s::MixtureSampler) =
     rand(rng, s.csamplers[rand(rng, s.psampler)])
-Base.@propagate_inbounds function rand!(rng::AbstractRNG, s::MixtureSampler{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+function rand!(rng::AbstractRNG, s::MixtureSampler{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
     rand!(rng, s.csamplers[rand(rng, s.psampler)], x)
     return x
 end
@@ -487,7 +487,7 @@ end
 
 # if only a single sample is requested, no alias table is created
 rand(rng::AbstractRNG, d::MixtureModel) = rand(rng, component(d, rand(rng, d.prior)))
-Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MixtureModel{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+function rand!(rng::AbstractRNG, d::MixtureModel{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
     rand!(rng, component(d, rand(rng, d.prior)), x)
     return x
 end

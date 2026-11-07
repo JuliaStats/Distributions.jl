@@ -40,8 +40,8 @@ function rand(rng::AbstractRNG, spl::VonMisesFisherSampler)
     rand!(rng, spl, x)
     return x
 end
-@inline function rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector{<:Real})
-    @boundscheck length(spl) == length(x)
+function rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector{<:Real})
+    _check_rand_size(spl, x)
     # TODO: Generalize to more general indices
     Base.require_one_based_indexing(x)
 

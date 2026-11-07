@@ -173,8 +173,8 @@ function rand(rng::AbstractRNG, d::GenericMvTDist, n::Int)
     x
 end
 
-@inline function rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
-    @boundscheck length(x) == length(d)
+function rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
+    _check_rand_size(d, x)
     chisqd = Chisq{partype(d)}(d.df)
     y = sqrt(rand(rng, chisqd) / d.df)
     unwhiten!(d.Σ, randn!(rng, x))
@@ -182,8 +182,8 @@ end
     x
 end
 
-@inline function rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{<:Real})
-    @boundscheck size(x, 1) == length(d)
+function rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{<:Real})
+    _check_rand_size(d, x)
     cols = size(x,2)
     chisqd = Chisq{partype(d)}(d.df)
     y = similar(x, (1, cols))

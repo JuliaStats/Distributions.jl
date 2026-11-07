@@ -38,8 +38,8 @@ length(d::Product) = length(d.v)
 namedparams(d::Product) = (; d.v)
 
 rand(rng::AbstractRNG, d::Product) = map(Base.Fix1(rand, rng), d.v)
-@inline function rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
-    @boundscheck length(x) == length(d)
+function rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
+    _check_rand_size(d, x)
     map!(Base.Fix1(rand, rng), x, d.v)
     return x
 end
@@ -48,8 +48,8 @@ end
 function rand(rng::AbstractRNG, d::Product{S,T,<:FillArrays.AbstractFill{T,1}}) where {S<:ValueSupport,T<:UnivariateDistribution{S}}
     return rand(rng, first(d.v), size(d))
 end
-@inline function rand!(rng::AbstractRNG, d::Product{S,T,<:FillArrays.AbstractFill{T,1}}, x::AbstractVector{<:Real}) where {S<:ValueSupport,T<:UnivariateDistribution{S}}
-    @boundscheck length(x) == length(d)
+function rand!(rng::AbstractRNG, d::Product{S,T,<:FillArrays.AbstractFill{T,1}}, x::AbstractVector{<:Real}) where {S<:ValueSupport,T<:UnivariateDistribution{S}}
+    _check_rand_size(d, x)
     rand!(rng, first(d.v), x)
     return x
 end

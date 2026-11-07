@@ -193,8 +193,8 @@ function rand(rng::AbstractRNG, d::Wishart)
     return A
 end
 
-@inline function rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix{<:Real})
-    @boundscheck size(d) == size(A)
+function rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix{<:Real})
+    _check_rand_size(d, A)
     if d.singular
         axes2 = axes(A, 2)
         r = rank(d)

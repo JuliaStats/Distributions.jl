@@ -148,8 +148,8 @@ function rand(rng::AbstractRNG, d::JointOrderStatistics)
     return x
 end
 
-@inline function rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
-    @boundscheck length(x) == length(d)
+function rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
+    _check_rand_size(d, x)
     n = d.n
     if n == length(d.ranks)  # ranks == 1:n
         # direct method, slower than inversion method for large `n` and distributions with

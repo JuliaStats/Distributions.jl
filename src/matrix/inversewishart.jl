@@ -127,8 +127,8 @@ function rand(rng::AbstractRNG, d::InverseWishart)
     return A
 end
 
-@inline function rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix{<:Real})
-    @boundscheck size(d) == size(A)
+function rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix{<:Real})
+    _check_rand_size(d, A)
     rand!(rng, Wishart(d.df, inv(d.Ψ)), A)
     A .= inv(cholesky!(Symmetric(A)))
 end

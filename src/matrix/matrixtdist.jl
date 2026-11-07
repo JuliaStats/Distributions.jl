@@ -148,10 +148,9 @@ function rand(rng::AbstractRNG, d::MatrixTDist)
     return A
 end
 
-@inline function rand!(rng::AbstractRNG, d::MatrixTDist, A::AbstractMatrix{<:Real})
-    n, p = size(d)
-    @boundscheck size(A) == (n, p)
-    S = Symmetric(rand(rng, InverseWishart(d.ν + n - 1, d.Σ)), :L)
+function rand!(rng::AbstractRNG, d::MatrixTDist, A::AbstractMatrix{<:Real})
+    _check_rand_size(d, A)
+    S = Symmetric(rand(rng, InverseWishart(d.ν + size(d, 1) - 1, d.Σ)), :L)
     rand!(rng, MatrixNormal(d.M, S, d.Ω), A)
     return A
 end

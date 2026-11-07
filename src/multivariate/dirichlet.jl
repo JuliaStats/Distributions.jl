@@ -162,16 +162,16 @@ function rand(rng::AbstractRNG, d::Dirichlet{<:Real,<:FillArrays.AbstractFill{<:
     return _normalize1!!(x)
 end
 
-@inline function rand!(rng::AbstractRNG, d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{<:Real})
-    @boundscheck length(d) == length(x)
+function rand!(rng::AbstractRNG, d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{<:Real})
+    _check_rand_size(d, x)
     for (i, αi) in zip(eachindex(x), d.alpha)
         x[i] = rand(rng, Gamma(αi))
     end
     return normalize!(x, 1)
 end
 
-@inline function rand!(rng::AbstractRNG, d::Dirichlet{T,<:FillArrays.AbstractFill{T}}, x::AbstractVector{<:Real}) where {T<:Real}
-    @boundscheck length(d) == length(x)
+function rand!(rng::AbstractRNG, d::Dirichlet{T,<:FillArrays.AbstractFill{T}}, x::AbstractVector{<:Real}) where {T<:Real}
+    _check_rand_size(d, x)
     rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
     return normalize!(x, 1)
 end

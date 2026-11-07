@@ -56,9 +56,9 @@ function rand(rng::AbstractRNG, s::MultinomialSampler)
     x = Vector{Int}(undef, length(s.prob))
     return rand!(rng, s, x)
 end
-@inline function rand!(rng::AbstractRNG, s::MultinomialSampler,
+function rand!(rng::AbstractRNG, s::MultinomialSampler,
                 x::AbstractVector{<:Real})
-    @boundscheck length(s) == length(x)
+    _check_rand_size(s, x)
     n = s.n
     k = length(s)
     if n^2 > k
