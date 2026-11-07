@@ -22,7 +22,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     end
     @test @inferred(mean(g)) ≈ mu
 
-    # evaluation of cdfc
+    # evaluation of cdf
     cf = zeros(eltype(X), n)
     for k = 1:K
         c_k = component(g, k)

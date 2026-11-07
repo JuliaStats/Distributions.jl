@@ -34,6 +34,7 @@ const tests = [
     "utils",
     "sparseconnectivitytracer", # extra file compared to /src
     "samplers",
+    "genericrand",
     "univariate/discrete/categorical",
     "univariates",
     "univariate/continuous", # extra file compared to /src

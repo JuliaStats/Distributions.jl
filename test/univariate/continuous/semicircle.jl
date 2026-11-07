@@ -39,7 +39,7 @@ d = Semicircle(2.0)
 @test quantile(d,  .5) ==   .0
 @test quantile(d, 1.0) == +2.0
 
-rng = StableRNG(123)
+rng = StableRNG(125)
 @testset for r in rand(rng, Uniform(0,10), 5)
     N = 10^4
     semi = Semicircle(r)

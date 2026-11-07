@@ -17,11 +17,7 @@ using FiniteDifferences
         dmat = LKJ(p, d.η)
         marginal = Distributions._marginal(dmat)    
         ndraws = length(xs)
-        zs = if VERSION >= v"1.9"
-            stack(Matrix, xs)
-        else
-            mapreduce(Matrix, (x , y) -> cat(x, y; dims=3), xs)
-        end
+        zs = stack(Matrix, xs)
 
         @testset "LKJCholesky marginal moments" begin
             @test mean(zs; dims=3)[:, :, 1] ≈ I atol=0.1

@@ -23,19 +23,13 @@ end
 function Base.rand(rng::AbstractRNG, p::CholeskyMvNormal)
     T = float(Base.promote_eltype(p.m, p.L))
     x = Vector{T}(undef, length(p.m))
-    @inbounds rand!(rng, p, x)
+    rand!(rng, p, x)
     return x
 end
-@inline function Random.rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::AbstractVector{<:Real})
-    @boundscheck length(x) == length(p)
+function Random.rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::AbstractVector{<:Real})
+    length(x) == length(p) || throw(DimensionMismatch("inconsistent length of samples"))
     randn!(rng, x)
-    # Older Julia versions that do not support `lmul!(::Diagonal, ::AbstractVector)`
-    # Ref https://github.com/JuliaLang/julia/pull/36012
-    if p.L isa Diagonal && VERSION < v"1.6.0-DEV.88"
-        x .*= p.L.diag
-    else
-        lmul!(p.L, x)
-    end
+    lmul!(p.L, x)
     x .+= p.m
     return x
 end

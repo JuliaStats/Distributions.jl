@@ -15,8 +15,8 @@ end
 struct FooEachvariate <: Sampleable{Multivariate, Continuous} end
 Base.length(::FooEachvariate) = 3
 Base.rand(rng::AbstractRNG, d::FooEachvariate) = rand(rng, length(d))
-@inline function Random.rand!(rng::AbstractRNG, d::FooEachvariate, x::AbstractVector{<:Real})
-    @boundscheck length(x) == length(d)
+function Random.rand!(rng::AbstractRNG, d::FooEachvariate, x::AbstractVector{<:Real})
+    length(x) == length(d) || throw(DimensionMismatch("inconsistent length of samples"))
     return rand!(rng, x)
 end
 

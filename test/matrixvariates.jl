@@ -13,7 +13,8 @@ import SpecialFunctions
 function _rand_dist(::Type{InverseWishart{T}}, n::Int, p::Int; rng::Union{AbstractRNG,Nothing} = nothing)::InverseWishart{T} where {T<:Real}
     n == p || throw(ArgumentError("dims must be equal for InverseWishart"))
     rng = rng === nothing ? () : (rng,)
-    ν = n + 3 + abs(10 * randn(rng..., T))
+    # `ν > n + 7` ensures finite fourth moments, required for the sample covariance to converge
+    ν = n + 7 + abs(10 * randn(rng..., T))
     X = rand(rng..., T, n, n)
     X .= 2 .* X .- 1
     Ψ = X * X'
@@ -36,7 +37,8 @@ function _rand_dist(::Type{MatrixFDist{T}}, n::Int, p::Int; rng::Union{AbstractR
     n == p || throw(ArgumentError("dims must be equal for MatrixFDist"))
     rng = rng === nothing ? () : (rng,)
     n1 = n + 1 + abs(10 * randn(rng..., T))
-    n2 = n + 3 + abs(10 * randn(rng..., T))
+    # `n2 > n + 7` ensures finite fourth moments, required for the sample covariance to converge
+    n2 = n + 7 + abs(10 * randn(rng..., T))
     X = rand(rng..., T, n, n)
     X .= 2 .* X .- 1
     B = X * X'
@@ -129,7 +131,7 @@ end
 function test_draws(d::MatrixDistribution, draws::AbstractArray{<:AbstractMatrix})
     @test mean(draws) ≈ mean(d) rtol = 0.01
     draws_matrix = mapreduce(vec, hcat, draws)
-    @test cov(draws_matrix; dims=2) ≈ cov(d) rtol = 0.5
+    @test cov(draws_matrix; dims=2) ≈ cov(d) rtol = 0.2
     nothing
 end
 
@@ -326,14 +328,16 @@ end
 _multivariate(d::MatrixTDist) = MvTDist(d)
 
 function test_against_multivariate(::Type{D}, n::Integer, p::Integer; rng::Union{AbstractRNG,Nothing} = nothing) where {T<:Real,D<:Union{MatrixNormal{T}, MatrixTDist{T}}}
-    dist = _rand_dist(D, n, 1; rng=rng)
-    multivariate_dist = _multivariate(dist)
-    X = rng === nothing ? rand(dist) : rand(rng, dist)
-    x = vec(X)
-    @test logpdf(dist, X) ≈ logpdf(multivariate_dist, x)
-    @test pdf(dist, X) ≈ pdf(multivariate_dist, x)
-    @test vec(mean(dist)) ≈ mean(multivariate_dist)
-    @test cov(dist) ≈ cov(multivariate_dist)
+    for (k, l) in ((n, 1), (1, p))
+        dist = _rand_dist(D, k, l; rng=rng)
+        multivariate_dist = _multivariate(dist)
+        X = rng === nothing ? rand(dist) : rand(rng, dist)
+        x = vec(X)
+        @test logpdf(dist, X) ≈ logpdf(multivariate_dist, x)
+        @test pdf(dist, X) ≈ pdf(multivariate_dist, x)
+        @test vec(mean(dist)) ≈ mean(multivariate_dist)
+        @test cov(dist) ≈ cov(multivariate_dist)
+    end
     nothing
 end
 
@@ -455,10 +459,7 @@ function test_special(::Type{D}; rng::Union{AbstractRNG,Nothing} = nothing) wher
         end
     end
     @testset "meanlogdet" begin
-        # Errors for Float32?!
-        if T === Float64
-            @test Distributions.meanlogdet(d) ≈ mean(logdet, H) rtol = 0.1
-        end
+        @test Distributions.meanlogdet(d) ≈ mean(logdet, H) rtol = 0.1
     end
     @testset "H ~ W(ν, Σ), a ~ p(a) independent ⟹ a'Ha / a'Σa ~ χ²(ν)" begin
         q = rng === nothing ? MvTDist(10, randn(T, n), rand(d)) : MvTDist(10, randn(rng, T, n), rand(rng, d))
@@ -511,7 +512,7 @@ function test_special(::Type{D}; rng::Union{AbstractRNG,Nothing} = nothing) wher
         @test InverseWishart(5, PDiagMat(ones(T, 5))) isa InverseWishart{T, PDiagMat{T, Vector{T}}}
     end
 end
-                                                                                                            
+
 function test_special(::Type{D}; rng::Union{AbstractRNG,Nothing} = nothing) where {T<:Real,D<:MatrixTDist{T}}
     @testset "MT(v, M, vΣ, Ω) → MN(M, Σ, Ω) as v → ∞" begin
         n, p = (6, 3)
@@ -703,7 +704,7 @@ matrixvariates = [(MatrixNormal, 2, 4, 10^5),
                   (LKJ, 3, 3, 10^5)]
 for (D, n, p, M) in matrixvariates
     println("    testing $(D)")
-    @testset "$(D) ($(rng === nothing ? "with" : "without") RNG)" for rng in (nothing, Random.default_rng())
+    @testset "$(D) ($(rng === nothing ? "without" : "with") RNG)" for rng in (nothing, Random.default_rng())
         @testset for T in (Float32, Float64)
             test_matrixvariate(D{T}, n, p, M; rng=rng)
         end
