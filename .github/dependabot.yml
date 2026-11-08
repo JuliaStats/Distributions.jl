@@ -5,3 +5,15 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+  # Maintain compat entries of Julia dependencies (replaces CompatHelper)
+  - package-ecosystem: "julia"
+    directories:
+      - "/"
+      - "/docs"
+    schedule:
+      interval: "daily"
+    groups:
+      # Group all Julia package updates into a single PR
+      all-julia-packages:
+        patterns:
+          - "*"
