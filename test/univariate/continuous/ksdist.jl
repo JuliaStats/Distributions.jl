@@ -30,6 +30,27 @@ end
         @test cdf(KSDist(5), 2.256281e-01) ≈ 0.08852108277095537 rtol = 1e-14
     end
 
+    # Polynomials for n = 10 from p. 2 of Marsaglia, Tsang and Wang (2003)
+    @testset "Marsaglia, Tsang and Wang (2003)" begin
+        d = KSDist(10)
+        # 5/20 < x < 6/20 (h ≤ 1/2)
+        p1(x) = 419328x^10 - 801024x^9 + 3771936//5 * x^8 - 11684736//25 * x^7 +
+            24769584//125 * x^6 - 32213664//625 * x^5 + 3604041//625 * x^4 +
+            5313231//12500 * x^3 - 7515459//50000 * x^2 + 25247817//2500000 * x -
+            15369417//100000000
+        # 4/20 < x < 5/20 (h > 1/2)
+        p2(x) = -806400x^10 + 1102080x^9 - 594720x^8 + 177408//5 * x^7 +
+            3421908//25 * x^6 - 9773694//125 * x^5 + 47717019//2500 * x^4 -
+            13212297//6250 * x^3 + 1035279//12500 * x^2 + 848673//625000 * x -
+            88389//781250
+        @test cdf(d, 0.274) ≈ 0.6284796154565043 rtol = 1e-14
+        for (p, lo, hi) in ((p1, 5 / 20, 6 / 20), (p2, 4 / 20, 5 / 20))
+            for x in range(lo, hi; length = 12)[2:(end - 1)]
+                @test cdf(d, x) ≈ p(Rational{BigInt}(x)) rtol = 1e-14
+            end
+        end
+    end
+
     @testset "exact values (n = $n)" for n in (3, 4, 5, 6, 8, 10)
         d = KSDist(n)
         @test iszero(cdf(d, 1 / (2n)))
