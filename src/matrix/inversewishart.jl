@@ -129,6 +129,9 @@ end
 
 function rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix{<:Real})
     _check_rand_size(d, A)
-    rand!(rng, Wishart(d.df, inv(d.Ψ)), A)
-    A .= inv(cholesky!(Symmetric(A)))
+    # Σ = (L * A) * (L * A)' with Ψ = L * L' (see `_invwishart_genA!`)
+    _invwishart_genA!(rng, A, d.df)
+    unwhiten!(d.Ψ, A)
+    A .= A * A'
+    return A
 end
