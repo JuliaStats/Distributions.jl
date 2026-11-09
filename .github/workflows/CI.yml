@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - 'min-patch'
+          - 'min'
           - '1'
           - pre
         os:
