@@ -494,11 +494,13 @@ function namedparams end
 # `params` flattens wrapped distributions, e.g. `params(truncated(Normal(), 0, 1))` is
 # `(0.0, 1.0, 0.0, 1.0)`. Distributions whose `params` keeps the wrapped distribution, such as
 # `AffineDistribution`, specialize it.
-function StatsAPI.params(d::Distribution)
-    return reduce(_append, map(_paramvalues, values(namedparams(d))); init=())
-end
+StatsAPI.params(d::Distribution) = _flatparams(values(namedparams(d))...)
 
-_append(x::Tuple, y::Tuple) = (x..., y...)
+# Splices the parameter tuples by recursion over the arguments instead of by a fold over
+# them, so that the result is assembled at compile time and reverse-mode AD sees a plain
+# tuple construction.
+_flatparams() = ()
+_flatparams(x, xs...) = (_paramvalues(x)..., _flatparams(xs...)...)
 
 _paramvalues(x) = (x,)
 _paramvalues(d::Distribution) = params(d)
