@@ -78,7 +78,7 @@
 
         # eltype
         for d in d1s
-            @test eltype(d) === eltype(d1)
+            @test @test_deprecated(eltype(d)) === @test_deprecated(eltype(d1))
         end
 
         # logpdf

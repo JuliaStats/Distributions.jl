@@ -138,15 +138,16 @@ struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,Continuous},
     s2::S2
 end
 
-function sampler(d::Beta{T}) where T
-    (α, β) = params(d)
-    if (α ≤ 1.0) && (β ≤ 1.0)
+function sampler(d::Beta)
+    α, β = params(d)
+    if α ≤ 1 && β ≤ 1
         return BetaSampler(false, inv(α), inv(β),
-                           sampler(Uniform()), sampler(Uniform()))
+                           sampler(Uniform(zero(α), oneunit(α))),
+                           sampler(Uniform(zero(β), oneunit(β))))
     else
         return BetaSampler(true, inv(α), inv(β),
-                           sampler(Gamma(α, one(T))),
-                           sampler(Gamma(β, one(T))))
+                           sampler(Gamma(α, oneunit(α))),
+                           sampler(Gamma(β, oneunit(β))))
     end
 end
 
@@ -160,11 +161,11 @@ function rand(rng::AbstractRNG, s::BetaSampler)
         iα = s.iα
         iβ = s.iβ
         while true
-            u = rand(rng) # the Uniform sampler just calls rand()
-            v = rand(rng)
+            u = rand(rng, s.s1) # the Uniform sampler just calls rand()
+            v = rand(rng, s.s2)
             x = u^iα
             y = v^iβ
-            if x + y ≤ one(x)
+            if x + y ≤ 1
                 if (x + y > 0)
                     return x / (x + y)
                 else
@@ -180,16 +181,20 @@ function rand(rng::AbstractRNG, s::BetaSampler)
     end
 end
 
-function rand(rng::AbstractRNG, d::Beta{T}) where T
-    (α, β) = params(d)
-    if (α ≤ 1.0) && (β ≤ 1.0)
+function rand(rng::AbstractRNG, d::Beta)
+    α, β = params(d)
+    if α ≤ 1 && β ≤ 1
+        iα = inv(α)
+        iβ = inv(β)
+        Tu = typeof(float(iα))
+        Tv = typeof(float(iβ))
         while true
-            u = rand(rng)
-            v = rand(rng)
-            x = u^inv(α)
-            y = v^inv(β)
-            if x + y ≤ one(x)
-                if (x + y > 0)
+            u = rand(rng, Tu)
+            v = rand(rng, Tv)
+            x = u^iα
+            y = v^iβ
+            if x + y ≤ 1
+                if x + y > 0
                     return x / (x + y)
                 else
                     logX = log(u) / α
@@ -202,8 +207,8 @@ function rand(rng::AbstractRNG, d::Beta{T}) where T
             end
         end
     else
-        g1 = rand(rng, Gamma(α, one(T)))
-        g2 = rand(rng, Gamma(β, one(T)))
+        g1 = rand(rng, Gamma(α, oneunit(α)))
+        g2 = rand(rng, Gamma(β, oneunit(β)))
         return g1 / (g1 + g2)
     end
 end

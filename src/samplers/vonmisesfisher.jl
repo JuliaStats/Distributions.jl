@@ -33,7 +33,15 @@ end
 
 Base.length(s::VonMisesFisherSampler) = length(s.v)
 
-function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector{<:Real})
+# Currently, the VonMisesFisherSampler is written for `Float64`
+# TODO: Generalize to other number types
+function rand(rng::AbstractRNG, spl::VonMisesFisherSampler)
+    x = Vector{Float64}(undef, length(spl))
+    rand!(rng, spl, x)
+    return x
+end
+function rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector{<:Real})
+    _check_rand_size(spl, x)
     # TODO: Generalize to more general indices
     Base.require_one_based_indexing(x)
 

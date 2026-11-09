@@ -73,7 +73,7 @@ function test_matrixreshaped(rng, d1, sizes)
         end
         @testset "MatrixReshaped eltype" begin
             for d in d1s
-                @test eltype(d) === eltype(d1)
+                @test @test_deprecated(eltype(d)) === @test_deprecated(eltype(d1))
             end
         end
         @testset "MatrixReshaped logpdf" begin

@@ -10,7 +10,7 @@ using Test, Random
         @test d isa BernoulliLogit{typeof(logitp)}
         @test convert(typeof(d), d) === d
         @test convert(BernoulliLogit{Float16}, d) === BernoulliLogit(Float16(logitp))
-        @test eltype(typeof(d)) === Bool
+        @test @test_deprecated(eltype(typeof(d))) === Bool
         @test params(d) == (logitp,)
         @test partype(d) === typeof(logitp)
     end

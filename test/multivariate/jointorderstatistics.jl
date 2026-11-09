@@ -52,7 +52,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             @test length(d) == length(r)
             @test params(d) == (params(dist)..., d.n, d.ranks)
             @test partype(d) === partype(dist)
-            @test eltype(d) === eltype(dist)
+            @test @test_deprecated(eltype(d)) === @test_deprecated(eltype(dist))
 
             length(r) == n && @test JointOrderStatistics(dist, n) == d
         end
@@ -94,7 +94,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                     logpdf(dist, xi) +
                     logpdf(dist, xj)
                 )
-                @test logpdf(d, x) ≈ lp
+                @test logpdf(d, x) ≈ lp rtol=10 * sqrt(eps(T))
                 @test pdf(d, x) ≈ exp(lp)
             elseif collect(r) == 1:n
                 @test logpdf(d, x) ≈ sum(Base.Fix1(logpdf, d.dist), x) + loggamma(T(n + 1))

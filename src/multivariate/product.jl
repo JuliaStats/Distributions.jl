@@ -36,13 +36,24 @@ end
 
 length(d::Product) = length(d.v)
 namedparams(d::Product) = (; d.v)
-function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
-                                                    T<:UnivariateDistribution{S}}
-    return eltype(T)
+
+rand(rng::AbstractRNG, d::Product) = map(Base.Fix1(rand, rng), d.v)
+function rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
+    _check_rand_size(d, x)
+    map!(Base.Fix1(rand, rng), x, d.v)
+    return x
 end
 
-_rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
-    map!(Base.Fix1(rand, rng), x, d.v)
+# Specializations for FillArrays (for which `map(Base.Fix1(rand, rng), d.v)` is incorrect)
+function rand(rng::AbstractRNG, d::Product{S,T,<:FillArrays.AbstractFill{T,1}}) where {S<:ValueSupport,T<:UnivariateDistribution{S}}
+    return rand(rng, first(d.v), size(d))
+end
+function rand!(rng::AbstractRNG, d::Product{S,T,<:FillArrays.AbstractFill{T,1}}, x::AbstractVector{<:Real}) where {S<:ValueSupport,T<:UnivariateDistribution{S}}
+    _check_rand_size(d, x)
+    rand!(rng, first(d.v), x)
+    return x
+end
+
 function _logpdf(d::Product, x::AbstractVector{<:Real})
     dists = d.v
     if isempty(dists)

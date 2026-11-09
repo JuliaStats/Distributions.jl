@@ -57,7 +57,6 @@ The basic functionalities that a sampleable object provides are to *retrieve inf
 length(::Sampleable)
 size(::Sampleable)
 nsamples(::Type{Sampleable}, ::Any)
-eltype(::Type{Sampleable})
 rand(::AbstractRNG, ::Sampleable)
 rand!(::AbstractRNG, ::Sampleable, ::AbstractArray)
 ```

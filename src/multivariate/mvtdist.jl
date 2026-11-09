@@ -103,7 +103,6 @@ namedparams(d::GenericMvTDist) = (; d.df, d.μ, d.Σ)
 show(io::IO, d::GenericMvTDist) = _showcall(io, "MvTDist", d.df, d.μ, d.Σ)
 _showname(io::IO, ::GenericMvTDist) = print(io, "Multivariate Student's t")
 @inline partype(d::GenericMvTDist{T}) where {T} = T
-Base.eltype(::Type{<:GenericMvTDist{T}}) where {T} = T
 
 # For entropy calculations see "Multivariate t Distributions and their Applications", S. Kotz & S. Nadarajah
 function entropy(d::GenericMvTDist)
@@ -127,12 +126,14 @@ sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vec
 
 
 function mvtdist_consts(d::AbstractMvTDist)
-    H = convert(eltype(d), 0.5)
-    logpi = convert(eltype(d), log(pi))
-    hdf = H * d.df
-    hdim = H * d.dim
+    logdet_Σ = logdet(d.Σ)
+    onehalf = oftype(logdet_Σ, 1//2)
+    logpi = oftype(logdet_Σ, logπ)
+    df = oftype(logdet_Σ, d.df)
+    hdf = onehalf * df
+    hdim = onehalf * d.dim
     shdfhdim = hdf + hdim
-    v = loggamma(shdfhdim) - loggamma(hdf) - hdim*log(d.df) - hdim*logpi - H*logdet(d.Σ)
+    v = loggamma(shdfhdim) - loggamma(hdf) - hdim * (log(df) + logpi) - onehalf * logdet_Σ
     return (shdfhdim, v)
 end
 
@@ -157,7 +158,23 @@ function gradlogpdf(d::GenericMvTDist, x::AbstractVector{<:Real})
 end
 
 # Sampling (for GenericMvTDist)
-function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
+function rand(rng::AbstractRNG, d::GenericMvTDist)
+    chisqd = Chisq{partype(d)}(d.df)
+    y = sqrt(rand(rng, chisqd) / d.df)
+    x = unwhiten!(d.Σ, randn(rng, typeof(y), length(d)))
+    x .= x ./ y .+ d.μ
+    x
+end
+function rand(rng::AbstractRNG, d::GenericMvTDist, n::Int)
+    chisqd = Chisq{partype(d)}(d.df)
+    y = rand(rng, chisqd, n)
+    x = unwhiten!(d.Σ, randn(rng, eltype(y), length(d), n))
+    x .= x ./ sqrt.(y' ./ d.df) .+ d.μ
+    x
+end
+
+function rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
+    _check_rand_size(d, x)
     chisqd = Chisq{partype(d)}(d.df)
     y = sqrt(rand(rng, chisqd) / d.df)
     unwhiten!(d.Σ, randn!(rng, x))
@@ -165,10 +182,11 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
     x
 end
 
-function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
+function rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{<:Real})
+    _check_rand_size(d, x)
     cols = size(x,2)
     chisqd = Chisq{partype(d)}(d.df)
-    y = Matrix{T}(undef, 1, cols)
+    y = similar(x, (1, cols))
     unwhiten!(d.Σ, randn!(rng, x))
     rand!(rng, chisqd, y)
     x .= x ./ sqrt.(y ./ d.df) .+ d.μ
