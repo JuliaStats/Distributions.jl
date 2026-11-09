@@ -87,12 +87,12 @@ logccdf(d::BernoulliLogit, x::Bool) = x ? oftype(float(d.logitp), -Inf) : logsuc
 logccdf(d::BernoulliLogit, x::Int) = x < 0 ? zero(float(d.logitp)) : (x < 1 ? logsuccprob(d) : oftype(float(d.logitp), -Inf))
 
 function quantile(d::BernoulliLogit, p::Real)
-    T = float(partype(d))
-    0 <= p <= 1 ? (p <= failprob(d) ? zero(T) : one(T)) : T(NaN)
+    _check_quantile_arg(p)
+    p <= failprob(d) ? false : true
 end
 function cquantile(d::BernoulliLogit, p::Real)
-    T = float(partype(d))
-    0 <= p <= 1 ? (p >= succprob(d) ? zero(T) : one(T)) : T(NaN)
+    _check_cquantile_arg(q)
+    p >= succprob(d) ? false : true
 end
 
 mgf(d::BernoulliLogit, t::Real) = failprob(d) + exp(t + logsuccprob(d))
