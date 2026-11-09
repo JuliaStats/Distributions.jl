@@ -103,6 +103,21 @@ rng = MersenneTwister(123)
         @test isa(x, Matrix{Float32})
         @test size(x) == (3, 10)
 
+        # suffstats
+
+        d0 = Dirichlet(T.(v))
+        n0 = 50
+        x = func[2](d0, n0)
+        w = func[1](n0)
+
+        ss = suffstats(Dirichlet, x)
+        @test ss isa Distributions.DirichletStats
+        @test ss isa Distributions.DirichletStats
+        @test ss.tw == 50
+
+        ssw = suffstats(Dirichlet, x, w)
+        @test length(ssw) == length(v)
+        @test ssw.tw ≈ sum(w)
 
         # Test MLE
 
