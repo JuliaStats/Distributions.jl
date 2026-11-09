@@ -5,11 +5,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-  # Maintain compat entries of Julia dependencies (replaces CompatHelper)
+  # Maintain compat entries of Julia dependencies (replaces CompatHelper).
+  # The `docs` project is part of the workspace defined in Project.toml and
+  # is therefore resolved together with the package.
   - package-ecosystem: "julia"
-    directories:
-      - "/"
-      - "/docs"
+    directory: "/"
     schedule:
       interval: "daily"
     groups:
