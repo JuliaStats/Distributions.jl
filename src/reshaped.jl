@@ -19,6 +19,8 @@ struct ReshapedDistribution{N,S<:ValueSupport,D<:Distribution{<:ArrayLikeVariate
 end
 
 function _reshape_check_dims(dist::Distribution{<:ArrayLikeVariate}, dims::Dims)
+    dist isa UnivariateDistribution &&
+        throw(ArgumentError("univariate distributions cannot be reshaped"))
     (all(d > 0 for d in dims) && length(dist) == prod(dims)) ||
         throw(ArgumentError("dimensions $(dims) do not match size of source distribution $(size(dist))"))
 end
