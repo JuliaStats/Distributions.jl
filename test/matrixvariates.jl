@@ -10,14 +10,21 @@ import SpecialFunctions
 
 # Test utility: Construct matrix distributions with random parameters
 
+# Random positive definite matrix with eigenvalues in [1, 1 + n^2]
+# Bounding its condition number avoids draws of the matrix distributions that are
+# numerically singular in low precision such as `Float32`
+function _rand_pdmat(rng::Tuple, ::Type{T}, n::Int) where {T<:Real}
+    X = rand(rng..., T, n, n)
+    X .= 2 .* X .- 1
+    return X * X' + I
+end
+
 function _rand_dist(::Type{InverseWishart{T}}, n::Int, p::Int; rng::Union{AbstractRNG,Nothing} = nothing)::InverseWishart{T} where {T<:Real}
     n == p || throw(ArgumentError("dims must be equal for InverseWishart"))
     rng = rng === nothing ? () : (rng,)
     # `ν > n + 7` ensures finite fourth moments, required for the sample covariance to converge
     ν = n + 7 + abs(10 * randn(rng..., T))
-    X = rand(rng..., T, n, n)
-    X .= 2 .* X .- 1
-    Ψ = X * X'
+    Ψ = _rand_pdmat(rng, T, n)
     return InverseWishart(ν, Ψ)::InverseWishart{T}
 end
 function _rand_dist(::Type{LKJ{T}}, n::Int, p::Int; rng::Union{AbstractRNG,Nothing} = nothing)::LKJ{T} where {T<:Real}
@@ -39,47 +46,29 @@ function _rand_dist(::Type{MatrixFDist{T}}, n::Int, p::Int; rng::Union{AbstractR
     n1 = n + 1 + abs(10 * randn(rng..., T))
     # `n2 > n + 7` ensures finite fourth moments, required for the sample covariance to converge
     n2 = n + 7 + abs(10 * randn(rng..., T))
-    X = rand(rng..., T, n, n)
-    X .= 2 .* X .- 1
-    B = X * X'
+    B = _rand_pdmat(rng, T, n)
     return MatrixFDist(n1, n2, B)
 end
 function _rand_dist(::Type{MatrixNormal{T}}, n::Int, p::Int; rng::Union{AbstractRNG,Nothing} = nothing)::MatrixNormal{T} where {T<:Real}
     rng = rng === nothing ? () : (rng,)
     M = randn(rng..., T, n, p)
-    X = rand(rng..., T, n, n)
-    Y = rand(rng..., T, p, p)
-
-    X .= 2 .* X .- 1
-    U = X * X'
-
-    Y .= 2 .* Y .- 1
-    V = Y * Y'
-
+    U = _rand_pdmat(rng, T, n)
+    V = _rand_pdmat(rng, T, p)
     return MatrixNormal(M, U, V)
 end
 function _rand_dist(::Type{MatrixTDist{T}}, n::Int, p::Int; rng::Union{AbstractRNG,Nothing} = nothing)::MatrixTDist{T} where {T<:Real}
     rng = rng === nothing ? () : (rng,)
     ν = n + p + 1 + abs(10 * randn(rng..., T))
     M = randn(rng..., T, n, p)
-    X = rand(rng..., T, n, n)
-    Y = rand(rng..., T, p, p)
-
-    X .= 2 .* X .- 1
-    Σ = X * X'
-
-    Y .= 2 .* Y .- 1
-    Ω = Y * Y'
-
+    Σ = _rand_pdmat(rng, T, n)
+    Ω = _rand_pdmat(rng, T, p)
     return MatrixTDist(ν, M, Σ, Ω)
 end
 function _rand_dist(::Type{Wishart{T}}, n::Int, p::Int; rng::Union{AbstractRNG,Nothing} = nothing)::Wishart{T} where {T<:Real}
     n == p || throw(ArgumentError("dims must be equal for Wishart"))
     rng = rng === nothing ? () : (rng,)
     ν = n - 1 + abs(10 * randn(rng..., T))
-    X = rand(rng..., T, n, n)
-    X .= 2 .* X .- 1
-    S = X * X'
+    S = _rand_pdmat(rng, T, n)
     return Wishart(ν, S)
 end
 
