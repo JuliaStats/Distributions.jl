@@ -88,8 +88,11 @@ logpdf(d::Laplace, x::Real) = - (abs(zval(d, x)) + log(2scale(d)))
 
 cdf(d::Laplace, x::Real) = (z = zval(d, x); z < 0 ? exp(z)/2 : 1 - exp(-z)/2)
 ccdf(d::Laplace, x::Real) = (z = zval(d, x); z > 0 ? exp(-z)/2 : 1 - exp(z)/2)
-logcdf(d::Laplace, x::Real) = (z = zval(d, x); z < 0 ? loghalf + z : loghalf + log2mexp(-z))
-logccdf(d::Laplace, x::Real) = (z = zval(d, x); z > 0 ? loghalf - z : loghalf + log2mexp(z))
+# For `z ≥ 0`, `cdf(d, x) = 1 - exp(-z) / 2` (and symmetrically `ccdf(d, x) = 1 - exp(z) / 2` for `z ≤ 0`).
+# Its logarithm is computed with `log1p`, which is well-conditioned since `0 < exp(-z) / 2 ≤ 1/2`, and keeps
+# the tiny result `≈ -exp(-z) / 2` for large `z` (the sum `loghalf + log(2 - exp(-z))` would cancel to zero).
+logcdf(d::Laplace, x::Real) = (z = zval(d, x); z < 0 ? loghalf + z : log1p(-exp(-z) / 2))
+logccdf(d::Laplace, x::Real) = (z = zval(d, x); z > 0 ? loghalf - z : log1p(-exp(z) / 2))
 
 quantile(d::Laplace, p::Real) = p < 1/2 ? xval(d, log(2p)) : xval(d, -log(2(1 - p)))
 cquantile(d::Laplace, p::Real) = p > 1/2 ? xval(d, log(2(1 - p))) : xval(d, -log(2p))
