@@ -96,8 +96,26 @@ logccdf(d::Laplace, x::Real) = (z = zval(d, x); z > 0 ? loghalf - z : log1p(-exp
 
 quantile(d::Laplace, p::Real) = p < 1/2 ? xval(d, log(2p)) : xval(d, -log(2(1 - p)))
 cquantile(d::Laplace, p::Real) = p > 1/2 ? xval(d, log(2(1 - p))) : xval(d, -log(2p))
-invlogcdf(d::Laplace, lp::Real) = lp < loghalf ? xval(d, logtwo + lp) : xval(d, -(logtwo + log1mexp(lp)))
-invlogccdf(d::Laplace, lp::Real) = lp > loghalf ? xval(d, logtwo + log1mexp(lp)) : xval(d, -(logtwo + lp))
+
+# low part of `log(2)`, i.e., `log(2) - T(log(2))`
+for T in (Float16, Float32, Float64)
+    @eval _logtwo_lo(::Type{$T}) = $(T(big(logtwo) - T(logtwo)))
+end
+_logtwo_lo(::Type{T}) where {T} = T(BigFloat(logtwo; precision = 2 * precision(T) + 32) - T(logtwo))
+
+# Quantile of `Laplace(0, 1)` for log-probability `lp`. Close to the median the result is small:
+# `lp + logtwo` is exact there and the low part of `log(2)` is added to avoid cancellation.
+function _laplace_invlogcdf(lp::Real)
+    return if lp < loghalf
+        (lp + logtwo) + _logtwo_lo(typeof(lp))
+    elseif -2 * lp > logtwo
+        -log1p(-expm1((lp + logtwo) + _logtwo_lo(typeof(lp))))
+    else
+        -(logtwo + log1mexp(lp))
+    end
+end
+invlogcdf(d::Laplace, lp::Real) = xval(d, _laplace_invlogcdf(float(last(promote(d.μ, d.θ, lp)))))
+invlogccdf(d::Laplace, lp::Real) = xval(d, -_laplace_invlogcdf(float(last(promote(d.μ, d.θ, lp)))))
 
 function gradlogpdf(d::Laplace, x::Real)
     μ, θ = params(d)

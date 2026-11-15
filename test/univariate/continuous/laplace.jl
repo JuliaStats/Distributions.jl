@@ -1,4 +1,4 @@
-using StatsFuns: loghalf
+using StatsFuns: loghalf, logtwo
 
 @testset "laplace.jl" begin
     # affine transformations
@@ -17,5 +17,29 @@ using StatsFuns: loghalf
             @test logcdf(d, -z) ≈ T(loghalf) - z rtol = 4 * eps(T)
             @test logccdf(d, z) ≈ T(loghalf) - z rtol = 4 * eps(T)
         end
+    end
+
+    @testset "invlogcdf and invlogccdf accuracy (T = $T)" for T in (Float16, Float32, Float64, BigFloat)
+        d = Laplace(zero(T), one(T))
+        # reference: log(2p) for p < 1/2 and -log(2(1 - p)) otherwise
+        ref(lp) = T(
+            setprecision(BigFloat, 2 * precision(T) + 64) do
+                l = big(lp)
+                2 * exp(l) < 1 ? logtwo + l : -log(-2 * expm1(l))
+            end
+        )
+        m = T(loghalf)
+        lps = [
+            m, prevfloat(m), nextfloat(m), prevfloat(m, 16), nextfloat(m, 16), m - T(1 // 100), m + T(1 // 100),
+            T(-logtwo / 2), T(-1 // 10), T(-1 // 1000), -one(T), -floatmin(T), T(-20), T(-200),
+        ]
+        for lp in lps
+            @test @inferred(invlogcdf(d, lp)) ≈ ref(lp) rtol = 4 * eps(T)
+            @test @inferred(invlogccdf(d, lp)) ≈ -ref(lp) rtol = 4 * eps(T)
+        end
+        @test invlogcdf(d, zero(T)) == T(Inf)
+        @test invlogcdf(d, T(-Inf)) == T(-Inf)
+        @test invlogccdf(d, zero(T)) == T(-Inf)
+        @test invlogccdf(d, T(-Inf)) == T(Inf)
     end
 end
