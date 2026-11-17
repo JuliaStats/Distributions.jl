@@ -80,42 +80,7 @@ end
 
 #### Evaluations
 
-zval(d::Laplace, x::Real) = (x - d.μ) / d.θ
-xval(d::Laplace, z::Real) = d.μ + z * d.θ
-
-pdf(d::Laplace, x::Real) = exp(-abs(zval(d, x))) / 2scale(d)
-logpdf(d::Laplace, x::Real) = - (abs(zval(d, x)) + log(2scale(d)))
-
-cdf(d::Laplace, x::Real) = (z = zval(d, x); z < 0 ? exp(z)/2 : 1 - exp(-z)/2)
-ccdf(d::Laplace, x::Real) = (z = zval(d, x); z > 0 ? exp(-z)/2 : 1 - exp(z)/2)
-# For `z ≥ 0`, `cdf(d, x) = 1 - exp(-z) / 2` (and symmetrically `ccdf(d, x) = 1 - exp(z) / 2` for `z ≤ 0`).
-# Its logarithm is computed with `log1p`, which is well-conditioned since `0 < exp(-z) / 2 ≤ 1/2`, and keeps
-# the tiny result `≈ -exp(-z) / 2` for large `z` (the sum `loghalf + log(2 - exp(-z))` would cancel to zero).
-logcdf(d::Laplace, x::Real) = (z = zval(d, x); z < 0 ? loghalf + z : log1p(-exp(-z) / 2))
-logccdf(d::Laplace, x::Real) = (z = zval(d, x); z > 0 ? loghalf - z : log1p(-exp(z) / 2))
-
-quantile(d::Laplace, p::Real) = p < 1/2 ? xval(d, log(2p)) : xval(d, -log(2(1 - p)))
-cquantile(d::Laplace, p::Real) = p > 1/2 ? xval(d, log(2(1 - p))) : xval(d, -log(2p))
-
-# low part of `log(2)`, i.e., `log(2) - T(log(2))`
-for T in (Float16, Float32, Float64)
-    @eval _logtwo_lo(::Type{$T}) = $(T(big(logtwo) - T(logtwo)))
-end
-_logtwo_lo(::Type{T}) where {T} = T(BigFloat(logtwo; precision = 2 * precision(T) + 32) - T(logtwo))
-
-# Quantile of `Laplace(0, 1)` for log-probability `lp`. Close to the median the result is small:
-# `lp + logtwo` is exact there and the low part of `log(2)` is added to avoid cancellation.
-function _laplace_invlogcdf(lp::Real)
-    return if lp < loghalf
-        (lp + logtwo) + _logtwo_lo(typeof(lp))
-    elseif -2 * lp > logtwo
-        -log1p(-expm1((lp + logtwo) + _logtwo_lo(typeof(lp))))
-    else
-        -(logtwo + log1mexp(lp))
-    end
-end
-invlogcdf(d::Laplace, lp::Real) = xval(d, _laplace_invlogcdf(float(last(promote(d.μ, d.θ, lp)))))
-invlogccdf(d::Laplace, lp::Real) = xval(d, -_laplace_invlogcdf(float(last(promote(d.μ, d.θ, lp)))))
+@_delegate_statsfuns Laplace laplace μ θ
 
 function gradlogpdf(d::Laplace, x::Real)
     μ, θ = params(d)
