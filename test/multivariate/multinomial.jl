@@ -89,7 +89,15 @@ using Test
     @test logpdf(d2, x2) == -Inf
     @test logpdf(d1, x3) == -Inf
     @test logpdf(d2, x3) == -Inf
-    
+
+    # generating functions
+
+    t = T[0.1, -0.2, 0.3]
+    @test mgf(d, t) ≈ 1.4154746307426638
+    @test mgf(d, zeros(T, 3)) ≈ 1
+    @test cf(d, t) ≈ 0.7782155937673135 + 0.07430876988780569im
+    @test cf(d, zeros(T, 3)) ≈ 1
+
     # suffstats
     
     d0 = d

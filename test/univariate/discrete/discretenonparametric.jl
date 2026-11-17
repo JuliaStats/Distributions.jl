@@ -84,6 +84,7 @@ test_params(d)
 @test quantile(d, .3) == 40
 @test quantile(d, .7) == 80
 @test quantile(d, 1) == 120
+@test_throws DomainError quantile(d, -1)
 @test minimum(d) == -60
 @test maximum(d) == 120
 

@@ -51,7 +51,7 @@ end
 
 const IsoTDist  = GenericMvTDist{Float64, ScalMat{Float64}, Vector{Float64}}
 const DiagTDist = GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}, Vector{Float64}}
-const MvTDist = GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}, Vector{Float64}}
+const MvTDist = GenericMvTDist{Float64, typeof(PDMat(Matrix{Float64}(I, 1, 1))), Vector{Float64}}
 
 MvTDist(df::Real, μ::Vector{<:Real}, C::PDMat) = GenericMvTDist(df, μ, C)
 MvTDist(df::Real, C::PDMat) = GenericMvTDist(df, C)
@@ -73,7 +73,7 @@ mvtdist(df::Real, μ::Vector, C::AbstractPDMat) = GenericMvTDist(df, μ, C)
 mvtdist(df::Real, C::AbstractPDMat) = GenericMvTDist(df, C)
 
 mvtdist(df::Real, μ::Vector, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(σ)))
-mvtdist(df::Real, d::Int, σ::Real) = GenericMvTDist(df, μ, ScalMat(d, abs2(σ)))
+mvtdist(df::Real, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(σ)))
 mvtdist(df::Real, μ::Vector, σ::Vector) = GenericMvTDist(df, μ, PDiagMat(abs2.(σ)))
 mvtdist(df::Real, μ::Vector, Σ::Matrix) = GenericMvTDist(df, μ, PDMat(Σ))
 mvtdist(df::Real, Σ::Matrix) = GenericMvTDist(df, PDMat(Σ))
@@ -127,12 +127,13 @@ sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vec
 
 
 function mvtdist_consts(d::AbstractMvTDist)
-    H = convert(eltype(d), 0.5)
-    logpi = convert(eltype(d), log(pi))
+    ld = logdet(d.Σ)
+    T = promote_type(typeof(d.df), typeof(ld))
+    H = convert(T, 0.5)
     hdf = H * d.df
     hdim = H * d.dim
     shdfhdim = hdf + hdim
-    v = loggamma(shdfhdim) - loggamma(hdf) - hdim*log(d.df) - hdim*logpi - H*logdet(d.Σ)
+    v = loggamma(shdfhdim) - loggamma(hdf) - hdim*log(d.df) - hdim*logπ - H*ld
     return (shdfhdim, v)
 end
 

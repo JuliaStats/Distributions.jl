@@ -145,3 +145,30 @@ end
     @test typeof(convert(MvLogNormal{Float64}, d.normal.μ, d.normal.Σ)) == typeof(MvLogNormal(mu, PDMats.PDMat(C)))
     @test d == deepcopy(d)
 end
+
+@testset "MvLogNormal pdf/logpdf type stability" begin
+    mu = [0.1, 0.2, 0.3]
+    C = [0.4 -0.2 -0.1; -0.2 0.5 -0.1; -0.1 -0.1 0.6]
+
+    for T in (Float32, Float64)
+        d = MvLogNormal(MvNormal(Array{T}(mu), Array{T}(C)))
+
+        x_in = ones(T, length(mu))    # inside the support
+        x_zero = zeros(T, length(mu))   # on the boundary (not in support)
+        x_neg = -ones(T, length(mu))   # outside the support
+
+        for x in (x_in, x_zero, x_neg)
+            @test @inferred(logpdf(d, x)) isa T
+        end
+
+        for x in (x_in, x_zero, x_neg)
+            @test @inferred(pdf(d, x)) isa T
+        end
+
+        # values on the out-of-support branch are still correct
+        @test isequal(logpdf(d, x_zero), T(-Inf))
+        @test isequal(logpdf(d, x_neg), T(-Inf))
+        @test isequal(pdf(d, x_zero), zero(T))
+        @test isequal(pdf(d, x_neg), zero(T))
+    end
+end
