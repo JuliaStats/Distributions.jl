@@ -80,21 +80,7 @@ end
 
 #### Evaluations
 
-zval(d::Laplace, x::Real) = (x - d.μ) / d.θ
-xval(d::Laplace, z::Real) = d.μ + z * d.θ
-
-pdf(d::Laplace, x::Real) = exp(-abs(zval(d, x))) / 2scale(d)
-logpdf(d::Laplace, x::Real) = - (abs(zval(d, x)) + log(2scale(d)))
-
-cdf(d::Laplace, x::Real) = (z = zval(d, x); z < 0 ? exp(z)/2 : 1 - exp(-z)/2)
-ccdf(d::Laplace, x::Real) = (z = zval(d, x); z > 0 ? exp(-z)/2 : 1 - exp(z)/2)
-logcdf(d::Laplace, x::Real) = (z = zval(d, x); z < 0 ? loghalf + z : loghalf + log2mexp(-z))
-logccdf(d::Laplace, x::Real) = (z = zval(d, x); z > 0 ? loghalf - z : loghalf + log2mexp(z))
-
-quantile(d::Laplace, p::Real) = p < 1/2 ? xval(d, log(2p)) : xval(d, -log(2(1 - p)))
-cquantile(d::Laplace, p::Real) = p > 1/2 ? xval(d, log(2(1 - p))) : xval(d, -log(2p))
-invlogcdf(d::Laplace, lp::Real) = lp < loghalf ? xval(d, logtwo + lp) : xval(d, -(logtwo + log1mexp(lp)))
-invlogccdf(d::Laplace, lp::Real) = lp > loghalf ? xval(d, logtwo + log1mexp(lp)) : xval(d, -(logtwo + lp))
+@_delegate_statsfuns Laplace laplace μ θ
 
 function gradlogpdf(d::Laplace, x::Real)
     μ, θ = params(d)
