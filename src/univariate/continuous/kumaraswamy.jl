@@ -85,10 +85,24 @@ end
 
 function gradlogpdf(d::Kumaraswamy, x::Real)
     a, b = params(d)
+    if x <= 0 || x >= 1
+        # Unit values retain the interior arithmetic's result type, including
+        # integer/rational promotion, without dividing by zero at a boundary.
+        z = zero((one(a) * one(b) * one(x)^a) / one(x))
+        if x < 0 || x > 1
+            # Match the zero-gradient convention used outside Beta's support.
+            return z
+        elseif iszero(x)
+            # One-sided limits of (a - 1)/x - a*(b - 1)*x^(a - 1)/(1 - x^a).
+            return a == 1 ? one(z) - oftype(z, b) : oftype(z, a > 1 ? Inf : -Inf)
+        else
+            return b == 1 ? oftype(z, a) - one(z) : oftype(z, b > 1 ? -Inf : Inf)
+        end
+    end
     _x = clamp(x, 0, 1)
     _xᵃ = _x^a
     y = (a * (b * _xᵃ - 1) + (1 - _xᵃ)) / (_x * (_xᵃ - 1))
-    return x < 0 || x > 1 ? oftype(y, -Inf) : y
+    return y
 end
 
 ### Sampling
@@ -111,10 +125,10 @@ end
 function skewness(d::Kumaraswamy)
     a, b = params(d)
     μ = mean(d)
-    σ² = var(d)
     m₂ = _kumomentaswamy(a, b, 2)
     m₃ = _kumomentaswamy(a, b, 3)
-    return (2m₃ - μ * (3m₂ - μ^2)) / (σ² * sqrt(σ²))
+    σ² = m₂ - μ^2
+    return (m₃ + μ * (-3m₂ + 2μ^2)) / (σ² * sqrt(σ²))
 end
 
 function kurtosis(d::Kumaraswamy)
@@ -125,6 +139,10 @@ function kurtosis(d::Kumaraswamy)
     m₄ = _kumomentaswamy(a, b, 4)
     return (m₄ + μ * (-4m₃ + μ * (6m₂ - 3μ^2))) / var(d)^2 - 3
 end
+
+# Float16 raw-moment cancellation loses the fourth central moment. Evaluate
+# in Float32 and retain the public Float16 result type.
+kurtosis(d::Kumaraswamy{Float16}) = Float16(kurtosis(convert(Kumaraswamy{Float32}, d)))
 
 function median(d::Kumaraswamy)
     a, b = params(d)
