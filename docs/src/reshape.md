@@ -7,3 +7,6 @@ Distributions of array variates such as `MultivariateDistribution`s and
 reshape
 vec
 ```
+
+Univariate distributions have scalar variates and cannot be reshaped.
+Both `reshape` and `vec` reject them with an error.

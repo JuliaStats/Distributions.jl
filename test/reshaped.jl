@@ -134,6 +134,35 @@
         test_reshaped(rng, d1, sizes)
     end
 
+    @testset "univariate distributions cannot be reshaped" begin
+        expected_error = ArgumentError("univariate distributions cannot be reshaped")
+        for d in (Normal(), Uniform(), Bernoulli(0.3))
+            for dims in ((), (1,), (1, 1), (2,))
+                @test_throws expected_error reshape(d, dims)
+                @test_throws expected_error ReshapedDistribution(d, dims)
+                if !isempty(dims)
+                    @test_throws expected_error reshape(d, dims...)
+                end
+            end
+            @test_throws expected_error vec(d)
+        end
+    end
+
+    @testset "one-element array distributions can be reshaped" begin
+        for d in (
+            MvNormal([0.0], ones(1, 1)),
+            MatrixNormal(zeros(1, 1), ones(1, 1), ones(1, 1)),
+        )
+            for dims in ((1,), (1, 1))
+                for reshaped in (reshape(d, dims), ReshapedDistribution(d, dims))
+                    @test size(reshaped) == dims
+                    @test vec(mean(reshaped)) == [0.0]
+                    @test insupport(reshaped, fill(0.0, dims)) === true
+                end
+            end
+        end
+    end
+
     @testset "special cases" begin
         # MatrixNormal
         rand_posdef_mat(X) = X * X' + I
