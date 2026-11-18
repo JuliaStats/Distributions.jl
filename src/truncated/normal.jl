@@ -118,6 +118,36 @@ function entropy(d::Truncated{<:Normal{<:Real},Continuous})
     0.5 * (log2π + 1.) + log(σ * z) + (aφa - bφb) / (2.0 * z)
 end
 
+function mgf(d::Truncated{<:Normal{<:Real},Continuous}, t::Real)
+    T = float(promote_type(partype(d), typeof(t)))
+    a = T(minimum(d))
+    b = T(maximum(d))
+    if isnan(a) || isnan(b)  # TODO: Disallow constructing `Truncated` with a `NaN` bound?
+        return T(NaN)
+    elseif isinf(a) && isinf(b) && a != b
+        # Distribution is `Truncated`-wrapped but not actually truncated
+        return T(mgf(d.untruncated, t))
+    elseif a == b
+        # Truncated to a Dirac distribution; this is `mgf(Dirac(a), t)`
+        return exp(a * t)
+    end
+    d0 = d.untruncated
+    μ = mean(d0)
+    σ = std(d0)
+    σ²t = σ^2 * t
+    a′ = (a - μ) / σ
+    b′ = (b - μ) / σ
+    stdnorm = Normal{T}(zero(T), one(T))
+    # log((Φ(b′ - σ²t) - Φ(a′ - σ²t)) / (Φ(b′) - Φ(a′)))
+    logratio = if isfinite(a) && isfinite(b)  # doubly truncated
+        logdiffcdf(stdnorm, b′ - σ²t, a′ - σ²t) - logdiffcdf(stdnorm, b′, a′)
+    elseif isfinite(a)  # left truncated: b = ∞, Φ(b′) = Φ(b′ - σ²t) = 1
+        logccdf(stdnorm, a′ - σ²t) - logccdf(stdnorm, a′)
+    else  # isfinite(b), right truncated: a = ∞, Φ(a′) = Φ(a′ - σ²t) = 0
+        logcdf(stdnorm, b′ - σ²t) - logcdf(stdnorm, b′)
+    end
+    return exp(t * (μ + σ²t / 2) + logratio)
+end
 
 ### sampling
 
