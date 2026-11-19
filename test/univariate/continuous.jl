@@ -72,11 +72,27 @@ end
 @testset "VonMises with large kappa" begin
     d = VonMises(1.1, 1000)
     @test var(d) ≈ 0.0005001251251957198
+    @test std(d) ≈ 0.03163068856278875 rtol=1e-10
     @test entropy(d) ≈ -2.034688918525470
     @test cf(d, 2.5) ≈ -0.921417 + 0.38047im atol=1e-6
     @test pdf(d, 0.5) ≈ 1.758235814051e-75
     @test logpdf(d, 0.5) ≈ -172.1295710466005
     @test cdf(d, 1.0) ≈ 0.000787319 atol=1e-9
+end
+
+# circular standard deviation sqrt(-2 log R) with mean resultant length R = E[cos(x - μ)]
+# (issue #1736); reference values computed with QuadGK
+@testset "VonMises circular standard deviation" begin
+    for (μ, κ, σ) in ((0.0, 1.0, 1.2700884583350953),
+                      (1.1, 2.5, 0.731961333244502),
+                      (0.0, 4.0, 0.5417290769700058),
+                      (0.0, 1e-3, 3.8989492391007063))
+        d = VonMises(μ, κ)
+        @test std(d) ≈ σ rtol=1e-12
+        @test std(d) ≈ sqrt(-2 * log1p(-var(d)))
+    end
+    # approaches the standard deviation of the approximating normal distribution
+    @test std(VonMises(0.0, 1e6)) ≈ 1 / sqrt(1e6) rtol=1e-6
 end
 
 @testset "NormalInverseGaussian random repeatable and basic metrics" begin

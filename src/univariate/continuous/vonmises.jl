@@ -13,6 +13,11 @@ VonMises(κ)      # von Mises distribution with zero mean and concentration κ
 VonMises(μ, κ)   # von Mises distribution with mean μ and concentration κ
 ```
 
+As the von Mises distribution is a circular distribution, `var` and `std` return the
+*circular* variance ``1 - R`` and the *circular* standard deviation ``\\sqrt{-2 \\log R}``,
+where ``R = I_1(\\kappa) / I_0(\\kappa)`` is the mean resultant length.
+Note that, unlike for linear distributions, `std(d) != sqrt(var(d))`.
+
 External links
 
 * [von Mises distribution on Wikipedia](http://en.wikipedia.org/wiki/Von_Mises_distribution)
@@ -53,10 +58,13 @@ partype(::VonMises{T}) where {T<:Real} = T
 mean(d::VonMises) = d.μ
 median(d::VonMises) = d.μ
 mode(d::VonMises) = d.μ
-var(d::VonMises) = 1 - besselix(1, d.κ) / d.I0κx
+# mean resultant length R = E[cos(x - μ)] = I₁(κ) / I₀(κ)
+_meanresultantlength(d::VonMises) = besselix(1, d.κ) / d.I0κx
+var(d::VonMises) = 1 - _meanresultantlength(d)
+std(d::VonMises) = sqrt(-2 * log(_meanresultantlength(d)))
 # deprecated 12 September 2016
 @deprecate circvar(d) var(d)
-entropy(d::VonMises) = log(twoπ * d.I0κx) + d.κ * (1 - besselix(1, d.κ) / d.I0κx)
+entropy(d::VonMises) = log(twoπ * d.I0κx) + d.κ * (1 - _meanresultantlength(d))
 
 cf(d::VonMises, t::Real) = (besselix(abs(t), d.κ) / d.I0κx) * cis(t * d.μ)
 
