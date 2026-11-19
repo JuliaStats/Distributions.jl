@@ -101,6 +101,8 @@ export
     FullNormalCanon,
     Gamma,
     DiscreteNonParametric,
+    GeneralizedHyperbolic,
+    GeneralizedInverseGaussian,
     GeneralizedPareto,
     GeneralizedExtremeValue,
     Geometric,
