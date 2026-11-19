@@ -88,8 +88,6 @@ maximum(d::JointOrderStatistics) = Fill(maximum(d.dist), length(d))
 
 namedparams(d::JointOrderStatistics) = (; d.dist, d.n, d.ranks)
 partype(d::JointOrderStatistics) = partype(d.dist)
-Base.eltype(::Type{<:JointOrderStatistics{D}}) where {D} = Base.eltype(D)
-Base.eltype(d::JointOrderStatistics) = eltype(d.dist)
 
 function _showname(io::IO, d::JointOrderStatistics)
     print(io, "Joint order statistics of a ")
@@ -135,7 +133,23 @@ function _marginalize_range(dist, i, j, xᵢ, xⱼ, T)
     return k * T(logdiffcdf(dist, xⱼ, xᵢ)) - loggamma(T(k + 1))
 end
 
-function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
+function rand(rng::AbstractRNG, d::JointOrderStatistics)
+    n = d.n
+    if n == length(d.ranks)  # ranks == 1:n
+        # direct method, slower than inversion method for large `n` and distributions with
+        # fast quantile function or that use inversion sampling
+        x = rand(rng, d.dist, n)
+        sort!(x)
+    else
+        xi = rand(rng, d.dist) # this is only used to obtain the type of samples from `d.dist`
+        x = Vector{typeof(xi)}(undef, length(d.ranks))
+        rand!(rng, d, x)
+    end
+    return x
+end
+
+function rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
+    _check_rand_size(d, x)
     n = d.n
     if n == length(d.ranks)  # ranks == 1:n
         # direct method, slower than inversion method for large `n` and distributions with

@@ -58,8 +58,6 @@ insupport(d::OrderStatistic, x::Real) = insupport(d.dist, x)
 
 namedparams(d::OrderStatistic) = (; d.dist, d.n, d.rank)
 partype(d::OrderStatistic) = partype(d.dist)
-Base.eltype(::Type{<:OrderStatistic{D}}) where {D} = Base.eltype(D)
-Base.eltype(d::OrderStatistic) = eltype(d.dist)
 
 function _showname(io::IO, d::OrderStatistic)
     print(io, "Order statistic of a ")
@@ -112,7 +110,6 @@ end
 function rand(rng::AbstractRNG, d::OrderStatistic)
     # inverse transform sampling. Since quantile function is Qₓ(Uᵢₙ⁻¹(p)), we draw a random
     # variable from Uᵢₙ and pass it through the quantile function of `d.dist`
-    T = eltype(d.dist)
     b = _uniform_orderstatistic(d)
-    return T(quantile(d.dist, rand(rng, b)))
+    return quantile(d.dist, float(partype(d.dist))(rand(rng, b)))
 end

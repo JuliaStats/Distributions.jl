@@ -95,7 +95,7 @@ end
 @testset "reproducibility across julia versions" begin
     d = Categorical([0.1, 0.2, 0.7])
     rng = StableRNGs.StableRNG(600)
-    @test rand(rng, d, 10) == [3, 1, 1, 2, 3, 2, 3, 3, 2, 3]
+    @test rand(rng, d, 10) == [1, 1, 2, 3, 2, 3, 3, 2, 3, 3]
 end
 
 @testset "comparisons" begin

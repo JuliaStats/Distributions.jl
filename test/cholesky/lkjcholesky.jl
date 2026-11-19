@@ -17,10 +17,7 @@ using FiniteDifferences
         dmat = LKJ(p, d.η)
         marginal = Distributions._marginal(dmat)    
         ndraws = length(xs)
-        zs = Array{eltype(d)}(undef, p, p, ndraws)
-        for k in 1:ndraws
-            zs[:, :, k] = Matrix(xs[k])
-        end
+        zs = stack(Matrix, xs)
 
         @testset "LKJCholesky marginal moments" begin
             @test mean(zs; dims=3)[:, :, 1] ≈ I atol=0.1
@@ -194,7 +191,7 @@ using FiniteDifferences
                 test_draw(d, rand(rng, d))
                 test_draws(d, rand(rng, d, 10^4); nkstests=nkstests)
             end
-            @test_broken rand(rng, LKJCholesky(5, Inf)) ≈ I
+            @test Matrix(rand(rng, LKJCholesky(5, Inf))) ≈ I
         end
 
         @testset "rand!" begin
