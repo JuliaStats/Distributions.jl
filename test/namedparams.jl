@@ -3,6 +3,7 @@ using InteractiveUtils
 using LinearAlgebra
 using PDMats: PDMat, ScalMat
 using Test
+using Zygote: Zygote
 
 using Distributions: namedparams
 
@@ -178,6 +179,19 @@ using Distributions: namedparams
         d = censored(truncated(Normal(); lower=0.0); upper=2.0)
         @test namedparams(d) == (uncensored=d.uncensored, lower=nothing, upper=2.0)
         @test params(d) === (0.0, 1.0, 0.0, nothing, nothing, 2.0)
+    end
+
+    @testset "reverse-mode AD" begin
+        # Natively, a fold over the parameters is as cheap as the recursion in `params`,
+        # but it made Zygote allocate about a hundred times more than for `namedparams`
+        allocations(f, x) = (Zygote.gradient(f, x); @allocated Zygote.gradient(f, x))
+        constructors = ("Poisson" => Poisson, "Normal" => μ -> Normal(μ, 2.0))
+        @testset "$name" for (name, dist) in constructors
+            params_sum(x) = sum(params(dist(x)))
+            namedparams_sum(x) = sum(values(namedparams(dist(x))))
+            @test Zygote.gradient(params_sum, 1.5) == (1.0,)
+            @test allocations(params_sum, 1.5) <= 10 * allocations(namedparams_sum, 1.5)
+        end
     end
 
     @testset "reconstruction" begin
