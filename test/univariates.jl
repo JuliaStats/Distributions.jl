@@ -145,6 +145,8 @@ function verify_and_test(D::Type, d::UnivariateDistribution, dct::AbstractDict, 
                      NoncentralHypergeometric,
                      NormalInverseGaussian})
         test_distr(d, n_tsamples)
+    else
+        test_constructionbase(d)
     end
 end
 

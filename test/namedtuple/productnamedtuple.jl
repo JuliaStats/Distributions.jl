@@ -24,6 +24,7 @@ using Test
         @test d.dists === nt
         @test Distributions.variate_form(typeof(d)) === NamedTupleVariate{(:x, :y, :z, :w)}
         @test Distributions.value_support(typeof(d)) === Continuous
+        test_constructionbase(d)
     end
 
     @testset "product_distribution" begin

@@ -58,6 +58,7 @@ using StableRNGs
         @test cov(g)    ≈ Σ
         @test invcov(g) ≈ inv(Σ)
         Distributions.TestUtils.test_mvnormal(g, 10^4)
+        test_constructionbase(g)
 
         # conversion between mean form and canonical form
         if isa(g, MvNormal)

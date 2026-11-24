@@ -21,6 +21,7 @@ rng = MersenneTwister(123)
         @test eltype(d) === T
         @test d.alpha == [2, 2, 2]
         @test d.alpha0 == 6
+        test_constructionbase(d)
 
         @test mean(d) ≈ fill(1/3, 3)
         @test mode(d) ≈ fill(1/3, 3)

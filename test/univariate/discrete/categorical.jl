@@ -68,6 +68,8 @@ for p in Any[
     # The test utilities are currently only able to handle Float64s
     if partype(d) === Float64
         test_distr(d, 10^6)
+    else
+        test_constructionbase(d)
     end
 end
 

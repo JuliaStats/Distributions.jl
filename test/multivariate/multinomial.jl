@@ -18,6 +18,7 @@ using Test
     
     @test length(d) == 3
     @test d.n == nt
+    test_constructionbase(d)
     @test mean(d) ≈ T[2., 5., 3.]
     @test std(d)  ≈ T[sqrt(1.6), sqrt(2.5), sqrt(2.1)]
     @test var(d)  ≈ T[1.6, 2.5, 2.1]

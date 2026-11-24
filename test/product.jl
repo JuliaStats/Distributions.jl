@@ -63,6 +63,7 @@ end
 
     # Check that methods for `VectorOfUnivariateDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds1, d_product2), (ds3, d_product3))
+        test_constructionbase(d_product)
         @test length(d_product) == length(ds)
         @test eltype(d_product) === eltype(ds[1])
         @test @inferred(mean(d_product)) == mean.(ds)
@@ -114,6 +115,7 @@ end
 
         # Check that methods for `VectorOfUnivariateDistribution` are consistent.
         for (ds, d_product) in ((ds1, d_product1), (ds1, d_product3), (ds3, d_product2))
+            test_constructionbase(d_product)
             @test length(d_product) == length(ds)
             @test eltype(d_product) === eltype(ds[1])
             @test @inferred(mean(d_product)) == mean.(ds)
@@ -150,6 +152,7 @@ end
 
     ds_vec = vcat(ds...)
 
+    test_constructionbase(d_product)
     @test length(d_product) == 3
     @test eltype(d_product) === Float64
     @test @inferred(mean(d_product)) == mean.(ds_vec)
@@ -190,6 +193,7 @@ end
 
     # Check that methods for `MatrixOfUnivariateDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
+        test_constructionbase(d_product)
         @test size(d_product) == size(ds)
         @test eltype(d_product) === eltype(ds[1])
         @test @inferred(mean(d_product)) == mean.(ds)
@@ -228,6 +232,7 @@ end
 
         # Check that methods for `VectorOfMultivariateDistribution` are consistent.
         for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
+            test_constructionbase(d_product)
             @test size(d_product) == (length(ds[1]), size(ds)...)
             @test eltype(d_product) === eltype(ds[1])
             @test @inferred(mean(d_product)) == reshape(mapreduce(mean, (x, y) -> cat(x, y; dims=ndims(ds) + 1), ds), size(d_product))

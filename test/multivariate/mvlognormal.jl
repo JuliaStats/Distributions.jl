@@ -9,6 +9,7 @@ using LinearAlgebra, Random, Test
 
 function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6,
                           rng::Union{AbstractRNG, Missing} = missing)
+    test_constructionbase(g)
     d = length(g)
     mn = mean(g)
     md = median(g)
