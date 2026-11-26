@@ -23,7 +23,7 @@ using LinearAlgebra
     # Check that methods for `ProductDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
         @test length(d_product) == length(ds)
-        @test eltype(d_product) === eltype(ds[1])
+        @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
         @test mean(d_product) == mean.(ds)
         @test std(d_product) == std.(ds)
         @test var(d_product) == var.(ds)
@@ -49,22 +49,22 @@ end
     # d_product1 = @inferred(product_distribution(ds1))
     # when `Product` is removed
     d_product1 = @inferred(Distributions.ProductDistribution(ds1))
-    @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector,Continuous,Float64}
+    @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector,Continuous}
 
     d_product2 = @inferred(product_distribution(ntuple(i -> Uniform(0.0, ubound[i]), 11)...))
-    @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous,Float64}
+    @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous}
 
     ds3 = Fill(Uniform(0.0, first(ubound)), N)
     # Replace with
     # d_product3 = @inferred(product_distribution(ds3))
     # when `Product` is removed
     d_product3 = @inferred(Distributions.ProductDistribution(ds3))
-    @test d_product3 isa Distributions.VectorOfUnivariateDistribution{<:Fill,Continuous,Float64}
+    @test d_product3 isa Distributions.VectorOfUnivariateDistribution{<:Fill,Continuous}
 
     # Check that methods for `VectorOfUnivariateDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds1, d_product2), (ds3, d_product3))
         @test length(d_product) == length(ds)
-        @test eltype(d_product) === eltype(ds[1])
+        @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
         @test @inferred(mean(d_product)) == mean.(ds)
         @test @inferred(std(d_product)) == std.(ds)
         @test @inferred(var(d_product)) == var.(ds)
@@ -100,22 +100,22 @@ end
         # d_product1 = @inferred(product_distribution(ds1))
         # when `Product` is removed
         d_product1 = @inferred(Distributions.ProductDistribution(ds1))
-        @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector{<:DiscreteNonParametric},Discrete,eltype(a)}
+        @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector{<:DiscreteNonParametric},Discrete}
 
         d_product2 = @inferred(product_distribution(ntuple(_ -> DiscreteNonParametric(a, [0.5, 0.5]), 11)...))
-        @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:NTuple{N,<:DiscreteNonParametric},Discrete,eltype(a)}
+        @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:NTuple{N,<:DiscreteNonParametric},Discrete}
 
         ds3 = Fill(DiscreteNonParametric(a, [0.5, 0.5]), N)
         # Replace with
         # d_product3 = @inferred(product_distribution(ds3))
         # when `Product` is removed
         d_product3 = @inferred(Distributions.ProductDistribution(ds3))
-        @test d_product3 isa Distributions.VectorOfUnivariateDistribution{<:Fill{<:DiscreteNonParametric,1},Discrete,eltype(a)}
+        @test d_product3 isa Distributions.VectorOfUnivariateDistribution{<:Fill{<:DiscreteNonParametric,1},Discrete}
 
         # Check that methods for `VectorOfUnivariateDistribution` are consistent.
         for (ds, d_product) in ((ds1, d_product1), (ds1, d_product3), (ds3, d_product2))
             @test length(d_product) == length(ds)
-            @test eltype(d_product) === eltype(ds[1])
+            @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
             @test @inferred(mean(d_product)) == mean.(ds)
             @test @inferred(std(d_product)) == std.(ds)
             @test @inferred(var(d_product)) == var.(ds)
@@ -146,12 +146,12 @@ end
 
     ds = (Bernoulli(0.3), Uniform(0.0, 0.7), Categorical([0.4, 0.2, 0.4]))
     d_product = @inferred(product_distribution(ds...))
-    @test d_product isa Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous,Float64}
+    @test d_product isa Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous}
 
     ds_vec = vcat(ds...)
 
     @test length(d_product) == 3
-    @test eltype(d_product) === Float64
+    @test @test_deprecated(eltype(d_product)) === Float64
     @test @inferred(mean(d_product)) == mean.(ds_vec)
     @test @inferred(std(d_product)) == std.(ds_vec)
     @test @inferred(var(d_product)) == var.(ds_vec)
@@ -182,16 +182,16 @@ end
 
     ds1 = Uniform.(0.0, ubound)
     d_product1 = @inferred(product_distribution(ds1))
-    @test d_product1 isa Distributions.MatrixOfUnivariateDistribution{<:Matrix{<:Uniform},Continuous,Float64}
+    @test d_product1 isa Distributions.MatrixOfUnivariateDistribution{<:Matrix{<:Uniform},Continuous}
 
     ds2 = Fill(Uniform(0.0, first(ubound)), M, N)
     d_product2 = @inferred(product_distribution(ds2))
-    @test d_product2 isa Distributions.MatrixOfUnivariateDistribution{<:Fill{<:Uniform,2},Continuous,Float64}
+    @test d_product2 isa Distributions.MatrixOfUnivariateDistribution{<:Fill{<:Uniform,2},Continuous}
 
     # Check that methods for `MatrixOfUnivariateDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
         @test size(d_product) == size(ds)
-        @test eltype(d_product) === eltype(ds[1])
+        @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
         @test @inferred(mean(d_product)) == mean.(ds)
         @test @inferred(var(d_product)) == var.(ds)
         @test @inferred(cov(d_product)) == Diagonal(vec(var.(ds)))
@@ -220,16 +220,16 @@ end
 
         ds1 = Dirichlet.(alphas)
         d_product1 = @inferred(product_distribution(ds1))
-        @test d_product1 isa Distributions.ProductDistribution{length(N) + 1,1,<:Array{<:Dirichlet{Float64},length(N)},Continuous,Float64}
+        @test d_product1 isa Distributions.ProductDistribution{length(N) + 1,1,<:Array{<:Dirichlet{Float64},length(N)},Continuous}
 
         ds2 = Fill(Dirichlet(first(alphas)), N...)
         d_product2 = @inferred(product_distribution(ds2))
-        @test d_product2 isa Distributions.ProductDistribution{length(N) + 1,1,<:Fill{<:Dirichlet{Float64},length(N)},Continuous,Float64}
+        @test d_product2 isa Distributions.ProductDistribution{length(N) + 1,1,<:Fill{<:Dirichlet{Float64},length(N)},Continuous}
 
         # Check that methods for `VectorOfMultivariateDistribution` are consistent.
         for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
             @test size(d_product) == (length(ds[1]), size(ds)...)
-            @test eltype(d_product) === eltype(ds[1])
+            @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
             @test @inferred(mean(d_product)) == reshape(mapreduce(mean, (x, y) -> cat(x, y; dims=ndims(ds) + 1), ds), size(d_product))
             @test @inferred(var(d_product)) == reshape(mapreduce(var, (x, y) -> cat(x, y; dims=ndims(ds) + 1), ds), size(d_product))
             @test @inferred(cov(d_product)) == Diagonal(mapreduce(var, vcat, ds))

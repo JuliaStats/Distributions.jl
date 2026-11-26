@@ -18,10 +18,20 @@ size(d::MultivariateDistribution)
 
 # multiple multivariate, must allocate matrix
 # TODO: inconsistency with other `ArrayLikeVariate`s and `rand(s, (n,))` - maybe remove?
-rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
-    rand!(rng, sampler(s), Matrix{eltype(s)}(undef, length(s), n))
-rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =
-    rand!(rng, sampler(s), Matrix{float(eltype(s))}(undef, length(s), n))
+function rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int)
+    return _rand(rng, sampler(s), n)
+end
+function _rand(rng, s::Sampleable{Multivariate}, n::Int)
+    r = rand(rng, s)
+    out = Matrix{eltype(r)}(undef, length(r), n)
+    if n > 0
+        copyto!(out, r)
+        if n > 1
+            rand!(rng, s, @view(out[:, 2:n]))
+        end
+    end
+    return out
+end
 
 ## domain
 

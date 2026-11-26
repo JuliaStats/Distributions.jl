@@ -4,7 +4,7 @@ function test_location_scale(
 )
     d = Distributions.AffineDistribution(μ, σ, ρ)
     @test params(d) == (μ,σ,ρ)
-    @test eltype(d) === eltype(dref)
+    @test @test_deprecated(eltype(d)) === @test_deprecated(eltype(dref))
 
     # Different ways to construct the AffineDistribution object
     if dref isa DiscreteDistribution
@@ -110,11 +110,10 @@ function test_location_scale(
             @test invlogccdf(dtest, log(0.5)) ≈ invlogccdf(dref, log(0.5))
             @test invlogccdf(dtest, log(0.8)) ≈ invlogccdf(dref, log(0.8))
 
-            r = Array{float(eltype(dtest))}(undef, 200000)
-            if ismissing(rng)
-                rand!(dtest, r)
+            r = if ismissing(rng)
+                rand(dtest, 200_000)
             else
-                rand!(rng, dtest, r)
+                rand(rng, dtest, 200_000)
             end
             @test mean(r) ≈ mean(dref) atol=0.02
             @test std(r) ≈ std(dref) atol=0.02

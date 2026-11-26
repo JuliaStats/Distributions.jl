@@ -78,8 +78,9 @@ function rand(rng::AbstractRNG, d::Semicircle)
     # sample polar coordinates r,θ
     # of point uniformly distributed on radius d.r half disk
     # project onto x axis
-    θ = rand(rng) # multiple of π
-    r = d.r * sqrt(rand(rng))
+    rmax = float(d.r)
+    θ = rand(rng, typeof(rmax)) # multiple of π
+    r = rmax * sqrt(rand(rng, typeof(rmax)))
     return cospi(θ) * r
 end
 

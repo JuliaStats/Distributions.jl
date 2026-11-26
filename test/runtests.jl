@@ -34,6 +34,7 @@ const tests = [
     "utils",
     "sparseconnectivitytracer", # extra file compared to /src
     "samplers",
+    "genericrand",
     "univariate/discrete/categorical",
     "univariates",
     "univariate/continuous", # extra file compared to /src
@@ -76,6 +77,7 @@ const tests = [
     "univariate/discrete/skellam",
     "univariate/discrete/soliton",
     "univariate/continuous/skewnormal",
+    "univariate/continuous/beta",
     "univariate/continuous/betaprime",
     "univariate/continuous/chi",
     "univariate/continuous/chisq",
@@ -141,8 +143,6 @@ const tests = [
     # "samplers/vonmises",
     # "samplers/vonmisesfisher",
     # "truncated/loguniform",
-    # "univariate/continuous/beta",
-    # "univariate/continuous/beta",
     # "univariate/continuous/biweight",
     # "univariate/continuous/epanechnikov",
     # "univariate/continuous/frechet",

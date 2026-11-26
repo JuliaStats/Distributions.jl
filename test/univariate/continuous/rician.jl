@@ -6,7 +6,7 @@
     @test shape(d1) == 0.0
     @test scale(d1) == 200.0
     @test partype(d1) === Float64
-    @test eltype(d1) === Float64
+    @test @test_deprecated(eltype(d1)) === Float64
     @test rand(d1) isa Float64
 
     d2 = Rayleigh(10.0)
@@ -35,7 +35,7 @@
     @test shape(d1) == 0.5f0
     @test scale(d1) == 300.0f0
     @test partype(d1) === Float32
-    @test eltype(d1) === Float64
+    @test @test_deprecated(eltype(d1)) === Float64
     @test rand(d1) isa Float64
 
     d1 = Rician()
