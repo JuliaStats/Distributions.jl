@@ -124,6 +124,25 @@
         test_reshaped(rng, d1, sizes)
     end
 
+    @testset "element and sample types" begin
+        for T in (Float32, Float64)
+            dist = MvNormal(zeros(T, 6), Diagonal(ones(T, 6)))
+            @test eltype(dist) === T
+            for dims in ((2, 3), (1, 2, 3))
+                d = reshape(dist, dims)
+                @test eltype(d) === T
+                @test eltype(typeof(d)) === T
+                x = rand(rng, d)
+                @test size(x) == dims
+                @test eltype(x) === T
+                xs = rand(rng, d, 2)
+                @test length(xs) == 2
+                @test all(x -> size(x) == dims, xs)
+                @test all(x -> eltype(x) === T, xs)
+            end
+        end
+    end
+
     @testset "reshape Dirichlet" begin
         α = rand(rng, 36) .+ 1 # mode is only defined if all alpha > 1
         d1 = Dirichlet(α)
