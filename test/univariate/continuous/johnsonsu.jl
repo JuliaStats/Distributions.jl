@@ -31,6 +31,38 @@
     @test Base.convert(JohnsonSU{Float64}, d1) === d1
     @test Base.convert(JohnsonSU{Int}, d1) isa JohnsonSU{Int}
 
+    @testset "affine transformations" begin
+        d = JohnsonSU(0.3, 1.5, -0.7, 2.0)
+        ξ, λ, γ, δ = params(d)
+        for (a, c) in ((2.0, 3.0), (2.0, -3.0))
+            td = @inferred(a + c * d)
+            @test td === JohnsonSU(a + c * ξ, abs(c) * λ, sign(c) * γ, δ)
+            # `td` is the distribution of `a + c * X` with `X ~ d`
+            for p in (0.01, 0.2, 0.5, 0.8, 0.99)
+                x = quantile(d, p)
+                @test cdf(td, a + c * x) ≈ (c > 0 ? cdf(d, x) : ccdf(d, x)) rtol = 1.0e-14
+                @test logpdf(td, a + c * x) ≈ logpdf(d, x) - log(abs(c)) rtol = 1.0e-14
+            end
+        end
+
+        # the remaining affine operations are defined in terms of `+` and `*`
+        @test @inferred(2.0 + d) === JohnsonSU(ξ + 2.0, λ, γ, δ)
+        @test @inferred(d - 2.0) === JohnsonSU(ξ - 2.0, λ, γ, δ)
+        @test @inferred(d * 2.0) === JohnsonSU(2.0 * ξ, 2.0 * λ, γ, δ)
+        @test @inferred(d / 2.0) === JohnsonSU(ξ / 2.0, λ / 2.0, γ, δ)
+        @test @inferred(-d) === JohnsonSU(-ξ, λ, -γ, δ)
+
+        # type promotion
+        d32 = JohnsonSU(0.3f0, 1.5f0, -0.7f0, 2.0f0)
+        @test @inferred(2 * d32 + 1) isa JohnsonSU{Float32}
+        @test @inferred(2.0 * d32) isa JohnsonSU{Float64}
+
+        # scaling by zero gives a degenerate distribution instead of an error
+        d0 = @inferred(0.0 * d)
+        @test d0 isa JohnsonSU{Float64}
+        @test scale(d0) == 0
+    end
+
     d1 = JohnsonSU()
     @test d1 isa JohnsonSU{Int}
     @test params(d1) == (0, 1, 0, 1)
