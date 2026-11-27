@@ -1,7 +1,7 @@
 using Distributions, Random, StaticArrays, LinearAlgebra
 using Test
 
-import Distributions: GenericMvTDist
+import Distributions: GenericMvTDist, mvtdist, DiagTDist
 import PDMats: PDMat
 
 @testset "mvtdist" begin
@@ -86,4 +86,61 @@ end
     x = rand(X_implicit)
     @test logpdf(X_implicit, x) ≈ logpdf(X_expicit, x)
 end
+
+@testset "mvtdist constructors" begin
+    df = 3.0
+    μ = [1.0, 2, 3]
+    k = length(μ)
+    σ = 2.0
+    σv = [1.0, 2, 3]
+    Σ = [4.0 2 1; 2 3 0.5; 1 0.5 2]
+    x = [0.5, -1.0, 2.0]
+    z = zeros(k)
+
+    # (description, distribution, expected mean parameter, expected scale matrix)
+    cases = [
+        ("(df, μ, PDMat)", mvtdist(df, μ, PDMat(Σ)), μ, Σ),
+        ("(df, μ, PDiagMat)", mvtdist(df, μ, PDiagMat(σv .^ 2)), μ, Matrix(Diagonal(σv .^ 2))),
+        ("(df, μ, ScalMat)", mvtdist(df, μ, ScalMat(k, σ^2)), μ, σ^2 * Matrix(I, k, k)),
+        ("(df, PDMat)", mvtdist(df, PDMat(Σ)), z, Σ),
+        ("(df, PDiagMat)", mvtdist(df, PDiagMat(σv .^ 2)), z, Matrix(Diagonal(σv .^ 2))),
+        ("(df, μ, σ::Real)", mvtdist(df, μ, σ), μ, σ^2 * Matrix(I, k, k)),
+        ("(df, d::Int, σ)", mvtdist(df, k, σ), z, σ^2 * Matrix(I, k, k)),
+        ("(df, μ, σ::Vector)", mvtdist(df, μ, σv), μ, Matrix(Diagonal(σv .^ 2))),
+        ("(df, μ, Σ::Matrix)", mvtdist(df, μ, Σ), μ, Σ),
+        ("(df, Σ::Matrix)", mvtdist(df, Σ), z, Σ),
+        # mixed / integer inputs
+        ("Int df", mvtdist(3, μ, Σ), μ, Σ),
+        ("Int μ", mvtdist(df, [1, 2, 3], Σ), μ, Σ),
+        ("Int df, Int σ", mvtdist(3, k, 2), z, 4 * Matrix(I, k, k)),
+    ]
+
+    @testset "$name" for (name, d, μ_exp, Σ_exp) in cases
+        @test d isa GenericMvTDist
+        @test length(d) == k
+        @test d.df == df
+        @test Vector(d.μ) ≈ μ_exp
+        @test Matrix(d.Σ) ≈ Σ_exp
+
+        # agrees with building the distribution directly
+        ref = GenericMvTDist(df, μ_exp, PDMat(Σ_exp))
+        @test logpdf(d, x) ≈ logpdf(ref, x)
+        @test cov(d) ≈ cov(ref)
+        @test mean(d) ≈ mean(ref)
+
+        # sampling works with the right shapes
+        @test size(rand(d)) == (k,)
+        @test size(rand(d, 5)) == (k, 5)
+    end
+
+    # the specializations for plain Float64 inputs return the concrete aliases
+    @test mvtdist(df, μ, Σ) isa MvTDist
+    @test mvtdist(df, μ, σv) isa DiagTDist
+    @test Distributions.MvTDist(df, μ, Σ) isa MvTDist
+
+    # invalid arguments are rejected
+    @test_throws ErrorException mvtdist(-1.0, μ, Σ)       # df must be positive
+    @test_throws DimensionMismatch mvtdist(df, [1.0, 2], PDMat(Σ))  # μ / Σ size mismatch
+end
+
 end

@@ -99,7 +99,7 @@ end
 
 function mgf(d::Multinomial{T}, t::AbstractVector) where T<:Real
     p = probs(d)
-    n = ntrials(p)
+    n = ntrials(d)
     s = zero(T)
     for i in 1:length(p)
         s += p[i] * exp(t[i])

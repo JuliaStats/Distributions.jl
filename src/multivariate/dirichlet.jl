@@ -181,7 +181,7 @@ struct DirichletStats <: SufficientStats
     DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, Float64(tw))
 end
 
-length(ss::DirichletStats) = length(s.slogp)
+length(ss::DirichletStats) = length(ss.slogp)
 
 mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
 
