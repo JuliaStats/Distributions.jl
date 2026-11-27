@@ -59,9 +59,9 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test 0.25 == cquantile(Normal(0.25, 0), 0.95)
     @test -Inf === cquantile(Normal(0.25, 0), 1)
     @test -Inf === invlogcdf(Normal(), -Inf)
-    @test isnan_type(Float64, invlogcdf(Normal(), NaN))
+    @test_throws DomainError invlogcdf(Normal(), NaN)
     @test Inf === invlogccdf(Normal(), -Inf)
-    @test isnan_type(Float64, invlogccdf(Normal(), NaN))
+    @test_throws DomainError invlogccdf(Normal(), NaN)
     # test for #996 being fixed
     let d = Normal(0, 1), x = 1.0, ∂x = 2.0
         @inferred cdf(d, ForwardDiff.Dual(x, ∂x)) ≈ ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
@@ -162,11 +162,11 @@ end
     @test @inferred(quantile(Normal(1.0, 0.0), 0.0f0))     === -Inf
     @test @inferred(quantile(Normal(1.0, 0.0f0), 1.0))     ===  Inf
     @test @inferred(quantile(Normal(1.0f0, 0.0), 0.5))     ===  1.0
-    @test isnan_type(Float64, @inferred(quantile(Normal(1.0f0, 0.0), NaN)))
+    @test_throws DomainError @inferred(quantile(Normal(1.0f0, 0.0), NaN))
     @test @inferred(quantile(Normal(1.0f0, 0.0f0), 0.0f0)) === -Inf32
     @test @inferred(quantile(Normal(1.0f0, 0.0f0), 1.0f0)) ===  Inf32
     @test @inferred(quantile(Normal(1.0f0, 0.0f0), 0.5f0)) ===  1.0f0
-    @test isnan_type(Float32, @inferred(quantile(Normal(1.0f0, 0.0f0), NaN32)))
+    @test_throws DomainError @inferred(quantile(Normal(1.0f0, 0.0f0), NaN32))
     @test @inferred(quantile(Normal(1//1, 0//1), 1//2))    ===  1.0
     @test @inferred(quantile(Normal(1f0, 0f0), 1//2))      ===  1f0
     @test @inferred(quantile(Normal(1f0, 0.0), 1//2))      ===  1.0
@@ -174,11 +174,11 @@ end
     @test @inferred(cquantile(Normal(1.0, 0.0), 0.0f0))     ===  Inf
     @test @inferred(cquantile(Normal(1.0, 0.0f0), 1.0))     === -Inf
     @test @inferred(cquantile(Normal(1.0f0, 0.0), 0.5))     ===  1.0
-    @test isnan_type(Float64, @inferred(cquantile(Normal(1.0f0, 0.0), NaN)))
+    @test_throws DomainError @inferred(cquantile(Normal(1.0f0, 0.0), NaN))
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 0.0f0)) ===  Inf32
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 1.0f0)) === -Inf32
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 0.5f0)) ===  1.0f0
-    @test isnan_type(Float32, @inferred(cquantile(Normal(1.0f0, 0.0f0), NaN32)))
+    @test_throws DomainError @inferred(cquantile(Normal(1.0f0, 0.0f0), NaN32))
     @test @inferred(cquantile(Normal(1//1, 0//1), 1//2))    ===  1.0
     @test @inferred(cquantile(Normal(1f0, 0f0), 1//2))      ===  1f0
     @test @inferred(cquantile(Normal(1f0, 0.0), 1//2))      ===  1.0
