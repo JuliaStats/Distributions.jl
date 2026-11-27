@@ -92,6 +92,11 @@ invlogccdf(d::JohnsonSU, lq::Real) = xval(d, norminvlogccdf(lq))
 # mgf(d::JohnsonSU)
 # cf(d::JohnsonSU)
 
+#### Affine transformations
+
+Base.:+(d::JohnsonSU, c::Real) = JohnsonSU(d.ξ + c, d.λ, d.γ, d.δ)
+Base.:*(c::Real, d::JohnsonSU) = JohnsonSU(c * d.ξ, abs(c) * d.λ, sign(c) * d.γ, d.δ)
+
 #### Sampling
 
 rand(rng::AbstractRNG, d::JohnsonSU) = xval(d, randn(rng))

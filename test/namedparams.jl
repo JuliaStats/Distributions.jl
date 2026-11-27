@@ -180,6 +180,17 @@ using Distributions: namedparams
         @test params(d) === (0.0, 1.0, 0.0, nothing, nothing, 2.0)
     end
 
+    @testset "no fold in generic `params`" begin
+        # A fold such as `reduce` compiles to the same code as the recursion in `params`, but
+        # Zygote transforms the lowered code and differentiates the fold about 100 times slower
+        foldnames = (:reduce, :mapreduce, :foldl, :mapfoldl)
+        calls_fold(x) = false
+        calls_fold(x::GlobalRef) = x.name in foldnames
+        calls_fold(x::Expr) = any(calls_fold, x.args)
+        code = only(code_lowered(params, (Poisson{Float64},))).code
+        @test !any(calls_fold, code)
+    end
+
     @testset "reconstruction" begin
         # `namedparams` reports the arguments that the constructor of `d` expects
         @testset "$f" for (f, d) in [

@@ -49,6 +49,7 @@ const tests = [
     "univariate/continuous/logitnormal",
     "multivariate/mvtdist",
     "univariate/continuous/kolmogorov",
+    "univariate/continuous/ksdist",
     "edgeworth",
     "matrixreshaped", # extra file compared to /src
     "matrixvariates",
@@ -149,7 +150,6 @@ const tests = [
     # "univariate/continuous/generalizedextremevalue",
     # "univariate/continuous/generalizedpareto",
     # "univariate/continuous/inversegamma",
-    # "univariate/continuous/ksdist",
     # "univariate/continuous/ksonesided",
     # "univariate/continuous/noncentralbeta",
     # "univariate/continuous/noncentralf",
