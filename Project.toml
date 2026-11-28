@@ -20,11 +20,13 @@ StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [weakdeps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+ConstructionBase = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
 DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 SparseConnectivityTracer = "9f842d2f-2579-4b1d-911e-f412cf18a3f5"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [extensions]
+ConstructionBaseExt = "ConstructionBase"
 DistributionsChainRulesCoreExt = "ChainRulesCore"
 DistributionsDensityInterfaceExt = "DensityInterface"
 DistributionsSparseConnectivityTracerExt = "SparseConnectivityTracer"
@@ -36,6 +38,7 @@ Aqua = "0.8.9"
 Calculus = "0.5"
 ChainRulesCore = "1"
 ChainRulesTestUtils = "1"
+ConstructionBase = "1.5"
 DensityInterface = "0.4, 1"
 Distributed = "<0.0.1, 1"
 FillArrays = "0.9, 0.10, 0.11, 0.12, 0.13, 1"
@@ -68,6 +71,7 @@ Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 ChainRulesTestUtils = "cdddcdb0-9152-4a09-a978-84456f9df70a"
+ConstructionBase = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
 DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
@@ -83,7 +87,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "StableRNGs", "Calculus", "ChainRulesCore", "ChainRulesTestUtils", "DensityInterface", "Distributed", "FiniteDifferences", "ForwardDiff", "InteractiveUtils", "JSON", "Optim", "SparseArrays", "SparseConnectivityTracer", "StaticArrays", "Test", "OffsetArrays"]
+test = ["Aqua", "StableRNGs", "Calculus", "ChainRulesCore", "ChainRulesTestUtils", "ConstructionBase", "DensityInterface", "Distributed", "FiniteDifferences", "ForwardDiff", "InteractiveUtils", "JSON", "Optim", "SparseArrays", "SparseConnectivityTracer", "StaticArrays", "Test", "OffsetArrays"]
 
 [workspace]
 projects = ["docs"]

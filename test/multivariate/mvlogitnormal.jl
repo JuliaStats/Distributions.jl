@@ -10,6 +10,7 @@ using Test
 function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int=10^6)
     @test d.normal isa AbstractMvNormal
     dnorm = d.normal
+    test_constructionbase(d)
 
     @testset "properties" begin
         @test length(d) == length(dnorm) + 1

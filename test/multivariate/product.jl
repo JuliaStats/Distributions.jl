@@ -18,6 +18,7 @@ using Distributions: Product
     x = rand.(ds)
     d_product = @test_deprecated(Product(ds))
     @test d_product isa Product
+    test_constructionbase(d_product)
     # Check that methods for `Product` are consistent.
     @test length(d_product) == length(ds)
     @test eltype(d_product) === eltype(ds[1])

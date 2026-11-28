@@ -43,6 +43,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
         ]
 
         d = JointOrderStatistics(dist, n, r)
+        test_constructionbase(d)
 
         @testset "basic" begin
             @test d isa JointOrderStatistics

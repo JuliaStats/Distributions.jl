@@ -164,6 +164,7 @@ function test_distr(d::MatrixDistribution, M::Integer)
     test_cov(d)
     test_convert(d)
     test_dim(d)
+    test_constructionbase(d)
     nothing
 end
 

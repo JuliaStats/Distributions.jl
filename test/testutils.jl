@@ -3,7 +3,8 @@
 using Distributions
 using Random
 using Printf: @printf
-using Test: @test
+using Test: @test, @testset, @test_throws
+import ConstructionBase
 import FiniteDifferences
 import ForwardDiff
 
@@ -42,6 +43,7 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
     test_samples(distr, n)
     test_samples(distr, n; rng=rng)
     test_params(distr)
+    test_constructionbase(distr)
 end
 
 function test_cgf(dist, ts)
@@ -81,6 +83,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
     xs = test_samples(distr, n, rng=rng)
     allow_test_stats(distr) && test_stats(distr, xs)
     test_params(distr)
+    test_constructionbase(distr)
 end
 
 
@@ -684,6 +687,80 @@ function test_params(d::Truncated)
     d_new = truncated(D(pars...), d.lower, d.upper)
     @test d_new == d
     @test d == deepcopy(d)
+end
+
+# Apply `f` to floating point parameters (scalars and `Array`s), keep all other parameters (e.g. PDMats)
+_mapfloats(f, x::AbstractFloat) = f(x)
+_mapfloats(f, x::Array{<:AbstractFloat}) = map(f, x)
+_mapfloats(f, x) = x
+
+# Only strip our own tag: parameters may already be `Dual`s (e.g. `UnivariateGMM` in mixture.jl)
+struct ConstructionBaseTestTag end
+_todual(x) = ForwardDiff.Dual{ConstructionBaseTestTag}(x, zero(x)) # nonzero partials fail checks of bounds, e.g. `p <= 1`
+_fromdual(x::ForwardDiff.Dual{ConstructionBaseTestTag}) = ForwardDiff.value(x)
+_fromdual(x::Array) = map(_fromdual, x)
+_fromdual(x) = x
+
+# Precision of floating point parameters
+_floatprecision(x::AbstractFloat) = precision(x)
+_floatprecision(x::Array{<:AbstractFloat}) = precision(eltype(x))
+_floatprecision(x) = 1
+
+# Parameter types that a distribution does not support
+_unsupported_paramtypes(::Distribution) = ()
+_unsupported_paramtypes(::Union{VonMises,VonMisesFisher}) = (BigFloat,) # no `besselix(::BigFloat, ...)`
+_unsupported_paramtypes(::Soliton) = (ForwardDiff.Dual,) # `Float64` fields
+
+# Test that the properties of `d` are its parameters and that they can be set
+function test_constructionbase(d::Distribution)
+    @testset "ConstructionBase" begin
+        d_new = ConstructionBase.constructorof(typeof(d))(ConstructionBase.getfields(d)...)
+        @test d_new isa typeof(d)
+        @test d_new == d
+
+        props = ConstructionBase.getproperties(d)
+        d_new = ConstructionBase.setproperties(d, props)
+        @test d_new isa typeof(d)
+        @test d_new == d
+        for k in keys(props)
+            @test ConstructionBase.setproperties(d, NamedTuple{(k,)}((props[k],))) == d
+        end
+
+        # Fields that are not parameters (e.g. derived quantities) and unknown names can't be set
+        for k in (setdiff(fieldnames(typeof(d)), keys(props))..., :not_a_parameter)
+            patch = NamedTuple{(k,)}((1.0,))
+            msg = "($(repr(k)),) are not properties of $(nameof(typeof(d))); its properties are $(keys(props))"
+            @test_throws ArgumentError ConstructionBase.setproperties(d, patch)
+            @test_throws msg ConstructionBase.setproperties(d, patch)
+        end
+
+        unsupported = _unsupported_paramtypes(d)
+
+        # `BigFloat` with the precision of the parameters preserves their values and the default
+        # tolerances of argument checks (e.g. `isprobvec` of a `Float32` probability vector)
+        setprecision(BigFloat, maximum(_floatprecision, props; init = 1)) do
+            # Change the type of a single parameter
+            if BigFloat ∉ unsupported
+                for k in keys(props)
+                    v = _mapfloats(BigFloat, props[k])
+                    v === props[k] && continue
+                    d_new = ConstructionBase.setproperties(d, NamedTuple{(k,)}((v,)))
+                    @test ConstructionBase.getproperties(d_new)[k] == v
+                end
+            end
+
+            # Change the type of all parameters, and change it back
+            for (T, f) in ((BigFloat, BigFloat), (ForwardDiff.Dual, _todual))
+                T ∈ unsupported && continue
+                d_new = ConstructionBase.setproperties(d, map(p -> _mapfloats(f, p), props))
+                props_new = ConstructionBase.getproperties(d_new)
+                @test map(_fromdual, props_new) == props
+                d_back = ConstructionBase.setproperties(d_new, props)
+                @test d_back isa typeof(d)
+                @test d_back == d
+            end
+        end
+    end
 end
 
 # Finite difference differentiation

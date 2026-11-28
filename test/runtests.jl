@@ -21,6 +21,7 @@ const tests = [
     "truncated/uniform",
     "truncated/discrete_uniform",
     "censored",
+    "constructionbase", # extra file compared to /src
     "univariate/continuous/normal",
     "univariate/continuous/normalcanon",
     "univariate/continuous/laplace",

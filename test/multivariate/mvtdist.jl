@@ -26,6 +26,7 @@ rvalues = [-5.6561739738159975133,
 df = [1., 2, 3, 5, 10]
 for i = 1:length(df)
     d = MvTDist(df[i], mu, Sigma)
+    test_constructionbase(d)
     @test isapprox(logpdf(d, [-2., 3]), rvalues[i], atol=1.0e-8)
     dd = typeof(d)(params(d)...)
     @test d.df == dd.df

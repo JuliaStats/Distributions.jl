@@ -81,6 +81,7 @@ using FiniteDifferences
             @test d.η == η
             @test d.uplo == 'L'
             @test d.logc0 == LKJ(p, η).logc0
+            test_constructionbase(d)
         end
 
         @test_throws DomainError LKJCholesky(0, 2)

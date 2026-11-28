@@ -59,6 +59,7 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     μ = μ ./ norm(μ)
 
     d = VonMisesFisher(μ, κ)
+    test_constructionbase(d)
     @test length(d) == p
     @test meandir(d) == μ
     @test concentration(d) == κ
