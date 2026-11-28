@@ -235,10 +235,12 @@ end
         upper = 2.8274429454898398,
     )
     @test @inferred(cdf(dist, 2.82)) === 1.0
-    @test @inferred(ccdf(dist, 2.82)) === 0.0
+    # 256-bit reference: 5.1980154766339005e-22
+    @test 0 <= @inferred(ccdf(dist, 2.82)) <= 1
+    @test ccdf(dist, 2.82) ≈ 5.1980154766339005e-22 rtol=1e-13
 end
 
-@testset "ccdf and logccdf at the lower bound (#2095)" begin
+@testset "ccdf and logccdf in the tails and at the bounds (#2089, #2095)" begin
     # Discrete distributions: the mass at the lower bound is not part of the ccdf
     for (upper, p) in ((nothing, 1 / 3), (2, 1 / 3), (1, 0.0))
         d = truncated(Binomial(2, 0.5); lower=1, upper=upper)
@@ -248,9 +250,53 @@ end
         @test ccdf(d, 0) === 1.0
         @test logccdf(d, 0) === 0.0
     end
-    d = truncated(Poisson(1.0); lower=20)
-    @test ccdf(d, 20) ≈ 1 - pdf(Poisson(1.0), 20) / ccdf(Poisson(1.0), 19)
-    @test logccdf(d, 20) ≈ log1p(-pdf(Poisson(1.0), 20) / ccdf(Poisson(1.0), 19))
+
+    # Reference values from the survival function S(t) = P(X > t) of the untruncated distribution
+    # in 256-bit precision: P(X > x | l ≤ X ≤ u) = (S(x) - S(u)) / (P(X ≥ l) - S(u))
+    S_normal(t) = normccdf(big(float(t)))
+    S_poisson(λ, k) = 1 - sum(exp(-big(λ)) * big(λ)^j / factorial(big(j)) for j in 0:k)
+    S_geometric(p, k) = (1 - big(p))^(k + 1)
+    setprecision(BigFloat, 256) do
+        for (d, x, ref) in (
+            # continuous, right tail
+            (truncated(Normal(); lower=10.0), 10.5, S_normal(10.5) / S_normal(10)),
+            (truncated(Normal(), 9.0, 10.0), 9.99, (S_normal(9.99) - S_normal(10)) / (S_normal(9) - S_normal(10))),
+            (truncated(Normal(), 8.0, 9.0), 8.1, (S_normal(8.1) - S_normal(9)) / (S_normal(8) - S_normal(9))),
+            # discrete, right tail
+            (truncated(Poisson(1.0); lower=20), 21, S_poisson(1.0, 21) / S_poisson(1.0, 19)),
+            # discrete, at the lower bound
+            (truncated(Poisson(1.0); lower=20), 20, S_poisson(1.0, 20) / S_poisson(1.0, 19)),
+            (truncated(Poisson(3.0), 2, 6), 2,
+             (S_poisson(3.0, 2) - S_poisson(3.0, 6)) / (S_poisson(3.0, 1) - S_poisson(3.0, 6))),
+            # discrete, truncated mass concentrated at the lower bound
+            (truncated(Poisson(1e-6); lower=3), 3, S_poisson(1e-6, 3) / S_poisson(1e-6, 2)),
+            (truncated(Poisson(0.001); lower=5), 5, S_poisson(0.001, 5) / S_poisson(0.001, 4)),
+            (truncated(Geometric(0.999); lower=3), 3, S_geometric(0.999, 3) / S_geometric(0.999, 2)),
+        )
+            @test @inferred(ccdf(d, x)) ≈ ref rtol=1e-13
+            @test @inferred(logccdf(d, x)) ≈ log(ref) rtol=1e-13
+        end
+        # continuous, left tail: unchanged formula
+        d = truncated(Normal(), -10.0, -9.0)
+        ref = (S_normal(-9.5) - S_normal(-9)) / (S_normal(-10) - S_normal(-9))
+        @test @inferred(ccdf(d, -9.5)) ≈ ref rtol=1e-13
+        @test @inferred(logccdf(d, -9.5)) ≈ log(ref) atol=1e-14
+    end
+
+    # At and above the upper bound
+    for d in (
+        truncated(Normal(), 9.0, 10.0),
+        truncated(Normal(); upper=2.0),
+        truncated(Normal(); upper=-2.0),
+        truncated(Poisson(3.0), 2, 6),
+        truncated(Binomial(10, 0.3); upper=4),
+    )
+        u = d.upper
+        @test @inferred(ccdf(d, u)) === 0.0
+        @test @inferred(logccdf(d, u)) === -Inf
+        @test ccdf(d, u + 1) === 0.0
+        @test logccdf(d, u + 1) === -Inf
+    end
 
     # Continuous distributions: no mass at the lower bound
     d = truncated(Normal(); lower=10.0)
