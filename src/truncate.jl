@@ -189,11 +189,15 @@ function logcdf(d::Truncated, x::Real)
 end
 
 function ccdf(d::Truncated, x::Real)
-    result = clamp((d.ucdf - cdf(d.untruncated, x)) / d.tp, 0, 1)
+    # P(x < X ≤ u) for X ~ d0: if the upper bound lies in the upper half of d0, compute it from
+    # the upper tail since `d.ucdf - cdf(d0, x)` cancels there (#2089)
+    d0 = d.untruncated
+    numerator = d.ucdf > 1//2 ? ccdf(d0, x) - _ccdf_upper(d) : d.ucdf - cdf(d0, x)
+    result = clamp(numerator / d.tp, 0, 1)
     # Special cases for values outside of the support to avoid e.g. NaN issues with `Binomial`
-    return if d.lower !== nothing && x <= d.lower
+    return if d.lower !== nothing && _below_lower(d, x)
         one(result)
-    elseif d.upper !== nothing && x > d.upper
+    elseif d.upper !== nothing && x >= d.upper
         zero(result)
     else
         result
@@ -201,15 +205,33 @@ function ccdf(d::Truncated, x::Real)
 end
 
 function logccdf(d::Truncated, x::Real)
-    result = logsubexp(logccdf(d.untruncated, x), log1p(-d.ucdf)) - d.logtp
-    return if d.lower !== nothing && x <= d.lower
+    result = logsubexp(logccdf(d.untruncated, x), _logccdf_upper(d)) - d.logtp
+    return if d.lower !== nothing && _below_lower(d, x)
         zero(result)
-    elseif d.upper !== nothing && x > d.upper
+    elseif d.upper !== nothing && x >= d.upper
         oftype(result, -Inf)
     else
         result
     end
 end
+
+# (log) P(X > u) for X ~ d0; if u lies in the upper half of d0 it is evaluated directly since
+# `1 - d.ucdf` cancels there
+_ccdf_upper(d::Truncated) = d.upper === nothing ? zero(d.ucdf) : ccdf(d.untruncated, d.upper)
+function _logccdf_upper(d::Truncated)
+    return if d.upper === nothing
+        oftype(d.logtp, -Inf)
+    elseif d.ucdf > 1//2
+        logccdf(d.untruncated, d.upper)
+    else
+        log1p(-d.ucdf)
+    end
+end
+
+# Whether P(X > x | l ≤ X ≤ u) = 1. Discrete distributions can have mass at the lower bound l, so only
+# x < l qualifies for them; other distributions are assumed to have no mass at l.
+_below_lower(d::Truncated, x::Real) = x <= d.lower
+_below_lower(d::Truncated{<:DiscreteUnivariateDistribution}, x::Real) = x < d.lower
 
 ## random number generation
 
