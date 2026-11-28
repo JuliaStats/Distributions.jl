@@ -325,7 +325,6 @@ KSOneSided
 ```@docs
 Kumaraswamy
 ```
-
 ```@example plotdensity
 plotdensity((0, 1), Kumaraswamy, (2, 5)) # hide
 ```
