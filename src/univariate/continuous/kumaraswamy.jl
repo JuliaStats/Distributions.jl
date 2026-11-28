@@ -85,10 +85,23 @@ end
 
 function gradlogpdf(d::Kumaraswamy, x::Real)
     a, b = params(d)
-    _x = clamp(x, 0, 1)
+    _x = abs(clamp(x, 0, 1))  # Treat -0.0 as the lower endpoint.
     _xᵃ = _x^a
-    y = (a * (b * _xᵃ - 1) + (1 - _xᵃ)) / (_x * (_xᵃ - 1))
-    return x < 0 || x > 1 ? oftype(y, -Inf) : y
+    if promote_type(typeof(b), typeof(_xᵃ)) <: Union{Integer,Rational{<:Unsigned}}
+        _xᵃ = float(_xᵃ)  # Avoid integer overflow in the numerator.
+    end
+    if x < 0 || x > 1
+        return zero((a * one(_xᵃ)) / one(_x))
+    end
+    complement = 1 - _xᵃ
+    denominator = _x * complement
+    if denominator isa Rational && iszero(denominator)
+        # Rescale the numerator at exact rational endpoints to avoid overflow.
+        numerator = 1 - b * _xᵃ - complement / a
+        # An exact rational cannot represent the indeterminate endpoint.
+        return iszero(numerator) ? float(numerator) / denominator : numerator / denominator
+    end
+    return (a * (1 - b * _xᵃ) - complement) / denominator
 end
 
 ### Sampling
@@ -111,10 +124,10 @@ end
 function skewness(d::Kumaraswamy)
     a, b = params(d)
     μ = mean(d)
-    σ² = var(d)
     m₂ = _kumomentaswamy(a, b, 2)
     m₃ = _kumomentaswamy(a, b, 3)
-    return (2m₃ - μ * (3m₂ - μ^2)) / (σ² * sqrt(σ²))
+    σ² = m₂ - μ^2
+    return (m₃ + μ * (-3m₂ + 2μ^2)) / (σ² * sqrt(σ²))
 end
 
 function kurtosis(d::Kumaraswamy)
@@ -123,7 +136,7 @@ function kurtosis(d::Kumaraswamy)
     m₂ = _kumomentaswamy(a, b, 2)
     m₃ = _kumomentaswamy(a, b, 3)
     m₄ = _kumomentaswamy(a, b, 4)
-    return (m₄ + μ * (-4m₃ + μ * (6m₂ - 3μ^2))) / var(d)^2 - 3
+    return (m₄ + μ * (-4m₃ + μ * (6m₂ - 3μ^2))) / (m₂ - μ^2)^2 - 3
 end
 
 function median(d::Kumaraswamy)

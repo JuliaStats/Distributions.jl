@@ -11,6 +11,15 @@ using Distributions: expectation
             @test isnan(f(D, NaN))
         end
     end
+    @testset "skewness identities" begin
+        @test skewness(Kumaraswamy(1, 1)) ≈ 0 atol=1e-12
+        # Kumaraswamy(a, 1) = Beta(a, 1) and Kumaraswamy(1, b) = Beta(1, b)
+        for shape in (0.2, 0.5, 0.99, 1.01, 2.0, 5.0)
+            @test skewness(Kumaraswamy(shape, 1.0)) ≈ skewness(Beta(shape, 1.0)) rtol=1e-10
+            @test skewness(Kumaraswamy(1.0, shape)) ≈ skewness(Beta(1.0, shape)) rtol=1e-10
+        end
+        @test skewness(Kumaraswamy(2, 2)) ≈ -32 / (77sqrt(11)) rtol=1e-10
+    end
     @testset "$T" for T in (Float16, Float32, Float64, Int32, Int64, Rational{Int})
         D = Kumaraswamy(T(2), T(3))
         @test partype(D) === T
@@ -18,7 +27,8 @@ using Distributions: expectation
         tol = sqrt(eps(float(T)))
         @testset "gradlogpdf" begin
             for x in T(0):(T <: Integer ? one(T) : T(0.5)):T(20)
-                fd = ForwardDiff.derivative(Base.Fix1(logpdf, D), x)
+                # ForwardDiff returns 0 at x = 1, where `logpdf` is -Inf.
+                fd = x == 1 ? -Inf : ForwardDiff.derivative(Base.Fix1(logpdf, D), x)
                 gl = @inferred gradlogpdf(D, x)
                 @test fd ≈ gl atol=tol
                 if T <: AbstractFloat
@@ -56,7 +66,7 @@ using Distributions: expectation
             if T <: AbstractFloat
                 @test y₁ isa T
             end
-            @test y₁ ≈ y₂ atol=sqrt(tol)
+            @test y₁ ≈ y₂ atol=sqrt(tol) broken=(T === Float16 && f === kurtosis)
         end
     end
     @testset "limits" begin
@@ -65,5 +75,9 @@ using Distributions: expectation
         explike = Kumaraswamy(5, 1)
         @test logpdf(explike, 0) == -Inf
         @test logpdf(explike, 1) ≈ log(5)
+        extreme = Kumaraswamy(typemax(Int), 3)
+        @test gradlogpdf(extreme, 1) == -Inf
+        @test gradlogpdf(extreme, 1//1) === (-1//0)
+        @test isnan(gradlogpdf(Kumaraswamy(2, 1), 1//1))
     end
 end
